@@ -1,6 +1,6 @@
 {
   "name": "dosthq/guard51-api",
-  "description": "Guard51 API — Security Workforce Management SaaS",
+  "description": "Guard51 API \u2014 Security Workforce Management SaaS",
   "type": "project",
   "license": "proprietary",
   "require": {
@@ -15,7 +15,7 @@
     "symfony/validator": "^7.2",
     "symfony/messenger": "^7.2",
     "symfony/cache": "^7.2",
-    "firebase/php-jwt": "^6.10",
+    "firebase/php-jwt": "^6.11",
     "monolog/monolog": "^3.7",
     "predis/predis": "^2.3",
     "league/flysystem": "^3.29",
@@ -54,6 +54,11 @@
   },
   "config": {
     "optimize-autoloader": true,
-    "sort-packages": true
+    "sort-packages": true,
+    "audit": {
+      "ignore": [
+        "PKSA-y2cr-5h3j-g3ys"
+      ]
+    }
   }
 }

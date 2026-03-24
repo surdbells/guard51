@@ -51,6 +51,8 @@ docker/postgres/data/
 # ── Logs ──
 *.log
 logs/
+!logs/.gitkeep
+!apps/api/logs/.gitkeep
 
 # ── Storage (local uploads) ──
 apps/api/storage/uploads/*
