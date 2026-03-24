@@ -1,0 +1,2 @@
+cat > /home/claude/guard51/apps/desktop/README.md << 'EOF'
+# Guard51 Desktop (Electron)

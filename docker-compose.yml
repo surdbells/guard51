@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 16 + PostGIS
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: guard51-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-guard51}
+      POSTGRES_USER: ${DB_USER:-guard51}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-guard51_secret}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-guard51}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 7
+  redis:
+    image: redis:7-alpine
+    container_name: guard51-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PHP 8.3 FPM (API Backend)
+  api:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: guard51-api
+    restart: unless-stopped
+    volumes:
+      - ./apps/api:/var/www/api
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-guard51}
+      DB_USER: ${DB_USER:-guard51}
+      DB_PASSWORD: ${DB_PASSWORD:-guard51_secret}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      ZEPTOMAIL_API_KEY: ${ZEPTOMAIL_API_KEY:-}
+      ZEPTOMAIL_FROM_EMAIL: ${ZEPTOMAIL_FROM_EMAIL:-noreply@guard51.com}
+      ZEPTOMAIL_FROM_NAME: ${ZEPTOMAIL_FROM_NAME:-Guard51}
+      TERMII_API_KEY: ${TERMII_API_KEY:-}
+      TERMII_SENDER_ID: ${TERMII_SENDER_ID:-Guard51}
+      PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}
+      PAYSTACK_PUBLIC_KEY: ${PAYSTACK_PUBLIC_KEY:-}
+      FILE_STORAGE_DRIVER: ${FILE_STORAGE_DRIVER:-local}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_S3_REGION: ${AWS_S3_REGION:-af-south-1}
+      AWS_S3_KEY: ${AWS_S3_KEY:-}
+      AWS_S3_SECRET: ${AWS_S3_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Nginx (Reverse Proxy)
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: guard51-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./apps/api/public:/var/www/api/public
+    depends_on:
+      - api
+
+  # Node.js WebSocket Sidecar (Real-time: GPS, Chat, Dispatch)
+  realtime:
+    build:
+      context: ./apps/realtime
+      dockerfile: Dockerfile
+    container_name: guard51-realtime
+    restart: unless-stopped
+    ports:
+      - "${REALTIME_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: ${APP_ENV:-development}
+      PORT: 3001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      API_BASE_URL: http://nginx:80
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Angular Dev Server (development only)
+  web:
+    image: node:20-alpine
+    container_name: guard51-web
+    working_dir: /app
+    volumes:
+      - ./apps/web:/app
+      - web_node_modules:/app/node_modules
+    ports:
+      - "${WEB_PORT:-4200}:4200"
+    command: sh -c "npm install && npx ng serve --host 0.0.0.0 --poll 2000"
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  web_node_modules:

@@ -1,0 +1,5 @@
+cat > /home/claude/guard51/libs/shared-types/src/enums/.gitkeep << ''
+cat > /home/claude/guard51/libs/shared-types/src/dto/.gitkeep << ''
+cat > /home/claude/guard51/libs/shared-services/src/.gitkeep << ''
+cat > /home/claude/guard51/libs/shared-state/src/.gitkeep << ''
+cat > /home/claude/guard51/libs/shared-utils/src/.gitkeep << ''

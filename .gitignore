@@ -1,0 +1,69 @@
+# ── Environment ──
+.env
+.env.local
+.env.*.local
+
+# ── IDE ──
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── PHP / Composer ──
+apps/api/vendor/
+apps/api/.phpunit.result.cache
+apps/api/.php-cs-fixer.cache
+
+# ── Node.js ──
+node_modules/
+apps/web/node_modules/
+apps/realtime/node_modules/
+apps/desktop/node_modules/
+libs/**/node_modules/
+.npm
+.yarn
+
+# ── Angular ──
+apps/web/dist/
+apps/web/.angular/
+apps/web/.sass-cache/
+
+# ── NativeScript ──
+apps/mobile-*/platforms/
+apps/mobile-*/node_modules/
+apps/mobile-*/hooks/
+
+# ── Electron ──
+apps/desktop/dist/
+apps/desktop/out/
+
+# ── Build artifacts ──
+dist/
+build/
+*.tgz
+
+# ── Docker ──
+docker/postgres/data/
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Storage (local uploads) ──
+apps/api/storage/uploads/*
+!apps/api/storage/uploads/.gitkeep
+apps/api/storage/cache/*
+!apps/api/storage/cache/.gitkeep
+
+# ── Coverage ──
+coverage/
+.nyc_output/
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
