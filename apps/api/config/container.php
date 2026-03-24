@@ -7,18 +7,22 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMSetup;
+use Guard51\Middleware\AuthMiddleware;
 use Guard51\Middleware\CorsMiddleware;
 use Guard51\Middleware\TenantMiddleware;
+use Guard51\Module\Auth\AuthController;
 use Guard51\Repository\AuditLogRepository;
 use Guard51\Repository\RefreshTokenRepository;
 use Guard51\Repository\TenantRepository;
 use Guard51\Repository\UserRepository;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
+use Guard51\Service\JwtService;
 use Guard51\Service\PaystackService;
 use Guard51\Service\PdfService;
 use Guard51\Service\QueueService;
 use Guard51\Service\TermiiService;
+use Guard51\Service\ValidationService;
 use Guard51\Service\ZeptoMailService;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -150,6 +154,35 @@ $containerBuilder->addDefinitions([
 
     TenantMiddleware::class => function (ContainerInterface $c): TenantMiddleware {
         return new TenantMiddleware($c->get(EntityManagerInterface::class));
+    },
+
+    AuthMiddleware::class => function (ContainerInterface $c): AuthMiddleware {
+        return new AuthMiddleware($c->get(JwtService::class));
+    },
+
+    // Auth Services
+    JwtService::class => function (ContainerInterface $c): JwtService {
+        return new JwtService(
+            $c->get('settings')['jwt'],
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    ValidationService::class => function (ContainerInterface $c): ValidationService {
+        return new ValidationService();
+    },
+
+    // Controllers
+    AuthController::class => function (ContainerInterface $c): AuthController {
+        return new AuthController(
+            $c->get(UserRepository::class),
+            $c->get(TenantRepository::class),
+            $c->get(RefreshTokenRepository::class),
+            $c->get(JwtService::class),
+            $c->get(ValidationService::class),
+            $c->get(ZeptoMailService::class),
+            $c->get(LoggerInterface::class),
+        );
     },
 ]);
 
