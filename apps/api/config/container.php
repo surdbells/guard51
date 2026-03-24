@@ -7,6 +7,12 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMSetup;
+use Guard51\Middleware\CorsMiddleware;
+use Guard51\Middleware\TenantMiddleware;
+use Guard51\Repository\AuditLogRepository;
+use Guard51\Repository\RefreshTokenRepository;
+use Guard51\Repository\TenantRepository;
+use Guard51\Repository\UserRepository;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
 use Guard51\Service\PaystackService;
@@ -57,9 +63,17 @@ $containerBuilder->addDefinitions([
             isDevMode: $c->get('settings')['app']['debug'],
         );
 
-        $connection = DriverManager::getConnection($settings, $config);
+        // Register tenant filter for automatic multi-tenant scoping
+        $config->addFilter('tenant_filter', \Guard51\Filter\TenantFilter::class);
 
-        return new EntityManager($connection, $config);
+        $connection = DriverManager::getConnection($settings, $config);
+        $em = new EntityManager($connection, $config);
+
+        // Filter is registered but NOT enabled by default.
+        // TenantMiddleware enables it per-request with the resolved tenant_id.
+        // Super admin requests leave it disabled to see all tenants.
+
+        return $em;
     },
 
     // Services
@@ -110,6 +124,32 @@ $containerBuilder->addDefinitions([
             $c->get(EntityManagerInterface::class),
             $c->get(LoggerInterface::class),
         );
+    },
+
+    // Repositories
+    TenantRepository::class => function (ContainerInterface $c): TenantRepository {
+        return new TenantRepository($c->get(EntityManagerInterface::class));
+    },
+
+    UserRepository::class => function (ContainerInterface $c): UserRepository {
+        return new UserRepository($c->get(EntityManagerInterface::class));
+    },
+
+    RefreshTokenRepository::class => function (ContainerInterface $c): RefreshTokenRepository {
+        return new RefreshTokenRepository($c->get(EntityManagerInterface::class));
+    },
+
+    AuditLogRepository::class => function (ContainerInterface $c): AuditLogRepository {
+        return new AuditLogRepository($c->get(EntityManagerInterface::class));
+    },
+
+    // Middleware
+    CorsMiddleware::class => function (ContainerInterface $c): CorsMiddleware {
+        return new CorsMiddleware($c->get('settings'));
+    },
+
+    TenantMiddleware::class => function (ContainerInterface $c): TenantMiddleware {
+        return new TenantMiddleware($c->get(EntityManagerInterface::class));
     },
 ]);
 
