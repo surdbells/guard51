@@ -9,8 +9,11 @@ use Guard51\Middleware\RoleMiddleware;
 use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Onboarding\InvitationController;
+use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\PlanController;
 use Guard51\Module\Subscription\SubscriptionController;
+use Guard51\Module\Tenant\TenantController;
 use Guard51\Module\Usage\UsageController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -123,6 +126,48 @@ return function (App $app): void {
             $usage->get('/current', [UsageController::class, 'current']);
             $usage->get('/limits', [UsageController::class, 'limits']);
         })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Onboarding: Tenant (auth required) ───────
+        $group->group('/onboarding', function (RouteCollectorProxy $onb): void {
+            $onb->get('/status', [OnboardingController::class, 'status']);
+            $onb->put('/company', [OnboardingController::class, 'updateCompany']);
+            $onb->put('/branding', [OnboardingController::class, 'updateBranding']);
+            $onb->post('/bank-account', [OnboardingController::class, 'saveBankAccount']);
+            $onb->get('/platform-bank-accounts', [OnboardingController::class, 'platformBankAccounts']);
+            $onb->post('/complete', [OnboardingController::class, 'complete']);
+            $onb->post('/skip', [OnboardingController::class, 'skip']);
+        })
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Invitations: Public (accept — no auth) ───
+        $group->post('/invitations/accept', [InvitationController::class, 'accept'])
+            ->add(new RateLimitMiddleware($container->get(\Predis\Client::class), maxAttempts: 5, windowSeconds: 300, prefix: 'invite_accept'));
+
+        // ── Invitations: Tenant (auth required) ──────
+        $group->group('/invitations', function (RouteCollectorProxy $inv): void {
+            $inv->get('', [InvitationController::class, 'index']);
+            $inv->post('', [InvitationController::class, 'invite']);
+            $inv->post('/{id}/resend', [InvitationController::class, 'resend']);
+            $inv->delete('/{id}', [InvitationController::class, 'revoke']);
+        })
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Tenant Management: Super Admin ────────────
+        $group->group('/admin/tenants', function (RouteCollectorProxy $tenants): void {
+            $tenants->get('', [TenantController::class, 'index']);
+            $tenants->get('/stats', [TenantController::class, 'stats']);
+            $tenants->get('/{id}', [TenantController::class, 'show']);
+            $tenants->post('/{id}/suspend', [TenantController::class, 'suspend']);
+            $tenants->post('/{id}/reactivate', [TenantController::class, 'reactivate']);
+            $tenants->post('/{id}/impersonate', [TenantController::class, 'impersonate']);
+        })
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 

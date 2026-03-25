@@ -12,8 +12,11 @@ use Guard51\Middleware\CorsMiddleware;
 use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Onboarding\InvitationController;
+use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\SubscriptionController;
 use Guard51\Module\Subscription\PlanController;
+use Guard51\Module\Tenant\TenantController;
 use Guard51\Module\Usage\UsageController;
 use Guard51\Repository\AuditLogRepository;
 use Guard51\Repository\FeatureModuleRepository;
@@ -22,13 +25,16 @@ use Guard51\Repository\SubscriptionInvoiceRepository;
 use Guard51\Repository\SubscriptionPlanRepository;
 use Guard51\Repository\SubscriptionRepository;
 use Guard51\Repository\TenantFeatureModuleRepository;
+use Guard51\Repository\TenantInvitationRepository;
 use Guard51\Repository\TenantRepository;
 use Guard51\Repository\TenantUsageMetricRepository;
 use Guard51\Repository\UserRepository;
 use Guard51\Service\FeatureService;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
+use Guard51\Service\InvitationService;
 use Guard51\Service\JwtService;
+use Guard51\Service\OnboardingService;
 use Guard51\Service\PaystackService;
 use Guard51\Service\PdfService;
 use Guard51\Service\QueueService;
@@ -277,6 +283,56 @@ $containerBuilder->addDefinitions([
             $c->get(TenantUsageMetricRepository::class),
             $c->get(SubscriptionRepository::class),
             $c->get(SubscriptionPlanRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    // Phase 0E: Onboarding & Tenant Management
+    TenantInvitationRepository::class => function (ContainerInterface $c): TenantInvitationRepository {
+        return new TenantInvitationRepository($c->get(EntityManagerInterface::class));
+    },
+
+    OnboardingService::class => function (ContainerInterface $c): OnboardingService {
+        return new OnboardingService(
+            $c->get(TenantRepository::class),
+            $c->get(EntityManagerInterface::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    InvitationService::class => function (ContainerInterface $c): InvitationService {
+        return new InvitationService(
+            $c->get(TenantInvitationRepository::class),
+            $c->get(UserRepository::class),
+            $c->get(TenantRepository::class),
+            $c->get(ZeptoMailService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    OnboardingController::class => function (ContainerInterface $c): OnboardingController {
+        return new OnboardingController(
+            $c->get(OnboardingService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    InvitationController::class => function (ContainerInterface $c): InvitationController {
+        return new InvitationController(
+            $c->get(InvitationService::class),
+            $c->get(JwtService::class),
+            $c->get(ValidationService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    TenantController::class => function (ContainerInterface $c): TenantController {
+        return new TenantController(
+            $c->get(TenantRepository::class),
+            $c->get(UserRepository::class),
+            $c->get(SubscriptionRepository::class),
+            $c->get(TenantUsageMetricRepository::class),
+            $c->get(JwtService::class),
             $c->get(LoggerInterface::class),
         );
     },
