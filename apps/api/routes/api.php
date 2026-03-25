@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
+use Guard51\Entity\UserRole;
 use Guard51\Middleware\AuthMiddleware;
 use Guard51\Middleware\RateLimitMiddleware;
+use Guard51\Middleware\RoleMiddleware;
 use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
+use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Subscription\PlanController;
+use Guard51\Module\Subscription\SubscriptionController;
+use Guard51\Module\Usage\UsageController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -53,6 +59,69 @@ return function (App $app): void {
         $group->group('/auth', function (RouteCollectorProxy $auth): void {
             $auth->get('/me', [AuthController::class, 'me']);
             $auth->post('/logout', [AuthController::class, 'logout']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Subscription Plans: Public ───────────────
+        $group->get('/subscriptions/plans', [PlanController::class, 'publicPlans']);
+
+        // ── Subscription Plans: Super Admin CRUD ─────
+        $group->group('/admin/plans', function (RouteCollectorProxy $plans): void {
+            $plans->get('', [PlanController::class, 'index']);
+            $plans->post('', [PlanController::class, 'create']);
+            $plans->put('/{id}', [PlanController::class, 'update']);
+            $plans->delete('/{id}', [PlanController::class, 'delete']);
+            $plans->post('/{id}/duplicate', [PlanController::class, 'duplicate']);
+        })
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Subscriptions: Tenant (auth required) ────
+        $group->group('/subscriptions', function (RouteCollectorProxy $subs): void {
+            $subs->get('/current', [SubscriptionController::class, 'current']);
+            $subs->post('/initialize', [SubscriptionController::class, 'initialize']);
+            $subs->post('/verify', [SubscriptionController::class, 'verify']);
+            $subs->post('/bank-transfer', [SubscriptionController::class, 'bankTransfer']);
+            $subs->post('/cancel', [SubscriptionController::class, 'cancel']);
+            $subs->get('/invoices', [SubscriptionController::class, 'invoices']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Subscriptions: Paystack webhook (no auth) ─
+        $group->post('/subscriptions/webhook', [SubscriptionController::class, 'webhook']);
+
+        // ── Subscriptions: Super Admin ────────────────
+        $group->group('/admin/subscriptions', function (RouteCollectorProxy $adminSubs): void {
+            $adminSubs->get('/pending', [SubscriptionController::class, 'pendingTransfers']);
+            $adminSubs->post('/{id}/confirm-payment', [SubscriptionController::class, 'confirmPayment']);
+        })
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Feature Modules: Super Admin ─────────────
+        $group->get('/features/modules', [FeatureController::class, 'listModules'])
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Feature Modules: Tenant ──────────────────
+        $group->group('/features/tenant', function (RouteCollectorProxy $feat): void {
+            $feat->get('', [FeatureController::class, 'tenantModules']);
+            $feat->post('/enable/{moduleKey}', [FeatureController::class, 'enableModule']);
+            $feat->post('/disable/{moduleKey}', [FeatureController::class, 'disableModule']);
+        })
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Usage Metrics: Tenant ────────────────────
+        $group->group('/usage', function (RouteCollectorProxy $usage): void {
+            $usage->get('/current', [UsageController::class, 'current']);
+            $usage->get('/limits', [UsageController::class, 'limits']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

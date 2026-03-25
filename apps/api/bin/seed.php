@@ -10,6 +10,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
+use Guard51\Database\FeatureSeeder;
 use Guard51\Database\Seeder;
 
 $dotenv = Dotenv::createImmutable(dirname(__DIR__));
@@ -19,3 +20,6 @@ $entityManager = require __DIR__ . '/../config/doctrine.php';
 
 $seeder = new Seeder($entityManager);
 $seeder->run();
+
+$featureSeeder = new FeatureSeeder($entityManager);
+$featureSeeder->run();
