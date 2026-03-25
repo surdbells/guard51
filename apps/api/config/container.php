@@ -11,6 +11,8 @@ use Guard51\Middleware\AuthMiddleware;
 use Guard51\Middleware\CorsMiddleware;
 use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
+use Guard51\Module\AppDistribution\AppReleaseController;
+use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
@@ -19,6 +21,8 @@ use Guard51\Module\Subscription\PlanController;
 use Guard51\Module\Tenant\TenantController;
 use Guard51\Module\Usage\UsageController;
 use Guard51\Repository\AuditLogRepository;
+use Guard51\Repository\AppReleaseRepository;
+use Guard51\Repository\AppDownloadLogRepository;
 use Guard51\Repository\FeatureModuleRepository;
 use Guard51\Repository\RefreshTokenRepository;
 use Guard51\Repository\SubscriptionInvoiceRepository;
@@ -27,8 +31,10 @@ use Guard51\Repository\SubscriptionRepository;
 use Guard51\Repository\TenantFeatureModuleRepository;
 use Guard51\Repository\TenantInvitationRepository;
 use Guard51\Repository\TenantRepository;
+use Guard51\Repository\TenantAppConfigRepository;
 use Guard51\Repository\TenantUsageMetricRepository;
 use Guard51\Repository\UserRepository;
+use Guard51\Service\AppDistributionService;
 use Guard51\Service\FeatureService;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
@@ -333,6 +339,45 @@ $containerBuilder->addDefinitions([
             $c->get(SubscriptionRepository::class),
             $c->get(TenantUsageMetricRepository::class),
             $c->get(JwtService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    // Phase 0F: App Distribution Platform
+    AppReleaseRepository::class => function (ContainerInterface $c): AppReleaseRepository {
+        return new AppReleaseRepository($c->get(EntityManagerInterface::class));
+    },
+
+    AppDownloadLogRepository::class => function (ContainerInterface $c): AppDownloadLogRepository {
+        return new AppDownloadLogRepository($c->get(EntityManagerInterface::class));
+    },
+
+    TenantAppConfigRepository::class => function (ContainerInterface $c): TenantAppConfigRepository {
+        return new TenantAppConfigRepository($c->get(EntityManagerInterface::class));
+    },
+
+    AppDistributionService::class => function (ContainerInterface $c): AppDistributionService {
+        return new AppDistributionService(
+            $c->get(AppReleaseRepository::class),
+            $c->get(AppDownloadLogRepository::class),
+            $c->get(TenantAppConfigRepository::class),
+            $c->get(FileStorageService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    AppReleaseController::class => function (ContainerInterface $c): AppReleaseController {
+        return new AppReleaseController(
+            $c->get(AppDistributionService::class),
+            $c->get(AppReleaseRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    AppClientController::class => function (ContainerInterface $c): AppClientController {
+        return new AppClientController(
+            $c->get(AppDistributionService::class),
+            $c->get(TenantAppConfigRepository::class),
             $c->get(LoggerInterface::class),
         );
     },

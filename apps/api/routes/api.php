@@ -8,6 +8,8 @@ use Guard51\Middleware\RateLimitMiddleware;
 use Guard51\Middleware\RoleMiddleware;
 use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
+use Guard51\Module\AppDistribution\AppReleaseController;
+use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
@@ -166,6 +168,34 @@ return function (App $app): void {
             $tenants->post('/{id}/suspend', [TenantController::class, 'suspend']);
             $tenants->post('/{id}/reactivate', [TenantController::class, 'reactivate']);
             $tenants->post('/{id}/impersonate', [TenantController::class, 'impersonate']);
+        })
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── App Distribution: Public (no auth — called by apps) ──
+        $group->get('/apps/check-update', [AppClientController::class, 'checkUpdate']);
+        $group->post('/apps/heartbeat', [AppClientController::class, 'heartbeat']);
+
+        // ── App Distribution: Tenant (auth required) ─
+        $group->group('/apps', function (RouteCollectorProxy $apps): void {
+            $apps->get('/available', [AppClientController::class, 'available']);
+            $apps->get('/download/{releaseId}', [AppClientController::class, 'download']);
+            $apps->get('/config', [AppClientController::class, 'getConfig']);
+            $apps->put('/config/{appKey}', [AppClientController::class, 'updateConfig']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── App Distribution: Super Admin ─────────────
+        $group->group('/admin/apps', function (RouteCollectorProxy $adminApps): void {
+            $adminApps->get('/dashboard', [AppReleaseController::class, 'dashboard']);
+            $adminApps->get('/releases', [AppReleaseController::class, 'listReleases']);
+            $adminApps->post('/releases', [AppReleaseController::class, 'upload']);
+            $adminApps->get('/releases/{id}', [AppReleaseController::class, 'show']);
+            $adminApps->put('/releases/{id}', [AppReleaseController::class, 'update']);
+            $adminApps->delete('/releases/{id}', [AppReleaseController::class, 'deactivate']);
+            $adminApps->get('/analytics', [AppReleaseController::class, 'analytics']);
         })
             ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
             ->add($container->get(TenantMiddleware::class))
