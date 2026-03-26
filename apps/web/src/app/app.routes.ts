@@ -21,6 +21,28 @@ export const routes: Routes = [
         loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
       },
 
+      // Phase 1: Core Operations
+      {
+        path: 'sites',
+        loadChildren: () => import('./features/sites/sites.routes').then(m => m.SITES_ROUTES),
+      },
+      {
+        path: 'guards',
+        loadChildren: () => import('./features/guards/guards.routes').then(m => m.GUARDS_ROUTES),
+      },
+      {
+        path: 'clients',
+        loadChildren: () => import('./features/clients/clients.routes').then(m => m.CLIENTS_ROUTES),
+      },
+
+      // Guard Web Portal (guard role only)
+      {
+        path: 'portal',
+        canActivate: [roleGuard],
+        data: { roles: ['guard'] },
+        loadChildren: () => import('./features/guard-portal/guard-portal.routes').then(m => m.GUARD_PORTAL_ROUTES),
+      },
+
       // Super Admin routes
       {
         path: 'admin',
