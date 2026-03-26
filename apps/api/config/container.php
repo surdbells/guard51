@@ -14,6 +14,7 @@ use Guard51\Module\Auth\AuthController;
 use Guard51\Module\AppDistribution\AppReleaseController;
 use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
+use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Site\SiteController;
@@ -472,6 +473,16 @@ $containerBuilder->addDefinitions([
     ClientController::class => function (ContainerInterface $c): ClientController {
         return new ClientController(
             $c->get(ClientService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    DashboardController::class => function (ContainerInterface $c): DashboardController {
+        return new DashboardController(
+            $c->get(DailySnapshotRepository::class),
+            $c->get(GuardRepository::class),
+            $c->get(SiteRepository::class),
+            $c->get(ClientRepository::class),
             $c->get(LoggerInterface::class),
         );
     },

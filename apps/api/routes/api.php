@@ -11,6 +11,7 @@ use Guard51\Module\Auth\AuthController;
 use Guard51\Module\AppDistribution\AppReleaseController;
 use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
+use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Site\SiteController;
@@ -252,6 +253,7 @@ return function (App $app): void {
             $guards->get('/{id}/documents', [GuardController::class, 'listDocuments']);
             $guards->post('/{id}/documents', [GuardController::class, 'addDocument']);
             $guards->post('/documents/{docId}/verify', [GuardController::class, 'verifyDocument']);
+            $guards->post('/bulk-import', [GuardController::class, 'bulkImport']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
@@ -267,6 +269,15 @@ return function (App $app): void {
             $clients->post('/{id}/contacts', [ClientController::class, 'addContact']);
             $clients->put('/contacts/{contactId}', [ClientController::class, 'updateContact']);
             $clients->delete('/contacts/{contactId}', [ClientController::class, 'deleteContact']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Dashboard ────────────────────────────────
+        $group->group('/dashboard', function (RouteCollectorProxy $dash): void {
+            $dash->get('/stats', [DashboardController::class, 'stats']);
+            $dash->get('/snapshots', [DashboardController::class, 'snapshots']);
+            $dash->get('/today', [DashboardController::class, 'today']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

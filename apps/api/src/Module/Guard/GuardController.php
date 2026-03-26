@@ -137,4 +137,52 @@ final class GuardController
         $docs = $this->guardService->getExpiringDocuments($tenantId, $days);
         return JsonResponse::success($response, ['documents' => $docs, 'days_threshold' => $days]);
     }
+
+    /**
+     * POST /api/v1/guards/bulk-import — Import guards from CSV
+     */
+    public function bulkImport(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $body = (array) $request->getParsedBody();
+        $csvData = $body['csv_data'] ?? '';
+
+        if (empty($csvData)) {
+            throw ApiException::validation('CSV data is required.');
+        }
+
+        $lines = array_filter(explode("\n", trim($csvData)));
+        if (count($lines) < 2) {
+            throw ApiException::validation('CSV must have a header row and at least one data row.');
+        }
+
+        $headers = str_getcsv(array_shift($lines));
+        $headers = array_map(fn($h) => strtolower(trim($h)), $headers);
+
+        $imported = 0;
+        $errors = [];
+
+        foreach ($lines as $i => $line) {
+            $row = str_getcsv($line);
+            if (count($row) !== count($headers)) {
+                $errors[] = "Row " . ($i + 2) . ": column count mismatch.";
+                continue;
+            }
+
+            $data = array_combine($headers, $row);
+
+            try {
+                $this->guardService->createGuard($tenantId, $data);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "Row " . ($i + 2) . ": " . $e->getMessage();
+            }
+        }
+
+        return JsonResponse::success($response, [
+            'imported' => $imported,
+            'errors' => $errors,
+            'total_rows' => count($lines),
+        ]);
+    }
 }
