@@ -210,6 +210,7 @@ export class SidebarComponent {
         { label: 'Dashboard', translateKey: 'nav.dashboard', icon: LayoutDashboard, route: '/admin/dashboard' },
         { label: 'Tenants', translateKey: 'nav.clients', icon: Building2, route: '/admin/tenants' },
         { label: 'Subscriptions', translateKey: 'nav.invoices', icon: Receipt, route: '/admin/subscriptions' },
+        { label: 'Payments', translateKey: 'nav.invoices', icon: Bell, route: '/admin/payments' },
         { label: 'Features', translateKey: 'nav.settings', icon: Boxes, route: '/admin/features' },
         { label: 'Apps', translateKey: 'nav.settings', icon: AppWindow, route: '/admin/apps' },
         { label: 'Analytics', translateKey: 'nav.reports', icon: BarChart3, route: '/admin/analytics' },

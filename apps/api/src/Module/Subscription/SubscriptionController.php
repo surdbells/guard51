@@ -180,6 +180,49 @@ final class SubscriptionController
     }
 
     /**
+     * POST /api/v1/subscriptions/upgrade — Upgrade to a new plan
+     */
+    public function upgrade(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $tenant = $this->tenantRepo->findOrFail($tenantId);
+        $body = (array) $request->getParsedBody();
+
+        $newPlanId = $body['plan_id'] ?? '';
+        $billingCycle = $body['billing_cycle'] ?? 'monthly';
+        $paymentMethod = $body['payment_method'] ?? 'paystack';
+
+        if (empty($newPlanId)) {
+            throw ApiException::validation('Plan ID is required.');
+        }
+
+        // Cancel current subscription if active
+        $current = $this->subscriptionService->getCurrentSubscription($tenantId);
+        if ($current) {
+            $this->subscriptionService->cancel($current->getId(), 'Upgraded to new plan');
+        }
+
+        // Initialize new subscription based on payment method
+        if ($paymentMethod === 'bank_transfer') {
+            $subscription = $this->subscriptionService->initiateBankTransfer($tenant, $newPlanId, $billingCycle);
+            return JsonResponse::success($response, [
+                'subscription' => $subscription->toArray(),
+                'message' => 'Upgrade initiated via bank transfer. Please transfer funds and await confirmation.',
+            ]);
+        }
+
+        $result = $this->subscriptionService->initializePaystack(
+            $tenant, $newPlanId, $tenant->getEmail() ?? '', $billingCycle
+        );
+
+        return JsonResponse::success($response, [
+            'authorization_url' => $result['authorization_url'],
+            'subscription_id' => $result['subscription_id'],
+            'message' => 'Upgrade initiated. Complete payment to activate.',
+        ]);
+    }
+
+    /**
      * GET /api/v1/subscriptions/invoices — Tenant's subscription invoices
      */
     public function invoices(Request $request, Response $response): Response

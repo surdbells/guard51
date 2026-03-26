@@ -90,6 +90,7 @@ return function (App $app): void {
             $subs->post('/verify', [SubscriptionController::class, 'verify']);
             $subs->post('/bank-transfer', [SubscriptionController::class, 'bankTransfer']);
             $subs->post('/cancel', [SubscriptionController::class, 'cancel']);
+            $subs->post('/upgrade', [SubscriptionController::class, 'upgrade']);
             $subs->get('/invoices', [SubscriptionController::class, 'invoices']);
         })
             ->add($container->get(TenantMiddleware::class))
@@ -127,6 +128,7 @@ return function (App $app): void {
         $group->group('/usage', function (RouteCollectorProxy $usage): void {
             $usage->get('/current', [UsageController::class, 'current']);
             $usage->get('/limits', [UsageController::class, 'limits']);
+            $usage->get('/history', [UsageController::class, 'history']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

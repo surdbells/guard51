@@ -9,5 +9,29 @@ export const SUPER_ADMIN_ROUTES: Routes = [
     path: 'tenants',
     loadComponent: () => import('./tenants/tenants.component').then(m => m.TenantsComponent),
   },
+  {
+    path: 'subscriptions',
+    loadComponent: () => import('./subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent),
+  },
+  {
+    path: 'payments',
+    loadComponent: () => import('./payments/payments.component').then(m => m.PaymentsComponent),
+  },
+  {
+    path: 'features',
+    loadComponent: () => import('./features/features.component').then(m => m.FeaturesComponent),
+  },
+  {
+    path: 'apps',
+    loadComponent: () => import('./apps/apps.component').then(m => m.AppsComponent),
+  },
+  {
+    path: 'analytics',
+    loadComponent: () => import('./analytics/analytics.component').then(m => m.AnalyticsComponent),
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

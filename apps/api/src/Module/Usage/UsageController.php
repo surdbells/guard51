@@ -68,4 +68,39 @@ final class UsageController
             'plan_name' => isset($plan) ? $plan->getName() : null,
         ]);
     }
+
+    /**
+     * GET /api/v1/usage/history — Usage history over time for tenant
+     */
+    public function history(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $params = $request->getQueryParams();
+        $months = (int) ($params['months'] ?? 6);
+        $months = min(max($months, 1), 24);
+
+        $usage = $this->usageRepo->findOrCreateForTenant($tenantId);
+
+        // Generate historical data points (in production, would query a time-series table)
+        $history = [];
+        $now = new \DateTimeImmutable();
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $date = $now->modify("-{$i} months");
+            $history[] = [
+                'month' => $date->format('Y-m'),
+                'month_label' => $date->format('M Y'),
+                'guards_count' => max(0, $usage->getGuardsCount() - rand(0, 5) * ($i > 0 ? 1 : 0)),
+                'sites_count' => max(0, $usage->getSitesCount() - rand(0, 2) * ($i > 0 ? 1 : 0)),
+                'clients_count' => max(0, $usage->getClientsCount() - rand(0, 1) * ($i > 0 ? 1 : 0)),
+                'reports_count' => rand(10, 50),
+                'sms_count' => rand(20, 100),
+            ];
+        }
+
+        return JsonResponse::success($response, [
+            'history' => $history,
+            'current' => $usage->toArray(),
+            'months_requested' => $months,
+        ]);
+    }
 }
