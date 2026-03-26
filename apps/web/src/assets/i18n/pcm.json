@@ -1,0 +1,77 @@
+{
+  "app": {
+    "name": "Guard51",
+    "tagline": "Security Workforce Management"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "guards": "Guards",
+    "clients": "Clients",
+    "sites": "Sites",
+    "scheduling": "Schedule",
+    "attendance": "Attendance",
+    "tracker": "Live Tracker",
+    "reports": "Reports",
+    "incidents": "Incidents",
+    "dispatch": "Dispatch",
+    "invoices": "Invoice",
+    "payroll": "Payroll",
+    "messenger": "Messenger",
+    "settings": "Settings",
+    "help": "Help & Support",
+    "logout": "Comot"
+  },
+  "nav_sections": {
+    "main": "Main",
+    "operations": "Operations",
+    "finance": "Money Matter",
+    "communication": "Communication",
+    "admin": "Admin",
+    "support": "Help & Support"
+  },
+  "auth": {
+    "login": "Enter",
+    "register": "Open Account",
+    "email": "Email address",
+    "password": "Password",
+    "forgot_password": "You forget password?",
+    "remember_me": "Make e remember me",
+    "no_account": "You no get account?",
+    "has_account": "You don get account?",
+    "sign_up": "Register",
+    "sign_in": "Enter",
+    "company_name": "Company name",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "phone": "Phone number",
+    "reset_password": "Change Password",
+    "new_password": "New password",
+    "confirm_password": "Confirm am"
+  },
+  "dashboard": {
+    "welcome_back": "Welcome back",
+    "overview": "See wetin dey happen for your security operations",
+    "guards_on_duty": "Guards Wey Dey Work",
+    "total_sites": "Active Sites",
+    "incidents_today": "Wahala Today",
+    "attendance_rate": "Attendance Rate",
+    "from_last_month": "from last month"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search...",
+    "loading": "E dey load...",
+    "no_data": "Nothing dey here",
+    "confirm": "Confirm",
+    "back": "Go Back",
+    "next": "Next",
+    "view_all": "See all",
+    "export": "Export",
+    "filter": "Filter",
+    "actions": "Actions"
+  }
+}
