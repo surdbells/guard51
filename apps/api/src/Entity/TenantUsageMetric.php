@@ -73,7 +73,9 @@ class TenantUsageMetric implements TenantAwareInterface
     public function incrementGuards(): static { $this->guardsCount++; return $this; }
     public function decrementGuards(): static { $this->guardsCount = max(0, $this->guardsCount - 1); return $this; }
     public function incrementSites(): static { $this->sitesCount++; return $this; }
+    public function decrementSites(): static { $this->sitesCount = max(0, $this->sitesCount - 1); return $this; }
     public function incrementClients(): static { $this->clientsCount++; return $this; }
+    public function decrementClients(): static { $this->clientsCount = max(0, $this->clientsCount - 1); return $this; }
 
     public function markRecalculated(): static
     {
