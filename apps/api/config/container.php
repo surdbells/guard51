@@ -13,7 +13,10 @@ use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
 use Guard51\Module\AppDistribution\AppReleaseController;
 use Guard51\Module\AppDistribution\AppClientController;
+use Guard51\Module\Client\ClientController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Site\SiteController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\SubscriptionController;
@@ -23,8 +26,16 @@ use Guard51\Module\Usage\UsageController;
 use Guard51\Repository\AuditLogRepository;
 use Guard51\Repository\AppReleaseRepository;
 use Guard51\Repository\AppDownloadLogRepository;
+use Guard51\Repository\ClientContactRepository;
+use Guard51\Repository\ClientRepository;
+use Guard51\Repository\DailySnapshotRepository;
 use Guard51\Repository\FeatureModuleRepository;
+use Guard51\Repository\GuardDocumentRepository;
+use Guard51\Repository\GuardRepository;
+use Guard51\Repository\GuardSkillRepository;
 use Guard51\Repository\RefreshTokenRepository;
+use Guard51\Repository\PostOrderRepository;
+use Guard51\Repository\SiteRepository;
 use Guard51\Repository\SubscriptionInvoiceRepository;
 use Guard51\Repository\SubscriptionPlanRepository;
 use Guard51\Repository\SubscriptionRepository;
@@ -35,7 +46,10 @@ use Guard51\Repository\TenantAppConfigRepository;
 use Guard51\Repository\TenantUsageMetricRepository;
 use Guard51\Repository\UserRepository;
 use Guard51\Service\AppDistributionService;
+use Guard51\Service\ClientService;
 use Guard51\Service\FeatureService;
+use Guard51\Service\GuardService;
+use Guard51\Service\SiteService;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
 use Guard51\Service\InvitationService;
@@ -378,6 +392,86 @@ $containerBuilder->addDefinitions([
         return new AppClientController(
             $c->get(AppDistributionService::class),
             $c->get(TenantAppConfigRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    // Phase 1: Core Operations
+    SiteRepository::class => function (ContainerInterface $c): SiteRepository {
+        return new SiteRepository($c->get(EntityManagerInterface::class));
+    },
+    PostOrderRepository::class => function (ContainerInterface $c): PostOrderRepository {
+        return new PostOrderRepository($c->get(EntityManagerInterface::class));
+    },
+    GuardRepository::class => function (ContainerInterface $c): GuardRepository {
+        return new GuardRepository($c->get(EntityManagerInterface::class));
+    },
+    GuardSkillRepository::class => function (ContainerInterface $c): GuardSkillRepository {
+        return new GuardSkillRepository($c->get(EntityManagerInterface::class));
+    },
+    GuardDocumentRepository::class => function (ContainerInterface $c): GuardDocumentRepository {
+        return new GuardDocumentRepository($c->get(EntityManagerInterface::class));
+    },
+    ClientRepository::class => function (ContainerInterface $c): ClientRepository {
+        return new ClientRepository($c->get(EntityManagerInterface::class));
+    },
+    ClientContactRepository::class => function (ContainerInterface $c): ClientContactRepository {
+        return new ClientContactRepository($c->get(EntityManagerInterface::class));
+    },
+    DailySnapshotRepository::class => function (ContainerInterface $c): DailySnapshotRepository {
+        return new DailySnapshotRepository($c->get(EntityManagerInterface::class));
+    },
+
+    SiteService::class => function (ContainerInterface $c): SiteService {
+        return new SiteService(
+            $c->get(SiteRepository::class),
+            $c->get(PostOrderRepository::class),
+            $c->get(TenantUsageMetricRepository::class),
+            $c->get(SubscriptionRepository::class),
+            $c->get(SubscriptionPlanRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    GuardService::class => function (ContainerInterface $c): GuardService {
+        return new GuardService(
+            $c->get(GuardRepository::class),
+            $c->get(GuardSkillRepository::class),
+            $c->get(GuardDocumentRepository::class),
+            $c->get(UserRepository::class),
+            $c->get(TenantUsageMetricRepository::class),
+            $c->get(SubscriptionRepository::class),
+            $c->get(SubscriptionPlanRepository::class),
+            $c->get(EntityManagerInterface::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    ClientService::class => function (ContainerInterface $c): ClientService {
+        return new ClientService(
+            $c->get(ClientRepository::class),
+            $c->get(ClientContactRepository::class),
+            $c->get(TenantUsageMetricRepository::class),
+            $c->get(SubscriptionRepository::class),
+            $c->get(SubscriptionPlanRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    SiteController::class => function (ContainerInterface $c): SiteController {
+        return new SiteController(
+            $c->get(SiteService::class),
+            $c->get(ValidationService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    GuardController::class => function (ContainerInterface $c): GuardController {
+        return new GuardController(
+            $c->get(GuardService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    ClientController::class => function (ContainerInterface $c): ClientController {
+        return new ClientController(
+            $c->get(ClientService::class),
             $c->get(LoggerInterface::class),
         );
     },

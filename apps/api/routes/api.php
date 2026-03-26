@@ -10,7 +10,10 @@ use Guard51\Middleware\TenantMiddleware;
 use Guard51\Module\Auth\AuthController;
 use Guard51\Module\AppDistribution\AppReleaseController;
 use Guard51\Module\AppDistribution\AppClientController;
+use Guard51\Module\Client\ClientController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Site\SiteController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\PlanController;
@@ -200,6 +203,71 @@ return function (App $app): void {
             $adminApps->get('/analytics', [AppReleaseController::class, 'analytics']);
         })
             ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 1: Core Operations
+        // ══════════════════════════════════════════════
+
+        // ── Sites ────────────────────────────────────
+        $group->group('/sites', function (RouteCollectorProxy $sites): void {
+            $sites->get('', [SiteController::class, 'index']);
+            $sites->get('/map', [SiteController::class, 'map']);
+            $sites->post('', [SiteController::class, 'create']);
+            $sites->get('/{id}', [SiteController::class, 'show']);
+            $sites->put('/{id}', [SiteController::class, 'update']);
+            $sites->delete('/{id}', [SiteController::class, 'delete']);
+            $sites->post('/{id}/suspend', [SiteController::class, 'suspend']);
+            $sites->post('/{id}/activate', [SiteController::class, 'activate']);
+            // Post Orders nested under sites
+            $sites->get('/{siteId}/post-orders', [SiteController::class, 'listPostOrders']);
+            $sites->post('/{siteId}/post-orders', [SiteController::class, 'createPostOrder']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // Post Orders (top-level for update/delete by ID)
+        $group->put('/post-orders/{id}', [SiteController::class, 'updatePostOrder'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+        $group->delete('/post-orders/{id}', [SiteController::class, 'deletePostOrder'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Guards ───────────────────────────────────
+        $group->group('/guards', function (RouteCollectorProxy $guards): void {
+            $guards->get('', [GuardController::class, 'index']);
+            $guards->post('', [GuardController::class, 'create']);
+            $guards->get('/skills', [GuardController::class, 'listSkills']);
+            $guards->post('/skills', [GuardController::class, 'createSkill']);
+            $guards->get('/documents/expiring', [GuardController::class, 'expiringDocuments']);
+            $guards->get('/{id}', [GuardController::class, 'show']);
+            $guards->put('/{id}', [GuardController::class, 'update']);
+            $guards->delete('/{id}', [GuardController::class, 'delete']);
+            $guards->post('/{id}/suspend', [GuardController::class, 'suspend']);
+            $guards->post('/{id}/activate', [GuardController::class, 'activate']);
+            $guards->post('/{id}/skills', [GuardController::class, 'assignSkill']);
+            $guards->delete('/{guardId}/skills/{skillId}', [GuardController::class, 'removeSkill']);
+            $guards->get('/{id}/documents', [GuardController::class, 'listDocuments']);
+            $guards->post('/{id}/documents', [GuardController::class, 'addDocument']);
+            $guards->post('/documents/{docId}/verify', [GuardController::class, 'verifyDocument']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Clients ──────────────────────────────────
+        $group->group('/clients', function (RouteCollectorProxy $clients): void {
+            $clients->get('', [ClientController::class, 'index']);
+            $clients->post('', [ClientController::class, 'create']);
+            $clients->get('/{id}', [ClientController::class, 'show']);
+            $clients->put('/{id}', [ClientController::class, 'update']);
+            $clients->delete('/{id}', [ClientController::class, 'delete']);
+            $clients->get('/{id}/contacts', [ClientController::class, 'listContacts']);
+            $clients->post('/{id}/contacts', [ClientController::class, 'addContact']);
+            $clients->put('/contacts/{contactId}', [ClientController::class, 'updateContact']);
+            $clients->delete('/contacts/{contactId}', [ClientController::class, 'deleteContact']);
+        })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
