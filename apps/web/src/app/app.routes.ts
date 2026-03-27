@@ -49,6 +49,20 @@ export const routes: Routes = [
         loadChildren: () => import('./features/passdowns/passdowns.routes').then(m => m.PASSDOWNS_ROUTES),
       },
 
+      // Phase 3: Tracking, Tours & Panic
+      {
+        path: 'tracker',
+        loadChildren: () => import('./features/tracker/tracker.routes').then(m => m.TRACKER_ROUTES),
+      },
+      {
+        path: 'tours',
+        loadChildren: () => import('./features/tours/tours.routes').then(m => m.TOURS_ROUTES),
+      },
+      {
+        path: 'panic',
+        loadChildren: () => import('./features/panic/panic.routes').then(m => m.PANIC_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',
