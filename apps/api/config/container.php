@@ -18,9 +18,12 @@ use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Passdown\PassdownController;
+use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
 use Guard51\Module\TimeClock\TimeClockController;
+use Guard51\Module\Tour\TourController;
+use Guard51\Module\Tracking\TrackingController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\SubscriptionController;
@@ -37,9 +40,13 @@ use Guard51\Repository\ClientContactRepository;
 use Guard51\Repository\ClientRepository;
 use Guard51\Repository\DailySnapshotRepository;
 use Guard51\Repository\FeatureModuleRepository;
+use Guard51\Repository\GeofenceAlertRepository;
 use Guard51\Repository\GuardDocumentRepository;
+use Guard51\Repository\GuardLocationRepository;
 use Guard51\Repository\GuardRepository;
 use Guard51\Repository\GuardSkillRepository;
+use Guard51\Repository\IdleAlertRepository;
+use Guard51\Repository\PanicAlertRepository;
 use Guard51\Repository\PassdownLogRepository;
 use Guard51\Repository\RefreshTokenRepository;
 use Guard51\Repository\PostOrderRepository;
@@ -48,6 +55,9 @@ use Guard51\Repository\ShiftSwapRequestRepository;
 use Guard51\Repository\ShiftTemplateRepository;
 use Guard51\Repository\SiteRepository;
 use Guard51\Repository\TimeClockRepository;
+use Guard51\Repository\TourCheckpointRepository;
+use Guard51\Repository\TourCheckpointScanRepository;
+use Guard51\Repository\TourSessionRepository;
 use Guard51\Repository\SubscriptionInvoiceRepository;
 use Guard51\Repository\SubscriptionPlanRepository;
 use Guard51\Repository\SubscriptionRepository;
@@ -62,10 +72,13 @@ use Guard51\Service\ClientService;
 use Guard51\Service\FeatureService;
 use Guard51\Service\GeofenceService;
 use Guard51\Service\GuardService;
+use Guard51\Service\LocationService;
+use Guard51\Service\PanicService;
 use Guard51\Service\PassdownService;
 use Guard51\Service\ShiftService;
 use Guard51\Service\SiteService;
 use Guard51\Service\TimeClockService;
+use Guard51\Service\TourService;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
 use Guard51\Service\InvitationService;
@@ -549,6 +562,43 @@ $containerBuilder->addDefinitions([
     ShiftController::class => fn(ContainerInterface $c) => new ShiftController($c->get(ShiftService::class)),
     TimeClockController::class => fn(ContainerInterface $c) => new TimeClockController($c->get(TimeClockService::class)),
     PassdownController::class => fn(ContainerInterface $c) => new PassdownController($c->get(PassdownService::class)),
+
+    // Phase 3: Tracking, Tours & Panic
+    GuardLocationRepository::class => fn(ContainerInterface $c) => new GuardLocationRepository($c->get(EntityManagerInterface::class)),
+    GeofenceAlertRepository::class => fn(ContainerInterface $c) => new GeofenceAlertRepository($c->get(EntityManagerInterface::class)),
+    IdleAlertRepository::class => fn(ContainerInterface $c) => new IdleAlertRepository($c->get(EntityManagerInterface::class)),
+    TourCheckpointRepository::class => fn(ContainerInterface $c) => new TourCheckpointRepository($c->get(EntityManagerInterface::class)),
+    TourSessionRepository::class => fn(ContainerInterface $c) => new TourSessionRepository($c->get(EntityManagerInterface::class)),
+    TourCheckpointScanRepository::class => fn(ContainerInterface $c) => new TourCheckpointScanRepository($c->get(EntityManagerInterface::class)),
+    PanicAlertRepository::class => fn(ContainerInterface $c) => new PanicAlertRepository($c->get(EntityManagerInterface::class)),
+
+    LocationService::class => function (ContainerInterface $c): LocationService {
+        return new LocationService(
+            $c->get(GuardLocationRepository::class),
+            $c->get(GeofenceAlertRepository::class),
+            $c->get(IdleAlertRepository::class),
+            $c->get(GeofenceService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    TourService::class => function (ContainerInterface $c): TourService {
+        return new TourService(
+            $c->get(TourCheckpointRepository::class),
+            $c->get(TourSessionRepository::class),
+            $c->get(TourCheckpointScanRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    PanicService::class => function (ContainerInterface $c): PanicService {
+        return new PanicService(
+            $c->get(PanicAlertRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    TrackingController::class => fn(ContainerInterface $c) => new TrackingController($c->get(LocationService::class)),
+    TourController::class => fn(ContainerInterface $c) => new TourController($c->get(TourService::class)),
+    PanicController::class => fn(ContainerInterface $c) => new PanicController($c->get(PanicService::class)),
 ]);
 
 return $containerBuilder->build();

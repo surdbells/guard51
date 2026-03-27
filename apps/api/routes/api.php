@@ -14,10 +14,13 @@ use Guard51\Module\Client\ClientController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Passdown\PassdownController;
 use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
 use Guard51\Module\TimeClock\TimeClockController;
+use Guard51\Module\Tour\TourController;
+use Guard51\Module\Tracking\TrackingController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\PlanController;
@@ -357,6 +360,58 @@ return function (App $app): void {
             $pd->get('/site/{siteId}', [PassdownController::class, 'listBySite']);
             $pd->get('/unacknowledged', [PassdownController::class, 'unacknowledged']);
             $pd->post('/{id}/acknowledge', [PassdownController::class, 'acknowledge']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 3: Tracking, Tours & Panic
+        // ══════════════════════════════════════════════
+
+        // ── Live Tracking ────────────────────────────
+        $group->group('/tracking', function (RouteCollectorProxy $tr): void {
+            $tr->post('/location', [TrackingController::class, 'recordLocation']);
+            $tr->post('/batch', [TrackingController::class, 'recordBatch']);
+            $tr->get('/live', [TrackingController::class, 'liveLocations']);
+            $tr->get('/guard/{guardId}/latest', [TrackingController::class, 'latestLocation']);
+            $tr->get('/guard/{guardId}/path', [TrackingController::class, 'guardPath']);
+            // Geofence alerts
+            $tr->get('/geofence-alerts', [TrackingController::class, 'geofenceAlerts']);
+            $tr->get('/geofence-alerts/recent', [TrackingController::class, 'recentGeofenceAlerts']);
+            $tr->post('/geofence-alerts/{id}/acknowledge', [TrackingController::class, 'acknowledgeGeofenceAlert']);
+            // Idle alerts
+            $tr->get('/idle-alerts', [TrackingController::class, 'idleAlerts']);
+            $tr->post('/idle-alerts/{id}/acknowledge', [TrackingController::class, 'acknowledgeIdleAlert']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Site Tours ───────────────────────────────
+        $group->group('/tours', function (RouteCollectorProxy $tours): void {
+            // Checkpoints
+            $tours->get('/site/{siteId}/checkpoints', [TourController::class, 'listCheckpoints']);
+            $tours->post('/site/{siteId}/checkpoints', [TourController::class, 'createCheckpoint']);
+            $tours->put('/checkpoints/{id}', [TourController::class, 'updateCheckpoint']);
+            // Sessions
+            $tours->post('/start', [TourController::class, 'startTour']);
+            $tours->post('/sessions/{sessionId}/scan', [TourController::class, 'recordScan']);
+            $tours->post('/sessions/{sessionId}/complete', [TourController::class, 'completeTour']);
+            $tours->get('/sessions/{sessionId}', [TourController::class, 'sessionDetail']);
+            $tours->get('/site/{siteId}/sessions', [TourController::class, 'sessionsBySite']);
+            $tours->get('/guard/{guardId}/sessions', [TourController::class, 'sessionsByGuard']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Panic Alerts ─────────────────────────────
+        $group->group('/panic', function (RouteCollectorProxy $panic): void {
+            $panic->post('/trigger', [PanicController::class, 'trigger']);
+            $panic->get('/active', [PanicController::class, 'active']);
+            $panic->get('/recent', [PanicController::class, 'recent']);
+            $panic->post('/{id}/acknowledge', [PanicController::class, 'acknowledge']);
+            $panic->post('/{id}/responding', [PanicController::class, 'responding']);
+            $panic->post('/{id}/resolve', [PanicController::class, 'resolve']);
+            $panic->post('/{id}/false-alarm', [PanicController::class, 'falseAlarm']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
