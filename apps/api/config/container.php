@@ -16,11 +16,15 @@ use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Incident\IncidentController;
 use Guard51\Module\Passdown\PassdownController;
 use Guard51\Module\Panic\PanicController;
+use Guard51\Module\Report\ReportController;
 use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
+use Guard51\Module\Task\TaskController;
 use Guard51\Module\TimeClock\TimeClockController;
 use Guard51\Module\Tour\TourController;
 use Guard51\Module\Tracking\TrackingController;
@@ -38,7 +42,12 @@ use Guard51\Repository\BreakConfigRepository;
 use Guard51\Repository\BreakLogRepository;
 use Guard51\Repository\ClientContactRepository;
 use Guard51\Repository\ClientRepository;
+use Guard51\Repository\CustomReportSubmissionRepository;
+use Guard51\Repository\CustomReportTemplateRepository;
+use Guard51\Repository\DailyActivityReportRepository;
 use Guard51\Repository\DailySnapshotRepository;
+use Guard51\Repository\DispatchAssignmentRepository;
+use Guard51\Repository\DispatchCallRepository;
 use Guard51\Repository\FeatureModuleRepository;
 use Guard51\Repository\GeofenceAlertRepository;
 use Guard51\Repository\GuardDocumentRepository;
@@ -46,6 +55,8 @@ use Guard51\Repository\GuardLocationRepository;
 use Guard51\Repository\GuardRepository;
 use Guard51\Repository\GuardSkillRepository;
 use Guard51\Repository\IdleAlertRepository;
+use Guard51\Repository\IncidentEscalationRepository;
+use Guard51\Repository\IncidentReportRepository;
 use Guard51\Repository\PanicAlertRepository;
 use Guard51\Repository\PassdownLogRepository;
 use Guard51\Repository\RefreshTokenRepository;
@@ -54,10 +65,12 @@ use Guard51\Repository\ShiftRepository;
 use Guard51\Repository\ShiftSwapRequestRepository;
 use Guard51\Repository\ShiftTemplateRepository;
 use Guard51\Repository\SiteRepository;
+use Guard51\Repository\TaskRepository;
 use Guard51\Repository\TimeClockRepository;
 use Guard51\Repository\TourCheckpointRepository;
 use Guard51\Repository\TourCheckpointScanRepository;
 use Guard51\Repository\TourSessionRepository;
+use Guard51\Repository\WatchModeLogRepository;
 use Guard51\Repository\SubscriptionInvoiceRepository;
 use Guard51\Repository\SubscriptionPlanRepository;
 use Guard51\Repository\SubscriptionRepository;
@@ -69,14 +82,18 @@ use Guard51\Repository\TenantUsageMetricRepository;
 use Guard51\Repository\UserRepository;
 use Guard51\Service\AppDistributionService;
 use Guard51\Service\ClientService;
+use Guard51\Service\DispatchService;
 use Guard51\Service\FeatureService;
 use Guard51\Service\GeofenceService;
 use Guard51\Service\GuardService;
+use Guard51\Service\IncidentService;
 use Guard51\Service\LocationService;
 use Guard51\Service\PanicService;
 use Guard51\Service\PassdownService;
+use Guard51\Service\ReportService;
 use Guard51\Service\ShiftService;
 use Guard51\Service\SiteService;
+use Guard51\Service\TaskService;
 use Guard51\Service\TimeClockService;
 use Guard51\Service\TourService;
 use Guard51\Service\FileStorageService;
@@ -599,6 +616,45 @@ $containerBuilder->addDefinitions([
     TrackingController::class => fn(ContainerInterface $c) => new TrackingController($c->get(LocationService::class)),
     TourController::class => fn(ContainerInterface $c) => new TourController($c->get(TourService::class)),
     PanicController::class => fn(ContainerInterface $c) => new PanicController($c->get(PanicService::class)),
+
+    // Phase 4: Reporting, Incidents, Dispatch, Tasks
+    DailyActivityReportRepository::class => fn(ContainerInterface $c) => new DailyActivityReportRepository($c->get(EntityManagerInterface::class)),
+    CustomReportTemplateRepository::class => fn(ContainerInterface $c) => new CustomReportTemplateRepository($c->get(EntityManagerInterface::class)),
+    CustomReportSubmissionRepository::class => fn(ContainerInterface $c) => new CustomReportSubmissionRepository($c->get(EntityManagerInterface::class)),
+    WatchModeLogRepository::class => fn(ContainerInterface $c) => new WatchModeLogRepository($c->get(EntityManagerInterface::class)),
+    IncidentReportRepository::class => fn(ContainerInterface $c) => new IncidentReportRepository($c->get(EntityManagerInterface::class)),
+    IncidentEscalationRepository::class => fn(ContainerInterface $c) => new IncidentEscalationRepository($c->get(EntityManagerInterface::class)),
+    DispatchCallRepository::class => fn(ContainerInterface $c) => new DispatchCallRepository($c->get(EntityManagerInterface::class)),
+    DispatchAssignmentRepository::class => fn(ContainerInterface $c) => new DispatchAssignmentRepository($c->get(EntityManagerInterface::class)),
+    TaskRepository::class => fn(ContainerInterface $c) => new TaskRepository($c->get(EntityManagerInterface::class)),
+
+    ReportService::class => function (ContainerInterface $c): ReportService {
+        return new ReportService(
+            $c->get(DailyActivityReportRepository::class), $c->get(CustomReportTemplateRepository::class),
+            $c->get(CustomReportSubmissionRepository::class), $c->get(WatchModeLogRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    IncidentService::class => function (ContainerInterface $c): IncidentService {
+        return new IncidentService(
+            $c->get(IncidentReportRepository::class), $c->get(IncidentEscalationRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    DispatchService::class => function (ContainerInterface $c): DispatchService {
+        return new DispatchService(
+            $c->get(DispatchCallRepository::class), $c->get(DispatchAssignmentRepository::class),
+            $c->get(GeofenceService::class), $c->get(LoggerInterface::class),
+        );
+    },
+    TaskService::class => function (ContainerInterface $c): TaskService {
+        return new TaskService($c->get(TaskRepository::class), $c->get(LoggerInterface::class));
+    },
+
+    ReportController::class => fn(ContainerInterface $c) => new ReportController($c->get(ReportService::class)),
+    IncidentController::class => fn(ContainerInterface $c) => new IncidentController($c->get(IncidentService::class)),
+    DispatchController::class => fn(ContainerInterface $c) => new DispatchController($c->get(DispatchService::class)),
+    TaskController::class => fn(ContainerInterface $c) => new TaskController($c->get(TaskService::class)),
 ]);
 
 return $containerBuilder->build();

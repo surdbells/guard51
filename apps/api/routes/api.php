@@ -13,11 +13,15 @@ use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Incident\IncidentController;
 use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Passdown\PassdownController;
+use Guard51\Module\Report\ReportController;
 use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
+use Guard51\Module\Task\TaskController;
 use Guard51\Module\TimeClock\TimeClockController;
 use Guard51\Module\Tour\TourController;
 use Guard51\Module\Tracking\TrackingController;
@@ -413,6 +417,70 @@ return function (App $app): void {
             $panic->post('/{id}/responding', [PanicController::class, 'responding']);
             $panic->post('/{id}/resolve', [PanicController::class, 'resolve']);
             $panic->post('/{id}/false-alarm', [PanicController::class, 'falseAlarm']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 4: Reporting, Incidents, Dispatch, Tasks
+        // ══════════════════════════════════════════════
+
+        // ── Reports (DAR, Custom, Watch Mode) ────────
+        $group->group('/reports', function (RouteCollectorProxy $rpt): void {
+            // DARs
+            $rpt->get('/dar', [ReportController::class, 'listDARs']);
+            $rpt->post('/dar', [ReportController::class, 'createDAR']);
+            $rpt->post('/dar/{id}/submit', [ReportController::class, 'submitDAR']);
+            $rpt->post('/dar/{id}/review', [ReportController::class, 'reviewDAR']);
+            // Custom templates
+            $rpt->get('/templates', [ReportController::class, 'listTemplates']);
+            $rpt->post('/templates', [ReportController::class, 'createTemplate']);
+            // Custom submissions
+            $rpt->post('/custom', [ReportController::class, 'submitCustomReport']);
+            $rpt->get('/custom/template/{templateId}', [ReportController::class, 'listSubmissions']);
+            // Watch mode
+            $rpt->post('/watch', [ReportController::class, 'logWatch']);
+            $rpt->get('/watch/site/{siteId}', [ReportController::class, 'watchFeed']);
+            $rpt->get('/watch/recent', [ReportController::class, 'recentWatchFeed']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Incidents ────────────────────────────────
+        $group->group('/incidents', function (RouteCollectorProxy $inc): void {
+            $inc->get('', [IncidentController::class, 'list']);
+            $inc->get('/active', [IncidentController::class, 'active']);
+            $inc->post('', [IncidentController::class, 'create']);
+            $inc->post('/{id}/status', [IncidentController::class, 'updateStatus']);
+            $inc->post('/{id}/resolve', [IncidentController::class, 'resolve']);
+            $inc->post('/{id}/escalate', [IncidentController::class, 'escalate']);
+            $inc->get('/{id}/escalations', [IncidentController::class, 'escalations']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Dispatch ─────────────────────────────────
+        $group->group('/dispatch', function (RouteCollectorProxy $dsp): void {
+            $dsp->get('/active', [DispatchController::class, 'activeCalls']);
+            $dsp->get('/recent', [DispatchController::class, 'recentCalls']);
+            $dsp->post('', [DispatchController::class, 'createCall']);
+            $dsp->post('/{id}/assign', [DispatchController::class, 'assignGuard']);
+            $dsp->post('/assignments/{assignmentId}/status', [DispatchController::class, 'updateAssignment']);
+            $dsp->post('/{id}/resolve', [DispatchController::class, 'resolveCall']);
+            $dsp->get('/nearest-guards', [DispatchController::class, 'nearestGuards']);
+            $dsp->get('/{id}/assignments', [DispatchController::class, 'assignments']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Tasks ────────────────────────────────────
+        $group->group('/tasks', function (RouteCollectorProxy $tsk): void {
+            $tsk->get('', [TaskController::class, 'list']);
+            $tsk->post('', [TaskController::class, 'create']);
+            $tsk->post('/{id}/status', [TaskController::class, 'updateStatus']);
+            $tsk->get('/guard/{guardId}', [TaskController::class, 'byGuard']);
+            $tsk->get('/site/{siteId}', [TaskController::class, 'bySite']);
+            $tsk->get('/overdue', [TaskController::class, 'overdue']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
