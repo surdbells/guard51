@@ -35,6 +35,20 @@ export const routes: Routes = [
         loadChildren: () => import('./features/clients/clients.routes').then(m => m.CLIENTS_ROUTES),
       },
 
+      // Phase 2: Scheduling & Attendance
+      {
+        path: 'scheduling',
+        loadChildren: () => import('./features/scheduling/scheduling.routes').then(m => m.SCHEDULING_ROUTES),
+      },
+      {
+        path: 'attendance',
+        loadChildren: () => import('./features/attendance/attendance.routes').then(m => m.ATTENDANCE_ROUTES),
+      },
+      {
+        path: 'passdowns',
+        loadChildren: () => import('./features/passdowns/passdowns.routes').then(m => m.PASSDOWNS_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',
