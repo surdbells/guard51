@@ -382,6 +382,7 @@ return function (App $app): void {
             // Idle alerts
             $tr->get('/idle-alerts', [TrackingController::class, 'idleAlerts']);
             $tr->post('/idle-alerts/{id}/acknowledge', [TrackingController::class, 'acknowledgeIdleAlert']);
+            $tr->post('/detect-idle', [TrackingController::class, 'detectIdle']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

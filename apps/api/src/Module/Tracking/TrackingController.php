@@ -88,4 +88,13 @@ final class TrackingController
         $alert = $this->locationService->acknowledgeIdleAlert($args['id'], $request->getAttribute('user_id'));
         return JsonResponse::success($response, $alert->toArray());
     }
+
+    /** POST /api/v1/tracking/detect-idle — Run idle detection (called by cron/worker) */
+    public function detectIdle(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $threshold = (int) ($body['threshold_minutes'] ?? 30);
+        $alerts = $this->locationService->detectIdleGuards($request->getAttribute('tenant_id'), $threshold);
+        return JsonResponse::success($response, ['detected' => count($alerts)]);
+    }
 }

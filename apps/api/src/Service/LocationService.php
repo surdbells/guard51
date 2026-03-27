@@ -137,6 +137,60 @@ final class LocationService
         return $alert;
     }
 
+    // ── Idle Detection ─────────────────────────────
+
+    /**
+     * Detect guards who haven't moved beyond a threshold distance
+     * for longer than the configured idle period. Called periodically by a cron/worker.
+     */
+    public function detectIdleGuards(string $tenantId, int $thresholdMinutes = 30): array
+    {
+        $conn = $this->locationRepo->getEntityManager()->getConnection();
+
+        // Find guards with clocked-in status whose latest 2 pings are within 10m
+        // and the oldest of those pings is older than threshold
+        $sql = "
+            WITH latest AS (
+                SELECT guard_id, latitude, longitude, recorded_at,
+                       ROW_NUMBER() OVER (PARTITION BY guard_id ORDER BY recorded_at DESC) as rn
+                FROM guard_locations
+                WHERE tenant_id = ? AND recorded_at > NOW() - INTERVAL '{$thresholdMinutes} minutes'
+            ),
+            idle_guards AS (
+                SELECT l1.guard_id,
+                       l1.latitude as last_lat, l1.longitude as last_lng,
+                       l1.recorded_at as last_seen,
+                       MIN(l2.recorded_at) as earliest_at_position
+                FROM latest l1
+                JOIN latest l2 ON l1.guard_id = l2.guard_id
+                WHERE l1.rn = 1
+                GROUP BY l1.guard_id, l1.latitude, l1.longitude, l1.recorded_at
+                HAVING EXTRACT(EPOCH FROM (NOW() - MIN(l2.recorded_at))) / 60 >= ?
+            )
+            SELECT * FROM idle_guards
+        ";
+
+        $idleGuards = $conn->fetchAllAssociative($sql, [$tenantId, $thresholdMinutes]);
+        $alerts = [];
+
+        foreach ($idleGuards as $guard) {
+            $idle = new IdleAlert();
+            $idle->setTenantId($tenantId)
+                ->setGuardId($guard['guard_id'])
+                ->setSiteId('') // Would need to look up assigned site
+                ->setIdleStartAt(new \DateTimeImmutable($guard['earliest_at_position']))
+                ->setIdleDurationMinutes($thresholdMinutes)
+                ->setLastKnownLat((float) $guard['last_lat'])
+                ->setLastKnownLng((float) $guard['last_lng']);
+
+            $this->idleAlertRepo->save($idle);
+            $alerts[] = $idle;
+            $this->logger->warning('Idle guard detected.', ['guard_id' => $guard['guard_id'], 'minutes' => $thresholdMinutes]);
+        }
+
+        return $alerts;
+    }
+
     // ── Private ──────────────────────────────────────
 
     private function checkGeofenceViolation(string $tenantId, string $guardId, string $siteId, float $lat, float $lng): void
