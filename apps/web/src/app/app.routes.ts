@@ -63,6 +63,24 @@ export const routes: Routes = [
         loadChildren: () => import('./features/panic/panic.routes').then(m => m.PANIC_ROUTES),
       },
 
+      // Phase 4: Reporting & Dispatch
+      {
+        path: 'reports',
+        loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORTS_ROUTES),
+      },
+      {
+        path: 'incidents',
+        loadChildren: () => import('./features/incidents/incidents.routes').then(m => m.INCIDENTS_ROUTES),
+      },
+      {
+        path: 'dispatch',
+        loadChildren: () => import('./features/dispatch/dispatch.routes').then(m => m.DISPATCH_ROUTES),
+      },
+      {
+        path: 'tasks',
+        loadChildren: () => import('./features/tasks/tasks.routes').then(m => m.TASKS_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',
