@@ -91,6 +91,24 @@ final class TimeClockController
         return JsonResponse::success($response, $record->toArray());
     }
 
+    /**
+     * POST /api/v1/attendance/bulk-reconcile — Auto-approve records below late threshold
+     */
+    public function bulkReconcile(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $threshold = (int) ($body['late_threshold_minutes'] ?? 15);
+        $reconciled = $this->clockService->bulkReconcile(
+            $request->getAttribute('tenant_id'),
+            $request->getAttribute('user_id'),
+            $threshold
+        );
+        return JsonResponse::success($response, [
+            'reconciled_count' => count($reconciled),
+            'threshold_minutes' => $threshold,
+        ]);
+    }
+
     // Breaks
     public function listBreakConfigs(Request $request, Response $response): Response
     {

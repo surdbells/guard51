@@ -523,6 +523,7 @@ $containerBuilder->addDefinitions([
             $c->get(ShiftTemplateRepository::class),
             $c->get(ShiftRepository::class),
             $c->get(ShiftSwapRequestRepository::class),
+            $c->get(EntityManagerInterface::class),
             $c->get(LoggerInterface::class),
         );
     },

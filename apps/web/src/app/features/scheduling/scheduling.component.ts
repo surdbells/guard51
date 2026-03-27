@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Plus, Calendar, Clock, ChevronLeft, ChevronRight, Users, AlertTriangle } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
@@ -10,16 +11,37 @@ import { ApiService } from '@core/services/api.service';
 @Component({
   selector: 'g51-scheduling',
   standalone: true,
-  imports: [RouterLink, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, StackedBarChartComponent],
+  imports: [RouterLink, NgClass, FormsModule, LucideAngularModule, PageHeaderComponent, StatsCardComponent, StackedBarChartComponent],
   template: `
     <g51-page-header title="Shift Scheduling" subtitle="Manage shifts, templates, and open shift board">
-      <button class="btn-secondary flex items-center gap-2" routerLink="templates">
+      <a routerLink="open-shifts" class="btn-secondary flex items-center gap-2">
+        <lucide-icon [img]="UsersIcon" [size]="16" /> Open Shifts
+      </a>
+      <a routerLink="swaps" class="btn-secondary flex items-center gap-2">
+        <lucide-icon [img]="AlertTriangleIcon" [size]="16" /> Swaps
+      </a>
+      <a routerLink="templates" class="btn-secondary flex items-center gap-2">
         <lucide-icon [img]="ClockIcon" [size]="16" /> Templates
-      </button>
-      <button class="btn-primary flex items-center gap-2" routerLink="new">
-        <lucide-icon [img]="PlusIcon" [size]="16" /> Create Shift
-      </button>
+      </a>
+      <a routerLink="bulk" class="btn-secondary flex items-center gap-2">
+        <lucide-icon [img]="CalendarIcon" [size]="16" /> Bulk
+      </a>
+      <a routerLink="new" class="btn-primary flex items-center gap-2">
+        <lucide-icon [img]="PlusIcon" [size]="16" /> New Shift
+      </a>
     </g51-page-header>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      <select [(ngModel)]="filterSiteId" (ngModelChange)="loadShifts()" class="input-base text-sm py-1.5 min-w-[180px]">
+        <option value="">All Sites</option>
+        @for (s of allSites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+      </select>
+      <select [(ngModel)]="filterGuardId" (ngModelChange)="loadShifts()" class="input-base text-sm py-1.5 min-w-[180px]">
+        <option value="">All Guards</option>
+        @for (g of allGuards(); track g.id) { <option [value]="g.id">{{ g.full_name }}</option> }
+      </select>
+    </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
       <g51-stats-card label="This Week's Shifts" [value]="stats().total" [icon]="CalendarIcon" />
@@ -90,6 +112,10 @@ export class SchedulingComponent implements OnInit {
   readonly weekOffset = signal(0);
   readonly stats = signal({ total: 0, confirmed: 0, open: 0, swaps: 0 });
   readonly shifts = signal<any[]>([]);
+  readonly allSites = signal<any[]>([]);
+  readonly allGuards = signal<any[]>([]);
+  filterSiteId = '';
+  filterGuardId = '';
 
   weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   chartSeries: StackedBarSeries[] = [
@@ -121,7 +147,16 @@ export class SchedulingComponent implements OnInit {
   nextWeek(): void { this.weekOffset.update(v => v + 1); }
 
   ngOnInit(): void {
-    this.api.get<any>('/shifts').subscribe({
+    this.api.get<any>('/sites').subscribe({ next: res => { if (res.data) this.allSites.set(res.data.sites || []); } });
+    this.api.get<any>('/guards').subscribe({ next: res => { if (res.data) this.allGuards.set(res.data.guards || []); } });
+    this.loadShifts();
+  }
+
+  loadShifts(): void {
+    let url = '/shifts?';
+    if (this.filterSiteId) url += `site_id=${this.filterSiteId}&`;
+    if (this.filterGuardId) url += `guard_id=${this.filterGuardId}&`;
+    this.api.get<any>(url).subscribe({
       next: res => { if (res.data) { this.shifts.set(res.data.shifts || []); this.stats.set({ total: res.data.total || 0, confirmed: 0, open: 0, swaps: 0 }); } }
     });
   }

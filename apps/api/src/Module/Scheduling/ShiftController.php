@@ -131,4 +131,21 @@ final class ShiftController
         $req = $this->shiftService->rejectSwap($args['id'], $request->getAttribute('user_id'), $body['notes'] ?? null);
         return JsonResponse::success($response, $req->toArray());
     }
+
+    /**
+     * GET /api/v1/shifts/available-guards — Find guards available for a time slot + optional skill
+     */
+    public function availableGuards(Request $request, Response $response): Response
+    {
+        $p = $request->getQueryParams();
+        if (empty($p['start_time']) || empty($p['end_time'])) {
+            throw ApiException::validation('start_time and end_time query params required.');
+        }
+        $guards = $this->shiftService->findAvailableGuards(
+            $request->getAttribute('tenant_id'),
+            $p['start_time'], $p['end_time'],
+            $p['skill_id'] ?? null
+        );
+        return JsonResponse::success($response, ['guards' => $guards]);
+    }
 }

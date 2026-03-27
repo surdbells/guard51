@@ -8,10 +8,12 @@ use Guard51\Entity\Shift;
 use Guard51\Entity\ShiftStatus;
 use Guard51\Entity\ShiftSwapRequest;
 use Guard51\Entity\ShiftTemplate;
+use Guard51\Entity\GuardSkillAssignment;
 use Guard51\Exception\ApiException;
 use Guard51\Repository\ShiftRepository;
 use Guard51\Repository\ShiftSwapRequestRepository;
 use Guard51\Repository\ShiftTemplateRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
 final class ShiftService
@@ -20,6 +22,7 @@ final class ShiftService
         private readonly ShiftTemplateRepository $templateRepo,
         private readonly ShiftRepository $shiftRepo,
         private readonly ShiftSwapRequestRepository $swapRepo,
+        private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -68,6 +71,9 @@ final class ShiftService
 
         if (!empty($data['guard_id'])) {
             $this->checkConflicts($data['guard_id'], $shift->getStartTime(), $shift->getEndTime());
+            if (!empty($data['required_skill_id'])) {
+                $this->checkGuardHasSkill($data['guard_id'], $data['required_skill_id']);
+            }
             $shift->setGuardId($data['guard_id']);
         }
         if (!empty($data['template_id'])) $shift->setTemplateId($data['template_id']);
@@ -247,6 +253,57 @@ final class ShiftService
         if (count($conflicts) > 0) {
             throw ApiException::conflict('Guard has a conflicting shift during this time period.');
         }
+    }
+
+    /**
+     * Skill-based scheduling: verify guard has the required skill before assignment.
+     */
+    private function checkGuardHasSkill(string $guardId, string $skillId): void
+    {
+        $assignment = $this->em->getRepository(GuardSkillAssignment::class)
+            ->findOneBy(['guardId' => $guardId, 'skillId' => $skillId]);
+
+        if (!$assignment) {
+            throw ApiException::conflict('Guard does not have the required skill for this shift.');
+        }
+
+        if ($assignment->isExpired()) {
+            throw ApiException::conflict('Guard\'s certification for the required skill has expired.');
+        }
+    }
+
+    /**
+     * Find guards available for a shift based on time + optional skill requirement.
+     * Used by scheduling UI to suggest assignable guards.
+     */
+    public function findAvailableGuards(string $tenantId, string $startTime, string $endTime, ?string $requiredSkillId = null): array
+    {
+        $start = new \DateTimeImmutable($startTime);
+        $end = new \DateTimeImmutable($endTime);
+
+        // Get all guards, then filter by no conflicts
+        $conn = $this->em->getConnection();
+        $sql = "SELECT g.id, g.first_name, g.last_name, g.employee_number
+                FROM guards g
+                WHERE g.tenant_id = ? AND g.status = 'active'
+                AND g.id NOT IN (
+                    SELECT s.guard_id FROM shifts s
+                    WHERE s.guard_id IS NOT NULL
+                    AND s.start_time < ? AND s.end_time > ?
+                    AND s.status NOT IN ('cancelled', 'missed')
+                )";
+        $params = [$tenantId, $end->format('Y-m-d H:i:s'), $start->format('Y-m-d H:i:s')];
+
+        if ($requiredSkillId) {
+            $sql .= " AND g.id IN (
+                SELECT gsa.guard_id FROM guard_skill_assignments gsa
+                WHERE gsa.skill_id = ? AND (gsa.expires_at IS NULL OR gsa.expires_at > CURRENT_DATE)
+            )";
+            $params[] = $requiredSkillId;
+        }
+
+        $sql .= " ORDER BY g.last_name, g.first_name";
+        return $conn->fetchAllAssociative($sql, $params);
     }
 
     private function hydrateTemplate(ShiftTemplate $t, array $data): void

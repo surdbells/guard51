@@ -132,6 +132,28 @@ final class TimeClockService
         return $record;
     }
 
+    /**
+     * Bulk reconciliation: auto-approve all unreconciled records where guard was present
+     * and late_minutes is below a threshold.
+     */
+    public function bulkReconcile(string $tenantId, string $userId, int $lateThresholdMinutes = 15): array
+    {
+        $unreconciled = $this->attendanceRepo->findUnreconciled($tenantId);
+        $reconciled = [];
+
+        foreach ($unreconciled as $record) {
+            if ($record->getStatus() === AttendanceStatus::PRESENT ||
+                ($record->getStatus() === AttendanceStatus::LATE && $record->getLateMinutes() <= $lateThresholdMinutes)) {
+                $record->reconcile($userId, $record->getStatus(), 'Auto-approved via bulk reconciliation');
+                $this->attendanceRepo->save($record);
+                $reconciled[] = $record;
+            }
+        }
+
+        $this->logger->info('Bulk reconciliation completed.', ['count' => count($reconciled), 'threshold' => $lateThresholdMinutes]);
+        return $reconciled;
+    }
+
     // ── Breaks ───────────────────────────────────────
 
     public function listBreakConfigs(string $tenantId): array

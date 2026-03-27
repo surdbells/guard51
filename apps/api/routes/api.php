@@ -309,6 +309,7 @@ return function (App $app): void {
             $shifts->post('/{id}/cancel', [ShiftController::class, 'cancelShift']);
             $shifts->post('/{id}/confirm', [ShiftController::class, 'confirmShift']);
             $shifts->post('/{id}/claim', [ShiftController::class, 'claimShift']);
+            $shifts->get('/available-guards', [ShiftController::class, 'availableGuards']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
@@ -344,6 +345,7 @@ return function (App $app): void {
             $att->get('', [TimeClockController::class, 'attendanceByDate']);
             $att->get('/guard/{guardId}', [TimeClockController::class, 'attendanceByGuard']);
             $att->get('/unreconciled', [TimeClockController::class, 'unreconciled']);
+            $att->post('/bulk-reconcile', [TimeClockController::class, 'bulkReconcile']);
             $att->post('/{id}/reconcile', [TimeClockController::class, 'reconcile']);
         })
             ->add($container->get(TenantMiddleware::class))
