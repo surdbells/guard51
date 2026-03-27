@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Navigation, MapPin, Battery, Clock, AlertTriangle, RefreshCw, Search, Filter } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
@@ -9,7 +9,7 @@ import { ApiService } from '@core/services/api.service';
 @Component({
   selector: 'g51-tracker',
   standalone: true,
-  imports: [NgClass, FormsModule, LucideAngularModule, PageHeaderComponent, StatsCardComponent],
+  imports: [NgClass, DatePipe, FormsModule, LucideAngularModule, PageHeaderComponent, StatsCardComponent],
   template: `
     <g51-page-header title="Live Tracker" subtitle="Real-time guard locations and geofence monitoring">
       <button (click)="refreshLocations()" class="btn-secondary flex items-center gap-2">
@@ -35,16 +35,43 @@ import { ApiService } from '@core/services/api.service';
           </p>
           <div class="mt-4 flex flex-wrap gap-2 justify-center">
             @for (guard of guards(); track guard.guard_id) {
-              <div class="px-3 py-2 rounded-lg text-xs" [style.background]="'var(--surface-card)'" [style.color]="'var(--text-primary)'">
+              <div class="px-3 py-2 rounded-lg text-xs cursor-pointer transition-colors hover:ring-1 hover:ring-[var(--color-brand-500)]"
+                [style.background]="selectedGuardId() === guard.guard_id ? 'var(--color-brand-500)' : 'var(--surface-card)'"
+                [style.color]="selectedGuardId() === guard.guard_id ? 'white' : 'var(--text-primary)'"
+                (click)="selectGuard(guard.guard_id)">
                 <span class="font-medium">{{ guard.first_name }} {{ guard.last_name }}</span>
-                <span class="ml-2" [style.color]="'var(--text-tertiary)'">{{ guard.lat?.toFixed(4) }}, {{ guard.lng?.toFixed(4) }}</span>
+                <span class="ml-2" [style.color]="selectedGuardId() === guard.guard_id ? 'rgba(255,255,255,.7)' : 'var(--text-tertiary)'">{{ guard.lat?.toFixed(4) }}, {{ guard.lng?.toFixed(4) }}</span>
                 @if (guard.battery_level) {
-                  <span class="ml-2 flex items-center gap-0.5 inline-flex" [style.color]="guard.battery_level < 20 ? 'var(--color-danger)' : 'var(--text-tertiary)'">
+                  <span class="ml-2 flex items-center gap-0.5 inline-flex" [style.color]="guard.battery_level < 20 ? 'var(--color-danger)' : selectedGuardId() === guard.guard_id ? 'rgba(255,255,255,.7)' : 'var(--text-tertiary)'">
                     <lucide-icon [img]="BatteryIcon" [size]="10" /> {{ guard.battery_level }}%
                   </span>
                 }
               </div>
             }
+          </div>
+
+          <!-- Path replay panel (when guard selected) -->
+          @if (selectedGuardId()) {
+            <div class="mt-4 p-3 rounded-lg" [style.background]="'var(--surface-card)'" [style.borderLeft]="'3px solid var(--color-brand-500)'">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-semibold" [style.color]="'var(--text-primary)'">Path Replay</h4>
+                <button (click)="selectedGuardId.set(null)" class="text-xs" [style.color]="'var(--text-tertiary)'">Close</button>
+              </div>
+              @if (pathPoints().length > 0) {
+                <p class="text-xs" [style.color]="'var(--text-secondary)'">{{ pathPoints().length }} location points today</p>
+                <div class="mt-2 max-h-[120px] overflow-y-auto space-y-1">
+                  @for (point of pathPoints().slice(0, 20); track $index) {
+                    <div class="text-[10px] flex justify-between" [style.color]="'var(--text-tertiary)'">
+                      <span>{{ point.lat?.toFixed(5) }}, {{ point.lng?.toFixed(5) }}</span>
+                      <span>{{ point.recorded_at | date:'shortTime' }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-xs" [style.color]="'var(--text-tertiary)'">Loading path data...</p>
+              }
+            </div>
+          }
           </div>
         </div>
       </div>
@@ -101,6 +128,24 @@ import { ApiService } from '@core/services/api.service';
             <p class="text-xs py-2" [style.color]="'var(--text-tertiary)'">No idle alerts</p>
           }
         </div>
+
+        <!-- Alert History (recent 24h) -->
+        <div class="card p-4">
+          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Alert History (24h)</h3>
+          @for (alert of recentAlerts(); track alert.id) {
+            <div class="py-2 border-b last:border-b-0" [style.borderColor]="'var(--border-default)'">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium" [style.color]="'var(--text-primary)'">{{ alert.alert_type_label }}</span>
+                <span class="text-[10px]" [style.color]="'var(--text-tertiary)'">{{ alert.created_at | date:'shortTime' }}</span>
+              </div>
+              <p class="text-[10px]" [style.color]="alert.is_acknowledged ? 'var(--text-tertiary)' : 'var(--color-warning)'">
+                {{ alert.is_acknowledged ? 'Acknowledged' : 'Pending' }}
+              </p>
+            </div>
+          } @empty {
+            <p class="text-xs py-2" [style.color]="'var(--text-tertiary)'">No alerts in last 24 hours</p>
+          }
+        </div>
       </div>
     </div>
   `,
@@ -114,6 +159,9 @@ export class TrackerComponent implements OnInit, OnDestroy {
   readonly guards = signal<any[]>([]);
   readonly geofenceAlerts = signal<any[]>([]);
   readonly idleAlerts = signal<any[]>([]);
+  readonly recentAlerts = signal<any[]>([]);
+  readonly selectedGuardId = signal<string | null>(null);
+  readonly pathPoints = signal<any[]>([]);
   readonly stats = signal({ online: 0, moving: 0, geofenceAlerts: 0, idleAlerts: 0 });
   filterSite = ''; filterStatus = '';
   private refreshInterval: any;
@@ -136,6 +184,22 @@ export class TrackerComponent implements OnInit, OnDestroy {
     });
     this.api.get<any>('/tracking/idle-alerts').subscribe({
       next: res => { if (res.data) { this.idleAlerts.set(res.data.alerts || []); this.stats.update(s => ({ ...s, idleAlerts: (res.data.alerts || []).length })); } },
+    });
+    this.api.get<any>('/tracking/geofence-alerts/recent').subscribe({
+      next: res => { if (res.data) this.recentAlerts.set(res.data.alerts || []); },
+    });
+  }
+
+  selectGuard(guardId: string): void {
+    if (this.selectedGuardId() === guardId) {
+      this.selectedGuardId.set(null);
+      this.pathPoints.set([]);
+      return;
+    }
+    this.selectedGuardId.set(guardId);
+    this.pathPoints.set([]);
+    this.api.get<any>(`/tracking/guard/${guardId}/path`).subscribe({
+      next: res => { if (res.data) this.pathPoints.set(res.data.path || []); },
     });
   }
 
