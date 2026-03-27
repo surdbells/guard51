@@ -1,0 +1,134 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Guard51\Module\Scheduling;
+
+use Guard51\Helper\JsonResponse;
+use Guard51\Service\ShiftService;
+use Guard51\Exception\ApiException;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+final class ShiftController
+{
+    public function __construct(private readonly ShiftService $shiftService) {}
+
+    // Templates
+    public function listTemplates(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $templates = $this->shiftService->listTemplates($tenantId, ($request->getQueryParams()['active'] ?? '') === 'true');
+        return JsonResponse::success($response, ['templates' => array_map(fn($t) => $t->toArray(), $templates)]);
+    }
+
+    public function createTemplate(Request $request, Response $response): Response
+    {
+        $t = $this->shiftService->createTemplate($request->getAttribute('tenant_id'), (array) $request->getParsedBody());
+        return JsonResponse::success($response, $t->toArray(), 201);
+    }
+
+    public function updateTemplate(Request $request, Response $response, array $args): Response
+    {
+        $t = $this->shiftService->updateTemplate($args['id'], (array) $request->getParsedBody());
+        return JsonResponse::success($response, $t->toArray());
+    }
+
+    // Shifts
+    public function listShifts(Request $request, Response $response): Response
+    {
+        $p = $request->getQueryParams();
+        $shifts = $this->shiftService->getShifts(
+            $request->getAttribute('tenant_id'),
+            $p['start_date'] ?? (new \DateTimeImmutable('monday this week'))->format('Y-m-d'),
+            $p['end_date'] ?? (new \DateTimeImmutable('sunday this week'))->format('Y-m-d'),
+            $p['site_id'] ?? null, $p['guard_id'] ?? null
+        );
+        return JsonResponse::success($response, ['shifts' => array_map(fn($s) => $s->toArray(), $shifts), 'total' => count($shifts)]);
+    }
+
+    public function createShift(Request $request, Response $response): Response
+    {
+        $shift = $this->shiftService->createShift($request->getAttribute('tenant_id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'));
+        return JsonResponse::success($response, $shift->toArray(), 201);
+    }
+
+    public function updateShift(Request $request, Response $response, array $args): Response
+    {
+        $shift = $this->shiftService->updateShift($args['id'], (array) $request->getParsedBody());
+        return JsonResponse::success($response, $shift->toArray());
+    }
+
+    public function cancelShift(Request $request, Response $response, array $args): Response
+    {
+        $shift = $this->shiftService->cancelShift($args['id']);
+        return JsonResponse::success($response, $shift->toArray());
+    }
+
+    public function bulkGenerate(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        if (empty($body['template_id']) || empty($body['start_date']) || empty($body['end_date'])) {
+            throw ApiException::validation('template_id, start_date, end_date are required.');
+        }
+        $shifts = $this->shiftService->bulkGenerate(
+            $request->getAttribute('tenant_id'), $body['template_id'],
+            $body['start_date'], $body['end_date'], $request->getAttribute('user_id'),
+            $body['site_id'] ?? null
+        );
+        return JsonResponse::success($response, ['created' => count($shifts), 'shifts' => array_map(fn($s) => $s->toArray(), $shifts)], 201);
+    }
+
+    public function publishShifts(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $count = $this->shiftService->publishShifts($request->getAttribute('tenant_id'), $body['shift_ids'] ?? []);
+        return JsonResponse::success($response, ['published' => $count]);
+    }
+
+    public function confirmShift(Request $request, Response $response, array $args): Response
+    {
+        $shift = $this->shiftService->confirmShift($args['id'], $request->getAttribute('user_id'));
+        return JsonResponse::success($response, $shift->toArray());
+    }
+
+    public function openShifts(Request $request, Response $response): Response
+    {
+        $shifts = $this->shiftService->getOpenShifts($request->getAttribute('tenant_id'));
+        return JsonResponse::success($response, ['shifts' => array_map(fn($s) => $s->toArray(), $shifts)]);
+    }
+
+    public function claimShift(Request $request, Response $response, array $args): Response
+    {
+        $shift = $this->shiftService->claimOpenShift($args['id'], $request->getAttribute('user_id'));
+        return JsonResponse::success($response, $shift->toArray());
+    }
+
+    // Swap Requests
+    public function listSwapRequests(Request $request, Response $response): Response
+    {
+        $reqs = $this->shiftService->listSwapRequests($request->getAttribute('tenant_id'));
+        return JsonResponse::success($response, ['swap_requests' => array_map(fn($r) => $r->toArray(), $reqs)]);
+    }
+
+    public function createSwapRequest(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $body['requesting_guard_id'] = $body['requesting_guard_id'] ?? $request->getAttribute('user_id');
+        $req = $this->shiftService->createSwapRequest($request->getAttribute('tenant_id'), $body);
+        return JsonResponse::success($response, $req->toArray(), 201);
+    }
+
+    public function approveSwap(Request $request, Response $response, array $args): Response
+    {
+        $req = $this->shiftService->approveSwap($args['id'], $request->getAttribute('user_id'));
+        return JsonResponse::success($response, $req->toArray());
+    }
+
+    public function rejectSwap(Request $request, Response $response, array $args): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $req = $this->shiftService->rejectSwap($args['id'], $request->getAttribute('user_id'), $body['notes'] ?? null);
+        return JsonResponse::success($response, $req->toArray());
+    }
+}

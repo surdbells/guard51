@@ -14,7 +14,10 @@ use Guard51\Module\Client\ClientController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Passdown\PassdownController;
+use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
+use Guard51\Module\TimeClock\TimeClockController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\PlanController;
@@ -278,6 +281,80 @@ return function (App $app): void {
             $dash->get('/stats', [DashboardController::class, 'stats']);
             $dash->get('/snapshots', [DashboardController::class, 'snapshots']);
             $dash->get('/today', [DashboardController::class, 'today']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 2: Scheduling & Attendance
+        // ══════════════════════════════════════════════
+
+        // ── Shift Templates ──────────────────────────
+        $group->group('/shift-templates', function (RouteCollectorProxy $st): void {
+            $st->get('', [ShiftController::class, 'listTemplates']);
+            $st->post('', [ShiftController::class, 'createTemplate']);
+            $st->put('/{id}', [ShiftController::class, 'updateTemplate']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Shifts ───────────────────────────────────
+        $group->group('/shifts', function (RouteCollectorProxy $shifts): void {
+            $shifts->get('', [ShiftController::class, 'listShifts']);
+            $shifts->post('', [ShiftController::class, 'createShift']);
+            $shifts->post('/bulk-generate', [ShiftController::class, 'bulkGenerate']);
+            $shifts->post('/publish', [ShiftController::class, 'publishShifts']);
+            $shifts->get('/open', [ShiftController::class, 'openShifts']);
+            $shifts->put('/{id}', [ShiftController::class, 'updateShift']);
+            $shifts->post('/{id}/cancel', [ShiftController::class, 'cancelShift']);
+            $shifts->post('/{id}/confirm', [ShiftController::class, 'confirmShift']);
+            $shifts->post('/{id}/claim', [ShiftController::class, 'claimShift']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Shift Swap Requests ──────────────────────
+        $group->group('/swap-requests', function (RouteCollectorProxy $swaps): void {
+            $swaps->get('', [ShiftController::class, 'listSwapRequests']);
+            $swaps->post('', [ShiftController::class, 'createSwapRequest']);
+            $swaps->post('/{id}/approve', [ShiftController::class, 'approveSwap']);
+            $swaps->post('/{id}/reject', [ShiftController::class, 'rejectSwap']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Time Clock ───────────────────────────────
+        $group->group('/time-clock', function (RouteCollectorProxy $tc): void {
+            $tc->post('/clock-in', [TimeClockController::class, 'clockIn']);
+            $tc->post('/clock-out', [TimeClockController::class, 'clockOut']);
+            $tc->get('/status', [TimeClockController::class, 'status']);
+            $tc->get('/site/{siteId}/active', [TimeClockController::class, 'activeBySite']);
+            $tc->get('/history', [TimeClockController::class, 'history']);
+            // Breaks
+            $tc->get('/breaks/configs', [TimeClockController::class, 'listBreakConfigs']);
+            $tc->post('/breaks/configs', [TimeClockController::class, 'createBreakConfig']);
+            $tc->post('/breaks/start', [TimeClockController::class, 'startBreak']);
+            $tc->post('/breaks/{id}/end', [TimeClockController::class, 'endBreak']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Attendance ───────────────────────────────
+        $group->group('/attendance', function (RouteCollectorProxy $att): void {
+            $att->get('', [TimeClockController::class, 'attendanceByDate']);
+            $att->get('/guard/{guardId}', [TimeClockController::class, 'attendanceByGuard']);
+            $att->get('/unreconciled', [TimeClockController::class, 'unreconciled']);
+            $att->post('/{id}/reconcile', [TimeClockController::class, 'reconcile']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Passdown Logs ────────────────────────────
+        $group->group('/passdowns', function (RouteCollectorProxy $pd): void {
+            $pd->post('', [PassdownController::class, 'create']);
+            $pd->get('/site/{siteId}', [PassdownController::class, 'listBySite']);
+            $pd->get('/unacknowledged', [PassdownController::class, 'unacknowledged']);
+            $pd->post('/{id}/acknowledge', [PassdownController::class, 'acknowledge']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

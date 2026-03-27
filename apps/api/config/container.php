@@ -17,7 +17,10 @@ use Guard51\Module\Client\ClientController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Guard\GuardController;
+use Guard51\Module\Passdown\PassdownController;
+use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
+use Guard51\Module\TimeClock\TimeClockController;
 use Guard51\Module\Onboarding\InvitationController;
 use Guard51\Module\Onboarding\OnboardingController;
 use Guard51\Module\Subscription\SubscriptionController;
@@ -27,6 +30,9 @@ use Guard51\Module\Usage\UsageController;
 use Guard51\Repository\AuditLogRepository;
 use Guard51\Repository\AppReleaseRepository;
 use Guard51\Repository\AppDownloadLogRepository;
+use Guard51\Repository\AttendanceRecordRepository;
+use Guard51\Repository\BreakConfigRepository;
+use Guard51\Repository\BreakLogRepository;
 use Guard51\Repository\ClientContactRepository;
 use Guard51\Repository\ClientRepository;
 use Guard51\Repository\DailySnapshotRepository;
@@ -34,9 +40,14 @@ use Guard51\Repository\FeatureModuleRepository;
 use Guard51\Repository\GuardDocumentRepository;
 use Guard51\Repository\GuardRepository;
 use Guard51\Repository\GuardSkillRepository;
+use Guard51\Repository\PassdownLogRepository;
 use Guard51\Repository\RefreshTokenRepository;
 use Guard51\Repository\PostOrderRepository;
+use Guard51\Repository\ShiftRepository;
+use Guard51\Repository\ShiftSwapRequestRepository;
+use Guard51\Repository\ShiftTemplateRepository;
 use Guard51\Repository\SiteRepository;
+use Guard51\Repository\TimeClockRepository;
 use Guard51\Repository\SubscriptionInvoiceRepository;
 use Guard51\Repository\SubscriptionPlanRepository;
 use Guard51\Repository\SubscriptionRepository;
@@ -49,8 +60,12 @@ use Guard51\Repository\UserRepository;
 use Guard51\Service\AppDistributionService;
 use Guard51\Service\ClientService;
 use Guard51\Service\FeatureService;
+use Guard51\Service\GeofenceService;
 use Guard51\Service\GuardService;
+use Guard51\Service\PassdownService;
+use Guard51\Service\ShiftService;
 use Guard51\Service\SiteService;
+use Guard51\Service\TimeClockService;
 use Guard51\Service\FileStorageService;
 use Guard51\Service\GpsService;
 use Guard51\Service\InvitationService;
@@ -486,6 +501,53 @@ $containerBuilder->addDefinitions([
             $c->get(LoggerInterface::class),
         );
     },
+
+    // Phase 2: Scheduling & Attendance
+    GeofenceService::class => function (ContainerInterface $c): GeofenceService {
+        return new GeofenceService(
+            $c->get(EntityManagerInterface::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    ShiftTemplateRepository::class => fn(ContainerInterface $c) => new ShiftTemplateRepository($c->get(EntityManagerInterface::class)),
+    ShiftRepository::class => fn(ContainerInterface $c) => new ShiftRepository($c->get(EntityManagerInterface::class)),
+    ShiftSwapRequestRepository::class => fn(ContainerInterface $c) => new ShiftSwapRequestRepository($c->get(EntityManagerInterface::class)),
+    TimeClockRepository::class => fn(ContainerInterface $c) => new TimeClockRepository($c->get(EntityManagerInterface::class)),
+    AttendanceRecordRepository::class => fn(ContainerInterface $c) => new AttendanceRecordRepository($c->get(EntityManagerInterface::class)),
+    BreakConfigRepository::class => fn(ContainerInterface $c) => new BreakConfigRepository($c->get(EntityManagerInterface::class)),
+    BreakLogRepository::class => fn(ContainerInterface $c) => new BreakLogRepository($c->get(EntityManagerInterface::class)),
+    PassdownLogRepository::class => fn(ContainerInterface $c) => new PassdownLogRepository($c->get(EntityManagerInterface::class)),
+
+    ShiftService::class => function (ContainerInterface $c): ShiftService {
+        return new ShiftService(
+            $c->get(ShiftTemplateRepository::class),
+            $c->get(ShiftRepository::class),
+            $c->get(ShiftSwapRequestRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    TimeClockService::class => function (ContainerInterface $c): TimeClockService {
+        return new TimeClockService(
+            $c->get(TimeClockRepository::class),
+            $c->get(AttendanceRecordRepository::class),
+            $c->get(BreakConfigRepository::class),
+            $c->get(BreakLogRepository::class),
+            $c->get(ShiftRepository::class),
+            $c->get(SiteRepository::class),
+            $c->get(GeofenceService::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+    PassdownService::class => function (ContainerInterface $c): PassdownService {
+        return new PassdownService(
+            $c->get(PassdownLogRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    ShiftController::class => fn(ContainerInterface $c) => new ShiftController($c->get(ShiftService::class)),
+    TimeClockController::class => fn(ContainerInterface $c) => new TimeClockController($c->get(TimeClockService::class)),
+    PassdownController::class => fn(ContainerInterface $c) => new PassdownController($c->get(PassdownService::class)),
 ]);
 
 return $containerBuilder->build();
