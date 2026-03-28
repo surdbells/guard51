@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import { LucideAngularModule, AlertTriangle, MapPin, CheckCircle, Phone, Radio, XCircle, Clock, Volume2 } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
@@ -9,7 +9,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-panic',
   standalone: true,
-  imports: [NgClass, LucideAngularModule, PageHeaderComponent, EmptyStateComponent],
+  imports: [NgClass, DatePipe, LucideAngularModule, PageHeaderComponent, EmptyStateComponent],
   template: `
     <g51-page-header title="Panic Alerts" subtitle="Emergency response and alert management" />
 

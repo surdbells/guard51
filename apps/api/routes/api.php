@@ -22,6 +22,7 @@ use Guard51\Module\Notification\NotificationController;
 use Guard51\Module\Analytics\AnalyticsController;
 use Guard51\Module\License\LicenseController;
 use Guard51\Module\Security\SecurityController;
+use Guard51\Module\UserManagement\UserManagementController;
 use Guard51\Module\Parking\ParkingController;
 use Guard51\Module\VehiclePatrol\VehiclePatrolController;
 use Guard51\Module\Visitor\VisitorController;
@@ -595,6 +596,32 @@ return function (App $app): void {
         // ══════════════════════════════════════════════
 
         // PHASE 8: Advanced Features
+
+
+        // ── User Management ────────────────────────────
+
+        $group->group('/users', function (RouteCollectorProxy $um): void {
+
+            $um->get(''  , [UserManagementController::class, 'list']);
+
+            $um->put('/{id}/role', [UserManagementController::class, 'changeRole']);
+
+            $um->get('/{id}/permissions', [UserManagementController::class, 'permissions']);
+
+            $um->post('/{id}/permissions', [UserManagementController::class, 'setPermission']);
+
+            $um->delete('/{id}/permissions/{moduleKey}', [UserManagementController::class, 'revokePermission']);
+
+            $um->get('/modules', [UserManagementController::class, 'modules']);
+
+        })
+
+            ->add($container->get(TenantMiddleware::class))
+
+            ->add($container->get(AuthMiddleware::class))
+
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN));
+
 
         // ══════════════════════════════════════════════
 

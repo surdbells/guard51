@@ -147,7 +147,6 @@ import { ApiService } from '@core/services/api.service';
           }
         </div>
       </div>
-    </div>
   `,
 })
 export class TrackerComponent implements OnInit, OnDestroy {

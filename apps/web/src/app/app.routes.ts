@@ -133,6 +133,20 @@ export const routes: Routes = [
         loadChildren: () => import('./features/security/security.routes').then(m => m.SECURITY_ROUTES),
       },
 
+      // SaaS Management
+      {
+        path: 'settings',
+        loadChildren: () => import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),
+      },
+      {
+        path: 'billing',
+        loadChildren: () => import('./features/billing/billing.routes').then(m => m.BILLING_ROUTES),
+      },
+      {
+        path: 'users',
+        loadChildren: () => import('./features/users/users.routes').then(m => m.USERS_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',

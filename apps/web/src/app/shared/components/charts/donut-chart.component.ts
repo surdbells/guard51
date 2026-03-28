@@ -22,7 +22,7 @@ export interface DonutChartData {
             [attr.stroke-dashoffset]="segment.dashOffset"
             stroke-linecap="round"
             class="transition-all duration-500"
-            transform="rotate(-90, {{ center() }}, {{ center() }})"
+            [attr.transform]="'rotate(-90, ' + center() + ', ' + center() + ')'"
           />
         }
         <!-- Center text -->

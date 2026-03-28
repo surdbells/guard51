@@ -19,6 +19,7 @@ use Guard51\Module\Chat\ChatController;
 use Guard51\Module\Analytics\AnalyticsController;
 use Guard51\Module\License\LicenseController;
 use Guard51\Module\Security\SecurityController;
+use Guard51\Module\UserManagement\UserManagementController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Dispatch\DispatchController;
@@ -65,6 +66,7 @@ use Guard51\Repository\GuardLicenseRepository;
 use Guard51\Repository\GuardPerformanceIndexRepository;
 use Guard51\Repository\TwoFactorSecretRepository;
 use Guard51\Repository\PropertyRepository;
+use Guard51\Repository\PermissionRepository;
 use Guard51\Repository\DeviceTokenRepository;
 use Guard51\Repository\DispatchAssignmentRepository;
 use Guard51\Repository\DispatchCallRepository;
@@ -125,6 +127,7 @@ use Guard51\Service\AuditService;
 use Guard51\Service\TwoFactorService;
 use Guard51\Service\LicenseService;
 use Guard51\Service\AnalyticsService;
+use Guard51\Service\UserManagementService;
 use Guard51\Service\DispatchService;
 use Guard51\Service\FeatureService;
 use Guard51\Service\GeofenceService;
@@ -787,6 +790,10 @@ $containerBuilder->addDefinitions([
     SecurityController::class => fn(ContainerInterface $c) => new SecurityController($c->get(TwoFactorService::class), $c->get(AuditService::class)),
     LicenseController::class => fn(ContainerInterface $c) => new LicenseController($c->get(LicenseService::class)),
     AnalyticsController::class => fn(ContainerInterface $c) => new AnalyticsController($c->get(AnalyticsService::class)),
+
+    PermissionRepository::class => fn(ContainerInterface $c) => new PermissionRepository($c->get(EntityManagerInterface::class)),
+    UserManagementService::class => fn(ContainerInterface $c) => new UserManagementService($c->get(UserRepository::class), $c->get(PermissionRepository::class), $c->get(LoggerInterface::class)),
+    UserManagementController::class => fn(ContainerInterface $c) => new UserManagementController($c->get(UserManagementService::class)),
 ]);
 
 return $containerBuilder->build();

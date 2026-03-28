@@ -1,0 +1,5641 @@
+openapi: 3.0.3
+info:
+  title: Guard51 API
+  description: |
+    Security Workforce & Operations Management Platform API.
+    
+    ## Authentication
+    All endpoints (except /auth/login, /auth/register, /subscriptions/plans) require
+    a Bearer JWT token in the Authorization header.
+    
+    ## Multi-tenancy
+    Each request must include the tenant context via the JWT token. The API automatically
+    scopes all data to the authenticated user's tenant.
+    
+    ## Roles
+    - **super_admin**: Platform owner (DOSTHQ) — manages tenants, plans, features
+    - **company_admin**: Security company administrator — full access to company data
+    - **supervisor**: Site supervisor — manages guards, approves reports
+    - **guard**: Security guard — clock in/out, reports, tours, chat
+    - **client**: Security service client — view reports, tracking, invoices
+    - **dispatcher**: Dispatch operator — manage calls, assign guards
+    
+  version: 1.0.0
+  contact:
+    name: DOSTHQ Limited
+    email: api@guard51.com
+    url: https://guard51.com
+  license:
+    name: Proprietary
+    url: https://guard51.com/terms
+
+servers:
+  - url: https://api.guard51.com
+    description: Production
+  - url: http://localhost:8080
+    description: Development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication
+    description: Login, register, JWT refresh, password reset, 2FA
+  - name: Super Admin
+    description: Tenant management, platform settings (super_admin only)
+  - name: Subscriptions
+    description: Plans, billing, Paystack payments, bank transfers
+  - name: Feature Flags
+    description: Module enable/disable per tenant
+  - name: Usage Tracking
+    description: API usage limits and history
+  - name: Onboarding
+    description: Tenant setup wizard and invitations
+  - name: App Distribution
+    description: Mobile/desktop app release management
+  - name: Sites
+    description: Post site CRUD and geofence configuration
+  - name: Guards
+    description: Guard profiles, skills, documents
+  - name: Clients
+    description: Client company CRUD and contacts
+  - name: Dashboard
+    description: Company dashboard stats and metrics
+  - name: Attendance
+    description: Attendance records and reconciliation
+  - name: Passdowns
+    description: Guard passdown logs between shifts
+  - name: GPS Tracking
+    description: Live guard locations and geofence alerts
+  - name: Site Tours
+    description: Tour checkpoints, sessions, QR/NFC scans
+  - name: Panic Alerts
+    description: Emergency panic button alerts
+  - name: Reports
+    description: Daily activity reports, custom templates
+  - name: Incidents
+    description: Incident reporting and escalation
+  - name: Dispatch
+    description: Dispatch calls and guard assignments
+  - name: Tasks
+    description: Task assignment and tracking
+  - name: Invoices
+    description: Client invoicing with NGN/VAT
+  - name: Payroll
+    description: Guard payroll with Nigeria PAYE
+  - name: Client Portal
+    description: Client-facing data access
+  - name: Chat
+    description: Real-time messaging and conversations
+  - name: Notifications
+    description: In-app, push, SMS, email notifications
+  - name: Security
+    description: 2FA setup/verify, audit logging
+  - name: Guard Licenses
+    description: Certification tracking and expiry alerts
+  - name: Analytics
+    description: KPIs and guard performance index
+  - name: Visitors
+    description: Visitor check-in/out management
+  - name: Parking
+    description: Parking area management and incidents
+  - name: Tenants
+    description: Tenant CRUD and management
+  - name: Scheduling
+    description: Shift templates, shifts, swap requests
+  - name: Time Clock
+    description: Clock in/out, GPS+selfie verification
+  - name: Vehicle Patrol
+    description: Patrol vehicles, routes, hit tracking
+
+paths:
+  /api/v1/admin/apps/analytics:
+    get:
+      tags: [Super Admin]
+      operationId: analytics
+      summary: Analytics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/apps/dashboard:
+    get:
+      tags: [Super Admin]
+      operationId: dashboard
+      summary: Dashboard
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/apps/releases:
+    get:
+      tags: [Super Admin]
+      operationId: listReleases
+      summary: Listreleases
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Super Admin]
+      operationId: upload
+      summary: Upload
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/apps/releases/{id}:
+    get:
+      tags: [Super Admin]
+      operationId: show
+      summary: Show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    put:
+      tags: [Super Admin]
+      operationId: update
+      summary: Update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Super Admin]
+      operationId: deactivate
+      summary: Deactivate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/plans:
+    get:
+      tags: [Super Admin]
+      operationId: index
+      summary: Index
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Super Admin]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/plans/{id}:
+    put:
+      tags: [Super Admin]
+      operationId: update
+      summary: Update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Super Admin]
+      operationId: delete
+      summary: Delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/plans/{id}/duplicate:
+    post:
+      tags: [Super Admin]
+      operationId: duplicate
+      summary: Duplicate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/subscriptions/features/modules:
+    get:
+      tags: [Super Admin]
+      operationId: listModules
+      summary: Listmodules
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/subscriptions/pending:
+    get:
+      tags: [Super Admin]
+      operationId: pendingTransfers
+      summary: Pendingtransfers
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/subscriptions/{id}/confirm-payment:
+    post:
+      tags: [Super Admin]
+      operationId: confirmPayment
+      summary: Confirmpayment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants:
+    get:
+      tags: [Super Admin]
+      operationId: index
+      summary: Index
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/apps/check-update:
+    get:
+      tags: [Super Admin]
+      operationId: checkUpdate
+      summary: Checkupdate
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/apps/heartbeat:
+    post:
+      tags: [Super Admin]
+      operationId: heartbeat
+      summary: Heartbeat
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/stats:
+    get:
+      tags: [Super Admin]
+      operationId: stats
+      summary: Stats
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/{id}:
+    get:
+      tags: [Super Admin]
+      operationId: show
+      summary: Show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/{id}/impersonate:
+    post:
+      tags: [Super Admin]
+      operationId: impersonate
+      summary: Impersonate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/{id}/reactivate:
+    post:
+      tags: [Super Admin]
+      operationId: reactivate
+      summary: Reactivate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/admin/tenants/{id}/suspend:
+    post:
+      tags: [Super Admin]
+      operationId: suspend
+      summary: Suspend
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/analytics/guard/{guardId}/performance:
+    get:
+      tags: [Analytics]
+      operationId: guardPerformance
+      summary: Guardperformance
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/analytics/kpis:
+    get:
+      tags: [Analytics]
+      operationId: kpis
+      summary: Kpis
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/apps/available:
+    get:
+      tags: [App Distribution]
+      operationId: available
+      summary: Available
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/apps/config:
+    get:
+      tags: [App Distribution]
+      operationId: getConfig
+      summary: Getconfig
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/apps/config/{appKey}:
+    put:
+      tags: [App Distribution]
+      operationId: updateConfig
+      summary: Updateconfig
+      parameters:
+        - name: appKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/apps/download/{releaseId}:
+    get:
+      tags: [App Distribution]
+      operationId: download
+      summary: Download
+      parameters:
+        - name: releaseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/attendance:
+    get:
+      tags: [Attendance]
+      operationId: attendanceByDate
+      summary: Attendancebydate
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/attendance/bulk-reconcile:
+    post:
+      tags: [Attendance]
+      operationId: bulkReconcile
+      summary: Bulkreconcile
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/attendance/guard/{guardId}:
+    get:
+      tags: [Attendance]
+      operationId: attendanceByGuard
+      summary: Attendancebyguard
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/attendance/unreconciled:
+    get:
+      tags: [Attendance]
+      operationId: unreconciled
+      summary: Unreconciled
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/attendance/{id}/reconcile:
+    post:
+      tags: [Attendance]
+      operationId: reconcile
+      summary: Reconcile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/forgot-password:
+    post:
+      tags: [Authentication]
+      operationId: forgotPassword
+      summary: Forgotpassword
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/login:
+    post:
+      tags: [Authentication]
+      operationId: login
+      summary: Login
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/logout:
+    post:
+      tags: [Authentication]
+      operationId: logout
+      summary: Logout
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/me:
+    get:
+      tags: [Authentication]
+      operationId: me
+      summary: Me
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/refresh:
+    post:
+      tags: [Authentication]
+      operationId: refresh
+      summary: Refresh
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/register:
+    post:
+      tags: [Authentication]
+      operationId: register
+      summary: Register
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/reset-password:
+    post:
+      tags: [Authentication]
+      operationId: resetPassword
+      summary: Resetpassword
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/auth/subscriptions/plans:
+    get:
+      tags: [Authentication]
+      operationId: publicPlans
+      summary: Publicplans
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/chat/conversations:
+    get:
+      tags: [Chat]
+      operationId: listConversations
+      summary: Listconversations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Chat]
+      operationId: createConversation
+      summary: Createconversation
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/chat/conversations/{id}/messages:
+    get:
+      tags: [Chat]
+      operationId: messages
+      summary: Messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Chat]
+      operationId: sendMessage
+      summary: Sendmessage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/chat/conversations/{id}/read:
+    post:
+      tags: [Chat]
+      operationId: markRead
+      summary: Markread
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/client-portal/attendance:
+    get:
+      tags: [Client Portal]
+      operationId: attendance
+      summary: Attendance
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/client-portal/incidents:
+    get:
+      tags: [Client Portal]
+      operationId: incidents
+      summary: Incidents
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/client-portal/invoices:
+    get:
+      tags: [Client Portal]
+      operationId: invoices
+      summary: Invoices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/client-portal/profile:
+    get:
+      tags: [Client Portal]
+      operationId: profile
+      summary: Profile
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/client-portal/reports:
+    get:
+      tags: [Client Portal]
+      operationId: reports
+      summary: Reports
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/client-portal/tracking:
+    get:
+      tags: [Client Portal]
+      operationId: tracking
+      summary: Tracking
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/clients:
+    get:
+      tags: [Clients]
+      operationId: index
+      summary: Index
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Clients]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/clients/contacts/{contactId}:
+    put:
+      tags: [Clients]
+      operationId: updateContact
+      summary: Updatecontact
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Clients]
+      operationId: deleteContact
+      summary: Deletecontact
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/clients/{id}:
+    get:
+      tags: [Clients]
+      operationId: show
+      summary: Show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    put:
+      tags: [Clients]
+      operationId: update
+      summary: Update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Clients]
+      operationId: delete
+      summary: Delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/clients/{id}/contacts:
+    get:
+      tags: [Clients]
+      operationId: listContacts
+      summary: Listcontacts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Clients]
+      operationId: addContact
+      summary: Addcontact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dashboard/snapshots:
+    get:
+      tags: [Dashboard]
+      operationId: snapshots
+      summary: Snapshots
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dashboard/stats:
+    get:
+      tags: [Dashboard]
+      operationId: stats
+      summary: Stats
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dashboard/today:
+    get:
+      tags: [Dashboard]
+      operationId: today
+      summary: Today
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch:
+    post:
+      tags: [Dispatch]
+      operationId: createCall
+      summary: Createcall
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/active:
+    get:
+      tags: [Dispatch]
+      operationId: activeCalls
+      summary: Activecalls
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/assignments/{assignmentId}/status:
+    post:
+      tags: [Dispatch]
+      operationId: updateAssignment
+      summary: Updateassignment
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/nearest-guards:
+    get:
+      tags: [Dispatch]
+      operationId: nearestGuards
+      summary: Nearestguards
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/recent:
+    get:
+      tags: [Dispatch]
+      operationId: recentCalls
+      summary: Recentcalls
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/{id}/assign:
+    post:
+      tags: [Dispatch]
+      operationId: assignGuard
+      summary: Assignguard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/{id}/assignments:
+    get:
+      tags: [Dispatch]
+      operationId: assignments
+      summary: Assignments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/dispatch/{id}/resolve:
+    post:
+      tags: [Dispatch]
+      operationId: resolveCall
+      summary: Resolvecall
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/features/tenant:
+    get:
+      tags: [Feature Flags]
+      operationId: tenantModules
+      summary: Tenantmodules
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/features/tenant/disable/{moduleKey}:
+    post:
+      tags: [Feature Flags]
+      operationId: disableModule
+      summary: Disablemodule
+      parameters:
+        - name: moduleKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/features/tenant/enable/{moduleKey}:
+    post:
+      tags: [Feature Flags]
+      operationId: enableModule
+      summary: Enablemodule
+      parameters:
+        - name: moduleKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards:
+    get:
+      tags: [Guards]
+      operationId: index
+      summary: Index
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Guards]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/bulk-import:
+    post:
+      tags: [Guards]
+      operationId: bulkImport
+      summary: Bulkimport
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/documents/expiring:
+    get:
+      tags: [Guards]
+      operationId: expiringDocuments
+      summary: Expiringdocuments
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/documents/{docId}/verify:
+    post:
+      tags: [Guards]
+      operationId: verifyDocument
+      summary: Verifydocument
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/skills:
+    get:
+      tags: [Guards]
+      operationId: listSkills
+      summary: Listskills
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Guards]
+      operationId: createSkill
+      summary: Createskill
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/{guardId}/skills/{skillId}:
+    delete:
+      tags: [Guards]
+      operationId: removeSkill
+      summary: Removeskill
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skillId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/{id}:
+    get:
+      tags: [Guards]
+      operationId: show
+      summary: Show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    put:
+      tags: [Guards]
+      operationId: update
+      summary: Update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Guards]
+      operationId: delete
+      summary: Delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/{id}/activate:
+    post:
+      tags: [Guards]
+      operationId: activate
+      summary: Activate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/{id}/documents:
+    get:
+      tags: [Guards]
+      operationId: listDocuments
+      summary: Listdocuments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Guards]
+      operationId: addDocument
+      summary: Adddocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/{id}/skills:
+    post:
+      tags: [Guards]
+      operationId: assignSkill
+      summary: Assignskill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/guards/{id}/suspend:
+    post:
+      tags: [Guards]
+      operationId: suspend
+      summary: Suspend
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/incidents:
+    get:
+      tags: [Incidents]
+      operationId: list
+      summary: List
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Incidents]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/incidents/active:
+    get:
+      tags: [Incidents]
+      operationId: active
+      summary: Active
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/incidents/{id}/escalate:
+    post:
+      tags: [Incidents]
+      operationId: escalate
+      summary: Escalate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/incidents/{id}/escalations:
+    get:
+      tags: [Incidents]
+      operationId: escalations
+      summary: Escalations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/incidents/{id}/resolve:
+    post:
+      tags: [Incidents]
+      operationId: resolve
+      summary: Resolve
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/incidents/{id}/status:
+    post:
+      tags: [Incidents]
+      operationId: updateStatus
+      summary: Updatestatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invitations:
+    get:
+      tags: [Invitations]
+      operationId: index
+      summary: Index
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Invitations]
+      operationId: invite
+      summary: Invite
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invitations/{id}:
+    delete:
+      tags: [Invitations]
+      operationId: revoke
+      summary: Revoke
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invitations/{id}/resend:
+    post:
+      tags: [Invitations]
+      operationId: resend
+      summary: Resend
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices:
+    get:
+      tags: [Invoices]
+      operationId: list
+      summary: List
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Invoices]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/generate:
+    post:
+      tags: [Invoices]
+      operationId: generateFromTimeClock
+      summary: Generatefromtimeclock
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/overdue:
+    get:
+      tags: [Invoices]
+      operationId: overdue
+      summary: Overdue
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/{id}:
+    get:
+      tags: [Invoices]
+      operationId: detail
+      summary: Detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/{id}/convert:
+    post:
+      tags: [Invoices]
+      operationId: convertEstimate
+      summary: Convertestimate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/{id}/export:
+    get:
+      tags: [Invoices]
+      operationId: export
+      summary: Export
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/{id}/payment:
+    post:
+      tags: [Invoices]
+      operationId: recordPayment
+      summary: Recordpayment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/invoices/{id}/send:
+    post:
+      tags: [Invoices]
+      operationId: send
+      summary: Send
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/licenses:
+    post:
+      tags: [Guard Licenses]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/licenses/expired:
+    get:
+      tags: [Guard Licenses]
+      operationId: expired
+      summary: Expired
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/licenses/expiring:
+    get:
+      tags: [Guard Licenses]
+      operationId: expiringSoon
+      summary: Expiringsoon
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/licenses/guard/{guardId}:
+    get:
+      tags: [Guard Licenses]
+      operationId: byGuard
+      summary: Byguard
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/notifications:
+    get:
+      tags: [Notifications]
+      operationId: list
+      summary: List
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/notifications/device:
+    post:
+      tags: [Notifications]
+      operationId: registerDevice
+      summary: Registerdevice
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/notifications/read-all:
+    post:
+      tags: [Notifications]
+      operationId: markAllRead
+      summary: Markallread
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      operationId: markRead
+      summary: Markread
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/bank-account:
+    post:
+      tags: [Onboarding]
+      operationId: saveBankAccount
+      summary: Savebankaccount
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/branding:
+    put:
+      tags: [Onboarding]
+      operationId: updateBranding
+      summary: Updatebranding
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/company:
+    put:
+      tags: [Onboarding]
+      operationId: updateCompany
+      summary: Updatecompany
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/complete:
+    post:
+      tags: [Onboarding]
+      operationId: complete
+      summary: Complete
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/invitations/accept:
+    post:
+      tags: [Onboarding]
+      operationId: accept
+      summary: Accept
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/platform-bank-accounts:
+    get:
+      tags: [Onboarding]
+      operationId: platformBankAccounts
+      summary: Platformbankaccounts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/skip:
+    post:
+      tags: [Onboarding]
+      operationId: skip
+      summary: Skip
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/onboarding/status:
+    get:
+      tags: [Onboarding]
+      operationId: status
+      summary: Status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/active:
+    get:
+      tags: [Panic Alerts]
+      operationId: active
+      summary: Active
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/recent:
+    get:
+      tags: [Panic Alerts]
+      operationId: recent
+      summary: Recent
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/trigger:
+    post:
+      tags: [Panic Alerts]
+      operationId: trigger
+      summary: Trigger
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/{id}/acknowledge:
+    post:
+      tags: [Panic Alerts]
+      operationId: acknowledge
+      summary: Acknowledge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/{id}/false-alarm:
+    post:
+      tags: [Panic Alerts]
+      operationId: falseAlarm
+      summary: Falsealarm
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/{id}/resolve:
+    post:
+      tags: [Panic Alerts]
+      operationId: resolve
+      summary: Resolve
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/panic/{id}/responding:
+    post:
+      tags: [Panic Alerts]
+      operationId: responding
+      summary: Responding
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/areas:
+    get:
+      tags: [Parking]
+      operationId: listAreas
+      summary: Listareas
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Parking]
+      operationId: createArea
+      summary: Createarea
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/areas/{areaId}/lots:
+    post:
+      tags: [Parking]
+      operationId: createLot
+      summary: Createlot
+      parameters:
+        - name: areaId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/incident-types:
+    get:
+      tags: [Parking]
+      operationId: listIncidentTypes
+      summary: Listincidenttypes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Parking]
+      operationId: createIncidentType
+      summary: Createincidenttype
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/incidents:
+    post:
+      tags: [Parking]
+      operationId: reportIncident
+      summary: Reportincident
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/site/{siteId}/parked:
+    get:
+      tags: [Parking]
+      operationId: listParked
+      summary: Listparked
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/vehicles:
+    post:
+      tags: [Parking]
+      operationId: logEntry
+      summary: Logentry
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/parking/vehicles/{id}/exit:
+    post:
+      tags: [Parking]
+      operationId: logExit
+      summary: Logexit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/passdowns:
+    post:
+      tags: [Passdowns]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/passdowns/site/{siteId}:
+    get:
+      tags: [Passdowns]
+      operationId: listBySite
+      summary: Listbysite
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/passdowns/unacknowledged:
+    get:
+      tags: [Passdowns]
+      operationId: unacknowledged
+      summary: Unacknowledged
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/passdowns/{id}/acknowledge:
+    post:
+      tags: [Passdowns]
+      operationId: acknowledge
+      summary: Acknowledge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/guard/{guardId}/payslips:
+    get:
+      tags: [Payroll]
+      operationId: guardPayslips
+      summary: Guardpayslips
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/periods:
+    get:
+      tags: [Payroll]
+      operationId: listPeriods
+      summary: Listperiods
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Payroll]
+      operationId: createPeriod
+      summary: Createperiod
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/periods/{id}:
+    get:
+      tags: [Payroll]
+      operationId: periodDetail
+      summary: Perioddetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/periods/{id}/approve:
+    post:
+      tags: [Payroll]
+      operationId: approve
+      summary: Approve
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/periods/{id}/calculate:
+    post:
+      tags: [Payroll]
+      operationId: calculateFromTimeClock
+      summary: Calculatefromtimeclock
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/periods/{id}/export:
+    get:
+      tags: [Payroll]
+      operationId: exportCsv
+      summary: Exportcsv
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/periods/{id}/items:
+    post:
+      tags: [Payroll]
+      operationId: addItem
+      summary: Additem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/payroll/rates:
+    get:
+      tags: [Payroll]
+      operationId: listRates
+      summary: Listrates
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Payroll]
+      operationId: createRate
+      summary: Createrate
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/client/site/{siteId}:
+    get:
+      tags: [Reports]
+      operationId: clientReports
+      summary: Clientreports
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/custom:
+    post:
+      tags: [Reports]
+      operationId: submitCustomReport
+      summary: Submitcustomreport
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/custom/template/{templateId}:
+    get:
+      tags: [Reports]
+      operationId: listSubmissions
+      summary: Listsubmissions
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/dar:
+    get:
+      tags: [Reports]
+      operationId: listDARs
+      summary: Listdars
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Reports]
+      operationId: createDAR
+      summary: Createdar
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/dar/{id}/export:
+    get:
+      tags: [Reports]
+      operationId: exportDAR
+      summary: Exportdar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/dar/{id}/review:
+    post:
+      tags: [Reports]
+      operationId: reviewDAR
+      summary: Reviewdar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/dar/{id}/submit:
+    post:
+      tags: [Reports]
+      operationId: submitDAR
+      summary: Submitdar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/templates:
+    get:
+      tags: [Reports]
+      operationId: listTemplates
+      summary: Listtemplates
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Reports]
+      operationId: createTemplate
+      summary: Createtemplate
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/watch:
+    post:
+      tags: [Reports]
+      operationId: logWatch
+      summary: Logwatch
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/watch/recent:
+    get:
+      tags: [Reports]
+      operationId: recentWatchFeed
+      summary: Recentwatchfeed
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/reports/watch/site/{siteId}:
+    get:
+      tags: [Reports]
+      operationId: watchFeed
+      summary: Watchfeed
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/security/2fa/disable:
+    post:
+      tags: [Security]
+      operationId: disable2FA
+      summary: Disable2Fa
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/security/2fa/setup:
+    post:
+      tags: [Security]
+      operationId: setup2FA
+      summary: Setup2Fa
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/security/2fa/status:
+    get:
+      tags: [Security]
+      operationId: status2FA
+      summary: Status2Fa
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/security/2fa/verify:
+    post:
+      tags: [Security]
+      operationId: verify2FA
+      summary: Verify2Fa
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/security/audit-log:
+    get:
+      tags: [Security]
+      operationId: auditLog
+      summary: Auditlog
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shift-templates:
+    get:
+      tags: [Shift Templates]
+      operationId: listTemplates
+      summary: Listtemplates
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Shift Templates]
+      operationId: createTemplate
+      summary: Createtemplate
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shift-templates/{id}:
+    put:
+      tags: [Shift Templates]
+      operationId: updateTemplate
+      summary: Updatetemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts:
+    get:
+      tags: [Shifts]
+      operationId: listShifts
+      summary: Listshifts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Shifts]
+      operationId: createShift
+      summary: Createshift
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/available-guards:
+    get:
+      tags: [Shifts]
+      operationId: availableGuards
+      summary: Availableguards
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/bulk-generate:
+    post:
+      tags: [Shifts]
+      operationId: bulkGenerate
+      summary: Bulkgenerate
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/open:
+    get:
+      tags: [Shifts]
+      operationId: openShifts
+      summary: Openshifts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/publish:
+    post:
+      tags: [Shifts]
+      operationId: publishShifts
+      summary: Publishshifts
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/{id}:
+    put:
+      tags: [Shifts]
+      operationId: updateShift
+      summary: Updateshift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/{id}/cancel:
+    post:
+      tags: [Shifts]
+      operationId: cancelShift
+      summary: Cancelshift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/{id}/claim:
+    post:
+      tags: [Shifts]
+      operationId: claimShift
+      summary: Claimshift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/shifts/{id}/confirm:
+    post:
+      tags: [Shifts]
+      operationId: confirmShift
+      summary: Confirmshift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites:
+    get:
+      tags: [Sites]
+      operationId: index
+      summary: Index
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Sites]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites/map:
+    get:
+      tags: [Sites]
+      operationId: map
+      summary: Map
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites/post-orders/{id}:
+    put:
+      tags: [Sites]
+      operationId: updatePostOrder
+      summary: Updatepostorder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Sites]
+      operationId: deletePostOrder
+      summary: Deletepostorder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites/{id}:
+    get:
+      tags: [Sites]
+      operationId: show
+      summary: Show
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    put:
+      tags: [Sites]
+      operationId: update
+      summary: Update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    delete:
+      tags: [Sites]
+      operationId: delete
+      summary: Delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites/{id}/activate:
+    post:
+      tags: [Sites]
+      operationId: activate
+      summary: Activate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites/{id}/suspend:
+    post:
+      tags: [Sites]
+      operationId: suspend
+      summary: Suspend
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/sites/{siteId}/post-orders:
+    get:
+      tags: [Sites]
+      operationId: listPostOrders
+      summary: Listpostorders
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Sites]
+      operationId: createPostOrder
+      summary: Createpostorder
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/bank-transfer:
+    post:
+      tags: [Subscriptions]
+      operationId: bankTransfer
+      summary: Banktransfer
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/cancel:
+    post:
+      tags: [Subscriptions]
+      operationId: cancel
+      summary: Cancel
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/current:
+    get:
+      tags: [Subscriptions]
+      operationId: current
+      summary: Current
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/initialize:
+    post:
+      tags: [Subscriptions]
+      operationId: initialize
+      summary: Initialize
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/invoices:
+    get:
+      tags: [Subscriptions]
+      operationId: invoices
+      summary: Invoices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/subscriptions/webhook:
+    post:
+      tags: [Subscriptions]
+      operationId: webhook
+      summary: Webhook
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/upgrade:
+    post:
+      tags: [Subscriptions]
+      operationId: upgrade
+      summary: Upgrade
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/subscriptions/verify:
+    post:
+      tags: [Subscriptions]
+      operationId: verify
+      summary: Verify
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/swap-requests:
+    get:
+      tags: [Swap Requests]
+      operationId: listSwapRequests
+      summary: Listswaprequests
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Swap Requests]
+      operationId: createSwapRequest
+      summary: Createswaprequest
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/swap-requests/{id}/approve:
+    post:
+      tags: [Swap Requests]
+      operationId: approveSwap
+      summary: Approveswap
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/swap-requests/{id}/reject:
+    post:
+      tags: [Swap Requests]
+      operationId: rejectSwap
+      summary: Rejectswap
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tasks:
+    get:
+      tags: [Tasks]
+      operationId: list
+      summary: List
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Tasks]
+      operationId: create
+      summary: Create
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tasks/guard/{guardId}:
+    get:
+      tags: [Tasks]
+      operationId: byGuard
+      summary: Byguard
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tasks/overdue:
+    get:
+      tags: [Tasks]
+      operationId: overdue
+      summary: Overdue
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tasks/site/{siteId}:
+    get:
+      tags: [Tasks]
+      operationId: bySite
+      summary: Bysite
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tasks/{id}/status:
+    post:
+      tags: [Tasks]
+      operationId: updateStatus
+      summary: Updatestatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/breaks/configs:
+    get:
+      tags: [Time Clock]
+      operationId: listBreakConfigs
+      summary: Listbreakconfigs
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Time Clock]
+      operationId: createBreakConfig
+      summary: Createbreakconfig
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/breaks/start:
+    post:
+      tags: [Time Clock]
+      operationId: startBreak
+      summary: Startbreak
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/breaks/{id}/end:
+    post:
+      tags: [Time Clock]
+      operationId: endBreak
+      summary: Endbreak
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/clock-in:
+    post:
+      tags: [Time Clock]
+      operationId: clockIn
+      summary: Clockin
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/clock-out:
+    post:
+      tags: [Time Clock]
+      operationId: clockOut
+      summary: Clockout
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/history:
+    get:
+      tags: [Time Clock]
+      operationId: history
+      summary: History
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/site/{siteId}/active:
+    get:
+      tags: [Time Clock]
+      operationId: activeBySite
+      summary: Activebysite
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/time-clock/status:
+    get:
+      tags: [Time Clock]
+      operationId: status
+      summary: Status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/checkpoints/{id}:
+    put:
+      tags: [Site Tours]
+      operationId: updateCheckpoint
+      summary: Updatecheckpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/guard/{guardId}/sessions:
+    get:
+      tags: [Site Tours]
+      operationId: sessionsByGuard
+      summary: Sessionsbyguard
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/sessions/{sessionId}:
+    get:
+      tags: [Site Tours]
+      operationId: sessionDetail
+      summary: Sessiondetail
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/sessions/{sessionId}/complete:
+    post:
+      tags: [Site Tours]
+      operationId: completeTour
+      summary: Completetour
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/sessions/{sessionId}/scan:
+    post:
+      tags: [Site Tours]
+      operationId: recordScan
+      summary: Recordscan
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/site/{siteId}/checkpoints:
+    get:
+      tags: [Site Tours]
+      operationId: listCheckpoints
+      summary: Listcheckpoints
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Site Tours]
+      operationId: createCheckpoint
+      summary: Createcheckpoint
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/site/{siteId}/sessions:
+    get:
+      tags: [Site Tours]
+      operationId: sessionsBySite
+      summary: Sessionsbysite
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tours/start:
+    post:
+      tags: [Site Tours]
+      operationId: startTour
+      summary: Starttour
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/batch:
+    post:
+      tags: [GPS Tracking]
+      operationId: recordBatch
+      summary: Recordbatch
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/detect-idle:
+    post:
+      tags: [GPS Tracking]
+      operationId: detectIdle
+      summary: Detectidle
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/geofence-alerts:
+    get:
+      tags: [GPS Tracking]
+      operationId: geofenceAlerts
+      summary: Geofencealerts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/geofence-alerts/recent:
+    get:
+      tags: [GPS Tracking]
+      operationId: recentGeofenceAlerts
+      summary: Recentgeofencealerts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/geofence-alerts/{id}/acknowledge:
+    post:
+      tags: [GPS Tracking]
+      operationId: acknowledgeGeofenceAlert
+      summary: Acknowledgegeofencealert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/guard/{guardId}/latest:
+    get:
+      tags: [GPS Tracking]
+      operationId: latestLocation
+      summary: Latestlocation
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/guard/{guardId}/path:
+    get:
+      tags: [GPS Tracking]
+      operationId: guardPath
+      summary: Guardpath
+      parameters:
+        - name: guardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/idle-alerts:
+    get:
+      tags: [GPS Tracking]
+      operationId: idleAlerts
+      summary: Idlealerts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/idle-alerts/{id}/acknowledge:
+    post:
+      tags: [GPS Tracking]
+      operationId: acknowledgeIdleAlert
+      summary: Acknowledgeidlealert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/live:
+    get:
+      tags: [GPS Tracking]
+      operationId: liveLocations
+      summary: Livelocations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/tracking/location:
+    post:
+      tags: [GPS Tracking]
+      operationId: recordLocation
+      summary: Recordlocation
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/usage/current:
+    get:
+      tags: [Usage Tracking]
+      operationId: current
+      summary: Current
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/usage/history:
+    get:
+      tags: [Usage Tracking]
+      operationId: history
+      summary: History
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/usage/limits:
+    get:
+      tags: [Usage Tracking]
+      operationId: limits
+      summary: Limits
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/vehicle-patrol/hits:
+    post:
+      tags: [Vehicle Patrol]
+      operationId: recordHit
+      summary: Recordhit
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/vehicle-patrol/missed:
+    get:
+      tags: [Vehicle Patrol]
+      operationId: missedPatrols
+      summary: Missedpatrols
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/vehicle-patrol/routes:
+    get:
+      tags: [Vehicle Patrol]
+      operationId: listRoutes
+      summary: Listroutes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Vehicle Patrol]
+      operationId: createRoute
+      summary: Createroute
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/vehicle-patrol/routes/{routeId}/hits:
+    get:
+      tags: [Vehicle Patrol]
+      operationId: routeHits
+      summary: Routehits
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/vehicle-patrol/vehicles:
+    get:
+      tags: [Vehicle Patrol]
+      operationId: listVehicles
+      summary: Listvehicles
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+    post:
+      tags: [Vehicle Patrol]
+      operationId: createVehicle
+      summary: Createvehicle
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/visitors/check-in:
+    post:
+      tags: [Visitors]
+      operationId: checkIn
+      summary: Checkin
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/visitors/search:
+    get:
+      tags: [Visitors]
+      operationId: search
+      summary: Search
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/visitors/site/{siteId}:
+    get:
+      tags: [Visitors]
+      operationId: listBySite
+      summary: Listbysite
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/visitors/site/{siteId}/checked-in:
+    get:
+      tags: [Visitors]
+      operationId: listCheckedIn
+      summary: Listcheckedin
+      parameters:
+        - name: siteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+  /api/v1/visitors/{id}/check-out:
+    post:
+      tags: [Visitors]
+      operationId: checkOut
+      summary: Checkout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (insufficient role)
+        '422':
+          description: Validation error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login
+
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        totp_code:
+          type: string
+          description: 2FA TOTP code (if 2FA enabled)
+
+    RegisterRequest:
+      type: object
+      required: [company_name, email, password, plan_id]
+      properties:
+        company_name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        plan_id:
+          type: string
+          format: uuid
+
+    Site:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        geofence_radius:
+          type: integer
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+
+    Guard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        employee_number:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended, terminated]
+
+    Incident:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        status:
+          type: string
+          enum: [reported, investigating, escalated, resolved, closed]
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_number:
+          type: string
+        total_amount:
+          type: number
+        currency:
+          type: string
+          default: NGN
+        status:
+          type: string
+          enum: [draft, sent, paid, overdue, cancelled]
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [shift_assigned, shift_change, clock_reminder, incident, panic, dispatch, report, message, invoice, system]
+        title:
+          type: string
+        body:
+          type: string
+        channel:
+          type: string
+          enum: [push, sms, email, in_app]
+        is_read:
+          type: boolean
+
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        per_page:
+          type: integer
+        current_page:
+          type: integer
+        last_page:
+          type: integer

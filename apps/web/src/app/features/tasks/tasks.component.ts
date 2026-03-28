@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import { LucideAngularModule, ListTodo, Plus, AlertTriangle, CheckCircle, Clock, User } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
@@ -12,7 +12,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-tasks',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent],
+  imports: [FormsModule, NgClass, DatePipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent],
   template: `
     <g51-page-header title="Task Management" subtitle="Assign tasks to guards and track completion">
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2">

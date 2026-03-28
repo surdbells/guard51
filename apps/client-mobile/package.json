@@ -1,0 +1,21 @@
+{
+  "name": "guard51-client-mobile",
+  "version": "1.0.0",
+  "description": "Guard51 ClientMobile App - NativeScript + Angular",
+  "main": "src/main.ts",
+  "dependencies": {
+    "@nativescript/core": "~8.7.0",
+    "@nativescript/angular": "~18.0.0",
+    "@angular/core": "~19.0.0",
+    "@angular/common": "~19.0.0",
+    "@angular/router": "~19.0.0",
+    "@angular/forms": "~19.0.0",
+    "rxjs": "~7.8.0"
+  },
+  "devDependencies": {
+    "@nativescript/android": "~8.7.0",
+    "@nativescript/ios": "~8.7.0",
+    "@nativescript/webpack": "~5.0.0",
+    "typescript": "~5.6.0"
+  }
+}

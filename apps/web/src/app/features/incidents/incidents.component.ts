@@ -72,7 +72,7 @@ import { ToastService } from '@core/services/toast.service';
         </div>
         <div class="card p-5">
           <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Incident Trend (30 days)</h3>
-          <g51-line-chart [series]="trendSeries" [labels]="trendLabels" [height]="220" />
+          <g51-line-chart [seriesData]="trendSeries" [labels]="trendLabels" [height]="220" />
         </div>
       </div>
     }

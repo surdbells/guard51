@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe, DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Receipt, Plus, DollarSign, AlertTriangle, CheckCircle, Send, CreditCard } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
@@ -15,7 +15,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-invoices',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, BarChartComponent, LineChartComponent, ModalComponent, EmptyStateComponent],
+  imports: [FormsModule, NgClass, DatePipe, DecimalPipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, BarChartComponent, LineChartComponent, ModalComponent, EmptyStateComponent],
   template: `
     <g51-page-header title="Invoices" subtitle="Client billing, payments, and revenue tracking">
       <button (click)="showGenerate.set(true)" class="btn-secondary flex items-center gap-2">
@@ -90,7 +90,7 @@ import { ToastService } from '@core/services/toast.service';
         </div>
         <div class="card p-5">
           <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Monthly Revenue Trend</h3>
-          <g51-line-chart [series]="revenueTrend" [labels]="trendLabels" [height]="220" />
+          <g51-line-chart [seriesData]="revenueTrend" [labels]="trendLabels" [height]="220" />
         </div>
       </div>
     }

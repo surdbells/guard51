@@ -27,8 +27,8 @@ export interface BarChartData {
           [attr.x]="barX(i)"
           [attr.y]="yScale(item.value)"
           [attr.width]="barWidth()"
-          [attr.height]="chartHeight - yScale(item.value) + topPadding"
-          [attr.fill]="item.color || colors()[i % colors().length]"
+          [attr.height]="chartHeight() - yScale(item.value) + topPadding"
+          [attr.fill]="item.color || colors()[$index % colors().length]"
           [attr.rx]="3"
           class="transition-all duration-300 hover:opacity-80"
         />
