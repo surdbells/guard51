@@ -11,11 +11,14 @@ use Guard51\Module\Auth\AuthController;
 use Guard51\Module\AppDistribution\AppReleaseController;
 use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
+use Guard51\Module\ClientPortal\ClientPortalController;
+use Guard51\Module\Chat\ChatController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
+use Guard51\Module\Notification\NotificationController;
 use Guard51\Module\Invoice\InvoiceController;
 use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Passdown\PassdownController;
@@ -521,6 +524,39 @@ return function (App $app): void {
             $pay->get('/guard/{guardId}/payslips', [PayrollController::class, 'guardPayslips']);
             $pay->get('/rates', [PayrollController::class, 'listRates']);
             $pay->post('/rates', [PayrollController::class, 'createRate']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 6: Client Portal, Chat, Notifications
+        // ══════════════════════════════════════════════
+
+        // ── Client Portal ────────────────────────────
+        $group->group('/client-portal', function (RouteCollectorProxy $cp): void {
+            $cp->get('/profile', [ClientPortalController::class, 'profile']);
+            $cp->get('/reports', [ClientPortalController::class, 'reports']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Chat ─────────────────────────────────────
+        $group->group('/chat', function (RouteCollectorProxy $ch): void {
+            $ch->get('/conversations', [ChatController::class, 'listConversations']);
+            $ch->post('/conversations', [ChatController::class, 'createConversation']);
+            $ch->get('/conversations/{id}/messages', [ChatController::class, 'messages']);
+            $ch->post('/conversations/{id}/messages', [ChatController::class, 'sendMessage']);
+            $ch->post('/conversations/{id}/read', [ChatController::class, 'markRead']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Notifications ────────────────────────────
+        $group->group('/notifications', function (RouteCollectorProxy $nt): void {
+            $nt->get('', [NotificationController::class, 'list']);
+            $nt->post('/{id}/read', [NotificationController::class, 'markRead']);
+            $nt->post('/read-all', [NotificationController::class, 'markAllRead']);
+            $nt->post('/device', [NotificationController::class, 'registerDevice']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

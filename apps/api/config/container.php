@@ -14,11 +14,14 @@ use Guard51\Module\Auth\AuthController;
 use Guard51\Module\AppDistribution\AppReleaseController;
 use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
+use Guard51\Module\ClientPortal\ClientPortalController;
+use Guard51\Module\Chat\ChatController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
+use Guard51\Module\Notification\NotificationController;
 use Guard51\Module\Invoice\InvoiceController;
 use Guard51\Module\Passdown\PassdownController;
 use Guard51\Module\Payroll\PayrollController;
@@ -44,10 +47,15 @@ use Guard51\Repository\BreakConfigRepository;
 use Guard51\Repository\BreakLogRepository;
 use Guard51\Repository\ClientContactRepository;
 use Guard51\Repository\ClientRepository;
+use Guard51\Repository\ClientUserRepository;
+use Guard51\Repository\ChatConversationRepository;
+use Guard51\Repository\ChatMessageRepository;
+use Guard51\Repository\ChatParticipantRepository;
 use Guard51\Repository\CustomReportSubmissionRepository;
 use Guard51\Repository\CustomReportTemplateRepository;
 use Guard51\Repository\DailyActivityReportRepository;
 use Guard51\Repository\DailySnapshotRepository;
+use Guard51\Repository\DeviceTokenRepository;
 use Guard51\Repository\DispatchAssignmentRepository;
 use Guard51\Repository\DispatchCallRepository;
 use Guard51\Repository\FeatureModuleRepository;
@@ -59,6 +67,7 @@ use Guard51\Repository\GuardSkillRepository;
 use Guard51\Repository\IdleAlertRepository;
 use Guard51\Repository\IncidentEscalationRepository;
 use Guard51\Repository\IncidentReportRepository;
+use Guard51\Repository\NotificationRepository;
 use Guard51\Repository\InvoiceItemRepository;
 use Guard51\Repository\InvoicePaymentRepository;
 use Guard51\Repository\InvoiceRepository;
@@ -91,6 +100,7 @@ use Guard51\Repository\TenantUsageMetricRepository;
 use Guard51\Repository\UserRepository;
 use Guard51\Service\AppDistributionService;
 use Guard51\Service\ClientService;
+use Guard51\Service\ChatService;
 use Guard51\Service\DispatchService;
 use Guard51\Service\FeatureService;
 use Guard51\Service\GeofenceService;
@@ -98,6 +108,7 @@ use Guard51\Service\GuardService;
 use Guard51\Service\IncidentService;
 use Guard51\Service\InvoiceService;
 use Guard51\Service\LocationService;
+use Guard51\Service\NotificationService;
 use Guard51\Service\PanicService;
 use Guard51\Service\PassdownService;
 use Guard51\Service\PayrollService;
@@ -692,6 +703,31 @@ $containerBuilder->addDefinitions([
 
     InvoiceController::class => fn(ContainerInterface $c) => new InvoiceController($c->get(InvoiceService::class)),
     PayrollController::class => fn(ContainerInterface $c) => new PayrollController($c->get(PayrollService::class)),
+
+    // Phase 6: Client Portal, Chat, Notifications
+    ClientUserRepository::class => fn(ContainerInterface $c) => new ClientUserRepository($c->get(EntityManagerInterface::class)),
+    ChatConversationRepository::class => fn(ContainerInterface $c) => new ChatConversationRepository($c->get(EntityManagerInterface::class)),
+    ChatParticipantRepository::class => fn(ContainerInterface $c) => new ChatParticipantRepository($c->get(EntityManagerInterface::class)),
+    ChatMessageRepository::class => fn(ContainerInterface $c) => new ChatMessageRepository($c->get(EntityManagerInterface::class)),
+    NotificationRepository::class => fn(ContainerInterface $c) => new NotificationRepository($c->get(EntityManagerInterface::class)),
+    DeviceTokenRepository::class => fn(ContainerInterface $c) => new DeviceTokenRepository($c->get(EntityManagerInterface::class)),
+
+    ChatService::class => function (ContainerInterface $c): ChatService {
+        return new ChatService(
+            $c->get(ChatConversationRepository::class), $c->get(ChatParticipantRepository::class),
+            $c->get(ChatMessageRepository::class), $c->get(LoggerInterface::class),
+        );
+    },
+    NotificationService::class => function (ContainerInterface $c): NotificationService {
+        return new NotificationService(
+            $c->get(NotificationRepository::class), $c->get(DeviceTokenRepository::class),
+            $c->get(LoggerInterface::class),
+        );
+    },
+
+    ClientPortalController::class => fn(ContainerInterface $c) => new ClientPortalController($c->get(ClientUserRepository::class), $c->get(ReportService::class)),
+    ChatController::class => fn(ContainerInterface $c) => new ChatController($c->get(ChatService::class)),
+    NotificationController::class => fn(ContainerInterface $c) => new NotificationController($c->get(NotificationService::class)),
 ]);
 
 return $containerBuilder->build();
