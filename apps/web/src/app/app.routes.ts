@@ -91,6 +91,20 @@ export const routes: Routes = [
         loadChildren: () => import('./features/payroll/payroll.routes').then(m => m.PAYROLL_ROUTES),
       },
 
+      // Phase 6: Client Experience & Communication
+      {
+        path: 'client-portal',
+        loadChildren: () => import('./features/client-portal/client-portal.routes').then(m => m.CLIENT_PORTAL_ROUTES),
+      },
+      {
+        path: 'chat',
+        loadChildren: () => import('./features/chat/chat.routes').then(m => m.CHAT_ROUTES),
+      },
+      {
+        path: 'notifications',
+        loadChildren: () => import('./features/notifications/notifications.routes').then(m => m.NOTIFICATIONS_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',
