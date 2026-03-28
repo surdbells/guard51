@@ -19,7 +19,9 @@ use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
+use Guard51\Module\Invoice\InvoiceController;
 use Guard51\Module\Passdown\PassdownController;
+use Guard51\Module\Payroll\PayrollController;
 use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Report\ReportController;
 use Guard51\Module\Scheduling\ShiftController;
@@ -57,8 +59,15 @@ use Guard51\Repository\GuardSkillRepository;
 use Guard51\Repository\IdleAlertRepository;
 use Guard51\Repository\IncidentEscalationRepository;
 use Guard51\Repository\IncidentReportRepository;
+use Guard51\Repository\InvoiceItemRepository;
+use Guard51\Repository\InvoicePaymentRepository;
+use Guard51\Repository\InvoiceRepository;
 use Guard51\Repository\PanicAlertRepository;
 use Guard51\Repository\PassdownLogRepository;
+use Guard51\Repository\PayRateMultiplierRepository;
+use Guard51\Repository\PayrollItemRepository;
+use Guard51\Repository\PayrollPeriodRepository;
+use Guard51\Repository\PayslipRepository;
 use Guard51\Repository\RefreshTokenRepository;
 use Guard51\Repository\PostOrderRepository;
 use Guard51\Repository\ShiftRepository;
@@ -87,9 +96,11 @@ use Guard51\Service\FeatureService;
 use Guard51\Service\GeofenceService;
 use Guard51\Service\GuardService;
 use Guard51\Service\IncidentService;
+use Guard51\Service\InvoiceService;
 use Guard51\Service\LocationService;
 use Guard51\Service\PanicService;
 use Guard51\Service\PassdownService;
+use Guard51\Service\PayrollService;
 use Guard51\Service\ReportService;
 use Guard51\Service\ShiftService;
 use Guard51\Service\SiteService;
@@ -655,6 +666,32 @@ $containerBuilder->addDefinitions([
     IncidentController::class => fn(ContainerInterface $c) => new IncidentController($c->get(IncidentService::class)),
     DispatchController::class => fn(ContainerInterface $c) => new DispatchController($c->get(DispatchService::class)),
     TaskController::class => fn(ContainerInterface $c) => new TaskController($c->get(TaskService::class)),
+
+    // Phase 5: Finance & Billing
+    InvoiceRepository::class => fn(ContainerInterface $c) => new InvoiceRepository($c->get(EntityManagerInterface::class)),
+    InvoiceItemRepository::class => fn(ContainerInterface $c) => new InvoiceItemRepository($c->get(EntityManagerInterface::class)),
+    InvoicePaymentRepository::class => fn(ContainerInterface $c) => new InvoicePaymentRepository($c->get(EntityManagerInterface::class)),
+    PayrollPeriodRepository::class => fn(ContainerInterface $c) => new PayrollPeriodRepository($c->get(EntityManagerInterface::class)),
+    PayrollItemRepository::class => fn(ContainerInterface $c) => new PayrollItemRepository($c->get(EntityManagerInterface::class)),
+    PayRateMultiplierRepository::class => fn(ContainerInterface $c) => new PayRateMultiplierRepository($c->get(EntityManagerInterface::class)),
+    PayslipRepository::class => fn(ContainerInterface $c) => new PayslipRepository($c->get(EntityManagerInterface::class)),
+
+    InvoiceService::class => function (ContainerInterface $c): InvoiceService {
+        return new InvoiceService(
+            $c->get(InvoiceRepository::class), $c->get(InvoiceItemRepository::class),
+            $c->get(InvoicePaymentRepository::class), $c->get(LoggerInterface::class),
+        );
+    },
+    PayrollService::class => function (ContainerInterface $c): PayrollService {
+        return new PayrollService(
+            $c->get(PayrollPeriodRepository::class), $c->get(PayrollItemRepository::class),
+            $c->get(PayRateMultiplierRepository::class), $c->get(PayslipRepository::class),
+            $c->get(TimeClockRepository::class), $c->get(LoggerInterface::class),
+        );
+    },
+
+    InvoiceController::class => fn(ContainerInterface $c) => new InvoiceController($c->get(InvoiceService::class)),
+    PayrollController::class => fn(ContainerInterface $c) => new PayrollController($c->get(PayrollService::class)),
 ]);
 
 return $containerBuilder->build();

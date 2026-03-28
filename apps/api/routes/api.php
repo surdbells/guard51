@@ -16,8 +16,10 @@ use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
+use Guard51\Module\Invoice\InvoiceController;
 use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Passdown\PassdownController;
+use Guard51\Module\Payroll\PayrollController;
 use Guard51\Module\Report\ReportController;
 use Guard51\Module\Scheduling\ShiftController;
 use Guard51\Module\Site\SiteController;
@@ -484,6 +486,39 @@ return function (App $app): void {
             $tsk->get('/guard/{guardId}', [TaskController::class, 'byGuard']);
             $tsk->get('/site/{siteId}', [TaskController::class, 'bySite']);
             $tsk->get('/overdue', [TaskController::class, 'overdue']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 5: Finance & Billing
+        // ══════════════════════════════════════════════
+
+        // ── Invoices ─────────────────────────────────
+        $group->group('/invoices', function (RouteCollectorProxy $inv): void {
+            $inv->get('', [InvoiceController::class, 'list']);
+            $inv->post('', [InvoiceController::class, 'create']);
+            $inv->get('/overdue', [InvoiceController::class, 'overdue']);
+            $inv->get('/{id}', [InvoiceController::class, 'detail']);
+            $inv->post('/{id}/payment', [InvoiceController::class, 'recordPayment']);
+            $inv->post('/{id}/send', [InvoiceController::class, 'send']);
+            $inv->post('/{id}/convert', [InvoiceController::class, 'convertEstimate']);
+            $inv->get('/{id}/export', [InvoiceController::class, 'export']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Payroll ──────────────────────────────────
+        $group->group('/payroll', function (RouteCollectorProxy $pay): void {
+            $pay->get('/periods', [PayrollController::class, 'listPeriods']);
+            $pay->post('/periods', [PayrollController::class, 'createPeriod']);
+            $pay->get('/periods/{id}', [PayrollController::class, 'periodDetail']);
+            $pay->post('/periods/{id}/items', [PayrollController::class, 'addItem']);
+            $pay->post('/periods/{id}/calculate', [PayrollController::class, 'calculateFromTimeClock']);
+            $pay->post('/periods/{id}/approve', [PayrollController::class, 'approve']);
+            $pay->get('/guard/{guardId}/payslips', [PayrollController::class, 'guardPayslips']);
+            $pay->get('/rates', [PayrollController::class, 'listRates']);
+            $pay->post('/rates', [PayrollController::class, 'createRate']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
