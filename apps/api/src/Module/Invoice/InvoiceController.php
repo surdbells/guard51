@@ -50,4 +50,19 @@ final class InvoiceController
         $invoices = $this->invoiceService->findOverdue($request->getAttribute('tenant_id'));
         return JsonResponse::success($response, ['invoices' => array_map(fn($i) => $i->toArray(), $invoices)]);
     }
+
+    /** POST /api/v1/invoices/generate — Auto-generate invoice from time clock data */
+    public function generateFromTimeClock(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $inv = $this->invoiceService->generateFromTimeClock(
+            $request->getAttribute('tenant_id'),
+            $body['client_id'] ?? '',
+            $body['start_date'] ?? '',
+            $body['end_date'] ?? '',
+            (float) ($body['billing_rate'] ?? 500),
+            $request->getAttribute('user_id'),
+        );
+        return JsonResponse::success($response, $inv->toArray(), 201);
+    }
 }

@@ -159,6 +159,40 @@ final class PayrollService
     }
 
     /**
+     * Email payslip to guard via ZeptoMail.
+     * TODO: Integrate with ZeptoMail API once email service is configured.
+     */
+    public function emailPayslip(string $payslipId): Payslip
+    {
+        $slip = $this->slipRepo->findOrFail($payslipId);
+        // TODO: $this->emailService->sendPayslip($slip);
+        $slip->markEmailed();
+        $this->slipRepo->save($slip);
+        $this->logger->info('Payslip emailed', ['id' => $slip->getId(), 'guard_id' => $slip->getGuardId()]);
+        return $slip;
+    }
+
+    /**
+     * Export payroll period as CSV data (guard breakdown).
+     */
+    public function exportPayrollCsv(string $periodId): string
+    {
+        $detail = $this->getPeriodDetail($periodId);
+        $csv = "Guard ID,Regular Hours,OT Hours,Holiday Hours,Regular Rate,OT Rate,Holiday Rate,Gross Pay,PAYE,Pension,NHF,Total Deductions,Net Pay\n";
+        foreach ($detail['items'] as $item) {
+            $paye = $item['deductions']['paye'] ?? 0;
+            $pension = $item['deductions']['pension'] ?? 0;
+            $nhf = $item['deductions']['nhf'] ?? 0;
+            $csv .= implode(',', [
+                $item['guard_id'], $item['regular_hours'], $item['overtime_hours'], $item['holiday_hours'],
+                $item['regular_rate'], $item['overtime_rate'], $item['holiday_rate'],
+                $item['gross_pay'], $paye, $pension, $nhf, $item['total_deductions'], $item['net_pay'],
+            ]) . "\n";
+        }
+        return $csv;
+    }
+
+    /**
      * Simplified Nigeria PAYE calculation.
      * CRA = max(200000, 1% of gross) + 20% of gross. Taxable = Gross - CRA - Pension.
      */

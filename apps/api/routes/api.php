@@ -504,6 +504,7 @@ return function (App $app): void {
             $inv->post('/{id}/send', [InvoiceController::class, 'send']);
             $inv->post('/{id}/convert', [InvoiceController::class, 'convertEstimate']);
             $inv->get('/{id}/export', [InvoiceController::class, 'export']);
+            $inv->post('/generate', [InvoiceController::class, 'generateFromTimeClock']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
@@ -516,6 +517,7 @@ return function (App $app): void {
             $pay->post('/periods/{id}/items', [PayrollController::class, 'addItem']);
             $pay->post('/periods/{id}/calculate', [PayrollController::class, 'calculateFromTimeClock']);
             $pay->post('/periods/{id}/approve', [PayrollController::class, 'approve']);
+            $pay->get('/periods/{id}/export', [PayrollController::class, 'exportCsv']);
             $pay->get('/guard/{guardId}/payslips', [PayrollController::class, 'guardPayslips']);
             $pay->get('/rates', [PayrollController::class, 'listRates']);
             $pay->post('/rates', [PayrollController::class, 'createRate']);

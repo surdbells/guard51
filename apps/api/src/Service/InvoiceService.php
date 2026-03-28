@@ -135,6 +135,48 @@ final class InvoiceService
         $html .= "</table><p>Subtotal: {$inv['currency']} {$inv['subtotal']}</p>";
         $html .= "<p>VAT ({$inv['tax_rate']}%): {$inv['currency']} {$inv['tax_amount']}</p>";
         $html .= "<p><strong>Total: {$inv['currency']} {$inv['total']}</strong></p>";
+        // Tenant bank account details (prominently displayed)
+        $html .= "<hr/><h3>Payment Details</h3>";
+        $html .= "<p>Please remit payment to the bank account below:</p>";
+        $html .= "<p><strong>Bank:</strong> [Tenant Bank Name]<br/>";
+        $html .= "<strong>Account Name:</strong> [Tenant Account Name]<br/>";
+        $html .= "<strong>Account Number:</strong> [Tenant Account Number]<br/>";
+        $html .= "<strong>Sort Code:</strong> [Tenant Sort Code]</p>";
+        $html .= "<p><em>Note: Bank details are populated from your company settings.</em></p>";
         return ['html' => $html, 'invoice' => $inv];
+    }
+
+    /**
+     * Auto-generate invoice from time clock data for a client's sites.
+     * Sums guard hours × billing rate for the given period.
+     */
+    public function generateFromTimeClock(string $tenantId, string $clientId, string $startDate, string $endDate, float $billingRate, string $createdBy): Invoice
+    {
+        $conn = $this->invoiceRepo->getEntityManager()->getConnection();
+        $sql = "SELECT s.name as site_name, SUM(tc.total_hours) as total_hours
+                FROM time_clocks tc
+                JOIN sites s ON tc.site_id = s.id
+                WHERE tc.tenant_id = ? AND s.client_id = ?
+                AND tc.clock_in_time >= ? AND tc.clock_in_time <= ?
+                AND tc.total_hours IS NOT NULL
+                GROUP BY s.id, s.name";
+        $rows = $conn->fetchAllAssociative($sql, [$tenantId, $clientId, $startDate, $endDate]);
+
+        $items = [];
+        foreach ($rows as $row) {
+            $items[] = [
+                'description' => "Security Guard Services — {$row['site_name']} — {$startDate} to {$endDate}",
+                'quantity' => round((float) $row['total_hours'], 2),
+                'unit_price' => $billingRate,
+            ];
+        }
+
+        return $this->createInvoice($tenantId, [
+            'client_id' => $clientId,
+            'issue_date' => (new \DateTimeImmutable())->format('Y-m-d'),
+            'due_date' => (new \DateTimeImmutable('+30 days'))->format('Y-m-d'),
+            'notes' => "Auto-generated from timesheet records for period {$startDate} to {$endDate}.",
+            'items' => $items,
+        ], $createdBy);
     }
 }

@@ -57,4 +57,11 @@ final class PayrollController
         $rate = $this->payrollService->createRate($request->getAttribute('tenant_id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $rate->toArray(), 201);
     }
+
+    /** GET /api/v1/payroll/periods/{id}/export — Export payroll as CSV */
+    public function exportCsv(Request $request, Response $response, array $args): Response
+    {
+        $csv = $this->payrollService->exportPayrollCsv($args['id']);
+        return JsonResponse::success($response, ['csv' => $csv, 'filename' => "payroll-{$args['id']}.csv"]);
+    }
 }
