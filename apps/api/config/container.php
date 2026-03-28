@@ -22,6 +22,9 @@ use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
 use Guard51\Module\Notification\NotificationController;
+use Guard51\Module\Parking\ParkingController;
+use Guard51\Module\VehiclePatrol\VehiclePatrolController;
+use Guard51\Module\Visitor\VisitorController;
 use Guard51\Module\Invoice\InvoiceController;
 use Guard51\Module\Passdown\PassdownController;
 use Guard51\Module\Payroll\PayrollController;
@@ -68,6 +71,12 @@ use Guard51\Repository\IdleAlertRepository;
 use Guard51\Repository\IncidentEscalationRepository;
 use Guard51\Repository\IncidentReportRepository;
 use Guard51\Repository\NotificationRepository;
+use Guard51\Repository\ParkingAreaRepository;
+use Guard51\Repository\ParkingIncidentRepository;
+use Guard51\Repository\ParkingIncidentTypeRepository;
+use Guard51\Repository\ParkingLotRepository;
+use Guard51\Repository\ParkingVehicleRepository;
+use Guard51\Repository\PatrolVehicleRepository;
 use Guard51\Repository\InvoiceItemRepository;
 use Guard51\Repository\InvoicePaymentRepository;
 use Guard51\Repository\InvoiceRepository;
@@ -85,6 +94,10 @@ use Guard51\Repository\ShiftTemplateRepository;
 use Guard51\Repository\SiteRepository;
 use Guard51\Repository\TaskRepository;
 use Guard51\Repository\TimeClockRepository;
+use Guard51\Repository\VehiclePatrolHitRepository;
+use Guard51\Repository\VehiclePatrolRouteRepository;
+use Guard51\Repository\VisitorRepository;
+use Guard51\Repository\VisitorVehicleRepository;
 use Guard51\Repository\TourCheckpointRepository;
 use Guard51\Repository\TourCheckpointScanRepository;
 use Guard51\Repository\TourSessionRepository;
@@ -109,10 +122,13 @@ use Guard51\Service\IncidentService;
 use Guard51\Service\InvoiceService;
 use Guard51\Service\LocationService;
 use Guard51\Service\NotificationService;
+use Guard51\Service\ParkingService;
 use Guard51\Service\PanicService;
 use Guard51\Service\PassdownService;
 use Guard51\Service\PayrollService;
 use Guard51\Service\ReportService;
+use Guard51\Service\VehiclePatrolService;
+use Guard51\Service\VisitorService;
 use Guard51\Service\ShiftService;
 use Guard51\Service\SiteService;
 use Guard51\Service\TaskService;
@@ -728,6 +744,26 @@ $containerBuilder->addDefinitions([
     ClientPortalController::class => fn(ContainerInterface $c) => new ClientPortalController($c->get(ClientUserRepository::class), $c->get(ReportService::class), $c->get(InvoiceService::class), $c->get(IncidentService::class)),
     ChatController::class => fn(ContainerInterface $c) => new ChatController($c->get(ChatService::class)),
     NotificationController::class => fn(ContainerInterface $c) => new NotificationController($c->get(NotificationService::class)),
+
+    // Phase 7: Operations & Extended Apps
+    PatrolVehicleRepository::class => fn(ContainerInterface $c) => new PatrolVehicleRepository($c->get(EntityManagerInterface::class)),
+    VehiclePatrolRouteRepository::class => fn(ContainerInterface $c) => new VehiclePatrolRouteRepository($c->get(EntityManagerInterface::class)),
+    VehiclePatrolHitRepository::class => fn(ContainerInterface $c) => new VehiclePatrolHitRepository($c->get(EntityManagerInterface::class)),
+    VisitorRepository::class => fn(ContainerInterface $c) => new VisitorRepository($c->get(EntityManagerInterface::class)),
+    VisitorVehicleRepository::class => fn(ContainerInterface $c) => new VisitorVehicleRepository($c->get(EntityManagerInterface::class)),
+    ParkingAreaRepository::class => fn(ContainerInterface $c) => new ParkingAreaRepository($c->get(EntityManagerInterface::class)),
+    ParkingLotRepository::class => fn(ContainerInterface $c) => new ParkingLotRepository($c->get(EntityManagerInterface::class)),
+    ParkingVehicleRepository::class => fn(ContainerInterface $c) => new ParkingVehicleRepository($c->get(EntityManagerInterface::class)),
+    ParkingIncidentTypeRepository::class => fn(ContainerInterface $c) => new ParkingIncidentTypeRepository($c->get(EntityManagerInterface::class)),
+    ParkingIncidentRepository::class => fn(ContainerInterface $c) => new ParkingIncidentRepository($c->get(EntityManagerInterface::class)),
+
+    VehiclePatrolService::class => fn(ContainerInterface $c) => new VehiclePatrolService($c->get(PatrolVehicleRepository::class), $c->get(VehiclePatrolRouteRepository::class), $c->get(VehiclePatrolHitRepository::class), $c->get(LoggerInterface::class)),
+    VisitorService::class => fn(ContainerInterface $c) => new VisitorService($c->get(VisitorRepository::class), $c->get(VisitorVehicleRepository::class), $c->get(LoggerInterface::class)),
+    ParkingService::class => fn(ContainerInterface $c) => new ParkingService($c->get(ParkingAreaRepository::class), $c->get(ParkingLotRepository::class), $c->get(ParkingVehicleRepository::class), $c->get(ParkingIncidentTypeRepository::class), $c->get(ParkingIncidentRepository::class), $c->get(LoggerInterface::class)),
+
+    VehiclePatrolController::class => fn(ContainerInterface $c) => new VehiclePatrolController($c->get(VehiclePatrolService::class)),
+    VisitorController::class => fn(ContainerInterface $c) => new VisitorController($c->get(VisitorService::class)),
+    ParkingController::class => fn(ContainerInterface $c) => new ParkingController($c->get(ParkingService::class)),
 ]);
 
 return $containerBuilder->build();

@@ -19,6 +19,9 @@ use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
 use Guard51\Module\Notification\NotificationController;
+use Guard51\Module\Parking\ParkingController;
+use Guard51\Module\VehiclePatrol\VehiclePatrolController;
+use Guard51\Module\Visitor\VisitorController;
 use Guard51\Module\Invoice\InvoiceController;
 use Guard51\Module\Panic\PanicController;
 use Guard51\Module\Passdown\PassdownController;
@@ -561,6 +564,48 @@ return function (App $app): void {
             $nt->post('/{id}/read', [NotificationController::class, 'markRead']);
             $nt->post('/read-all', [NotificationController::class, 'markAllRead']);
             $nt->post('/device', [NotificationController::class, 'registerDevice']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ══════════════════════════════════════════════
+        // PHASE 7: Operations & Extended Apps
+        // ══════════════════════════════════════════════
+
+        // ── Vehicle Patrol ───────────────────────────
+        $group->group('/vehicle-patrol', function (RouteCollectorProxy $vp): void {
+            $vp->get('/vehicles', [VehiclePatrolController::class, 'listVehicles']);
+            $vp->post('/vehicles', [VehiclePatrolController::class, 'createVehicle']);
+            $vp->get('/routes', [VehiclePatrolController::class, 'listRoutes']);
+            $vp->post('/routes', [VehiclePatrolController::class, 'createRoute']);
+            $vp->post('/hits', [VehiclePatrolController::class, 'recordHit']);
+            $vp->get('/routes/{routeId}/hits', [VehiclePatrolController::class, 'routeHits']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Visitors ─────────────────────────────────
+        $group->group('/visitors', function (RouteCollectorProxy $vis): void {
+            $vis->post('/check-in', [VisitorController::class, 'checkIn']);
+            $vis->post('/{id}/check-out', [VisitorController::class, 'checkOut']);
+            $vis->get('/site/{siteId}', [VisitorController::class, 'listBySite']);
+            $vis->get('/site/{siteId}/checked-in', [VisitorController::class, 'listCheckedIn']);
+            $vis->get('/search', [VisitorController::class, 'search']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Parking ──────────────────────────────────
+        $group->group('/parking', function (RouteCollectorProxy $pk): void {
+            $pk->get('/areas', [ParkingController::class, 'listAreas']);
+            $pk->post('/areas', [ParkingController::class, 'createArea']);
+            $pk->post('/areas/{areaId}/lots', [ParkingController::class, 'createLot']);
+            $pk->post('/vehicles', [ParkingController::class, 'logEntry']);
+            $pk->post('/vehicles/{id}/exit', [ParkingController::class, 'logExit']);
+            $pk->get('/site/{siteId}/parked', [ParkingController::class, 'listParked']);
+            $pk->post('/incidents', [ParkingController::class, 'reportIncident']);
+            $pk->get('/incident-types', [ParkingController::class, 'listIncidentTypes']);
+            $pk->post('/incident-types', [ParkingController::class, 'createIncidentType']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
