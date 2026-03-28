@@ -18,6 +18,9 @@ import { ToastService } from '@core/services/toast.service';
   imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, BarChartComponent, LineChartComponent, ModalComponent, EmptyStateComponent],
   template: `
     <g51-page-header title="Invoices" subtitle="Client billing, payments, and revenue tracking">
+      <button (click)="showGenerate.set(true)" class="btn-secondary flex items-center gap-2">
+        <lucide-icon [img]="CreditCardIcon" [size]="16" /> Generate from Timesheet
+      </button>
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2">
         <lucide-icon [img]="PlusIcon" [size]="16" /> New Invoice
       </button>
@@ -133,6 +136,25 @@ import { ToastService } from '@core/services/toast.service';
         <button (click)="onCreate()" class="btn-primary">Create Invoice</button>
       </div>
     </g51-modal>
+
+    <!-- Generate from Timesheet Modal -->
+    <g51-modal [open]="showGenerate()" title="Generate Invoice from Timesheet" maxWidth="480px" (closed)="showGenerate.set(false)">
+      <div class="space-y-3">
+        <p class="text-xs" [style.color]="'var(--text-tertiary)'">Auto-create an invoice from guard time clock records. Hours worked × billing rate = line items per site.</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Period Start *</label>
+            <input type="date" [(ngModel)]="genForm.start_date" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Period End *</label>
+            <input type="date" [(ngModel)]="genForm.end_date" class="input-base w-full" /></div>
+        </div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Rate (₦/hr) *</label>
+          <input type="number" [(ngModel)]="genForm.billing_rate" class="input-base w-full" step="50" /></div>
+      </div>
+      <div modal-footer>
+        <button (click)="showGenerate.set(false)" class="btn-secondary">Cancel</button>
+        <button (click)="onGenerate()" class="btn-primary">Generate Invoice</button>
+      </div>
+    </g51-modal>
   `,
 })
 export class InvoicesComponent implements OnInit {
@@ -143,11 +165,13 @@ export class InvoicesComponent implements OnInit {
 
   readonly activeTab = signal('All');
   readonly showCreate = signal(false);
+  readonly showGenerate = signal(false);
   readonly invoices = signal<any[]>([]);
   readonly stats = signal({ outstanding: '0', paidMonth: '0', overdue: 0, sentMonth: 0 });
   filterClient = '';
 
   form: any = { type: 'invoice', tax_rate: 7.5, issue_date: new Date().toISOString().substring(0, 10), due_date: '', notes: '', items: [{ description: '', quantity: 1, unit_price: 0 }] };
+  genForm = { start_date: '', end_date: '', billing_rate: 500 };
 
   revenueByClient: BarChartData[] = [
     { label: 'Lekki Estate', value: 2500000 }, { label: 'V.I. Corp', value: 1800000 },
@@ -177,6 +201,12 @@ export class InvoicesComponent implements OnInit {
   onCreate(): void {
     this.api.post('/invoices', this.form).subscribe({
       next: () => { this.showCreate.set(false); this.toast.success('Invoice created'); this.ngOnInit(); },
+    });
+  }
+
+  onGenerate(): void {
+    this.api.post('/invoices/generate', this.genForm).subscribe({
+      next: () => { this.showGenerate.set(false); this.toast.success('Invoice generated from timesheet'); this.ngOnInit(); },
     });
   }
 }
