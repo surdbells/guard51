@@ -68,4 +68,28 @@ final class VehiclePatrolService
     }
 
     public function getRouteHits(string $routeId, ?string $date = null): array { return $this->hitRepo->findByRoute($routeId, $date); }
+
+    /**
+     * Detect routes that have not met their expected hits for today.
+     * Returns array of routes with { route, expected, actual, missed } per route.
+     */
+    public function detectMissedPatrols(string $tenantId): array
+    {
+        $routes = $this->routeRepo->findBy(['tenantId' => $tenantId, 'isActive' => true]);
+        $missed = [];
+        foreach ($routes as $route) {
+            $todayHits = $this->hitRepo->countTodayHits($route->getId());
+            $expected = $route->toArray()['expected_hits_per_day'];
+            if ($todayHits < $expected) {
+                $missed[] = [
+                    'route' => $route->toArray(),
+                    'expected' => $expected,
+                    'actual' => $todayHits,
+                    'deficit' => $expected - $todayHits,
+                ];
+            }
+        }
+        $this->logger->info('Missed patrol check', ['tenant' => $tenantId, 'missed_routes' => count($missed)]);
+        return $missed;
+    }
 }

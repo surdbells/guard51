@@ -580,6 +580,7 @@ return function (App $app): void {
             $vp->post('/routes', [VehiclePatrolController::class, 'createRoute']);
             $vp->post('/hits', [VehiclePatrolController::class, 'recordHit']);
             $vp->get('/routes/{routeId}/hits', [VehiclePatrolController::class, 'routeHits']);
+            $vp->get('/missed', [VehiclePatrolController::class, 'missedPatrols']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
