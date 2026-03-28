@@ -1,0 +1,3 @@
+import { Component } from '@angular/core';
+@Component({ selector: 'g51-disp-login', template: `<FlexboxLayout flexDirection="column" class="page"><StackLayout class="form p-6"><Label text="Guard51 Dispatch" class="text-lg font-bold text-center mb-1"></Label><Label text="Control Room" class="text-xs text-muted text-center mb-6"></Label><TextField hint="Email" keyboardType="email" class="input mb-3"></TextField><TextField hint="Password" secure="true" class="input mb-4"></TextField><Button text="Sign In" class="btn-primary"></Button></StackLayout></FlexboxLayout>` })
+export class DispatcherLoginComponent {}

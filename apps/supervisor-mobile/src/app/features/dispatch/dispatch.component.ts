@@ -1,0 +1,3 @@
+import { Component } from '@angular/core';
+@Component({ selector: 'g51-sup-dispatch', template: `<ActionBar title="Dispatch Alerts" class="action-bar"><NavigationButton text="Back" android.systemIcon="ic_menu_back"></NavigationButton></ActionBar><ScrollView><StackLayout class="p-4"><Label text="Active Dispatches" class="text-sm font-bold mb-2"></Label><StackLayout class="card p-3 mb-2" style="border-left: 3px solid #ef4444;"><Label text="Emergency — Gate breach" class="text-sm font-medium"></Label><Label text="Lekki Phase 1 • High" class="text-xs text-muted"></Label><Label text="Guard: Musa Ibrahim • En Route" class="text-xs text-blue mt-1"></Label></StackLayout></StackLayout></ScrollView>` })
+export class SupervisorDispatchComponent {}

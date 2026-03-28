@@ -1,0 +1,3 @@
+import { Component } from '@angular/core';
+@Component({ selector: 'g51-disp-console', template: `<ActionBar title="Dispatch Console" class="action-bar"></ActionBar><ScrollView><StackLayout class="p-4"><Label text="Incoming Calls" class="text-sm font-bold mb-2"></Label><StackLayout class="card p-3 mb-2" style="border-left: 3px solid #ef4444;"><Label text="Mrs. Adeyemi — Emergency" class="text-sm font-medium"></Label><Label text="Suspicious persons at gate" class="text-xs text-muted"></Label><Button text="Assign Guard" class="btn-sm btn-primary mt-2"></Button></StackLayout><Button text="+ Log New Call" class="btn-primary mt-3"></Button></StackLayout></ScrollView>` })
+export class DispatcherConsoleComponent {}

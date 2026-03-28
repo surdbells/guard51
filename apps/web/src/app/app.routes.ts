@@ -105,6 +105,20 @@ export const routes: Routes = [
         loadChildren: () => import('./features/notifications/notifications.routes').then(m => m.NOTIFICATIONS_ROUTES),
       },
 
+      // Phase 7: Operations & Extended
+      {
+        path: 'vehicle-patrol',
+        loadChildren: () => import('./features/vehicle-patrol/vehicle-patrol.routes').then(m => m.VEHICLE_PATROL_ROUTES),
+      },
+      {
+        path: 'visitors',
+        loadChildren: () => import('./features/visitors/visitors.routes').then(m => m.VISITORS_ROUTES),
+      },
+      {
+        path: 'parking',
+        loadChildren: () => import('./features/parking/parking.routes').then(m => m.PARKING_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',

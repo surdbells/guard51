@@ -1,9 +1,26 @@
-# Guard51 Desktop (Electron)
+# Guard51 Desktop App
 
-Electron shell wrapping the Angular web app. Built in Phase 7F.
+Electron wrapper for the Guard51 Angular web application.
 
 ## Features
-- Native window controls, system tray, notifications
+- Native desktop experience (Windows, macOS, Linux)
+- System tray integration with minimize-to-tray
 - Auto-update from App Distribution Platform
-- Windows (.exe), macOS (.dmg), Linux (.AppImage)
-- Persistent login, startup launch option
+- Native notifications
+- Startup launch option
+- Persistent login session
+
+## Build
+```bash
+# Windows (.exe)
+npm run build:win
+
+# macOS (.dmg)
+npm run build:mac
+
+# Linux (.AppImage)
+npm run build:linux
+```
+
+## Distribution
+Upload built binaries to the Guard51 App Distribution Platform for tenant download.
