@@ -16,6 +16,9 @@ use Guard51\Module\AppDistribution\AppClientController;
 use Guard51\Module\Client\ClientController;
 use Guard51\Module\ClientPortal\ClientPortalController;
 use Guard51\Module\Chat\ChatController;
+use Guard51\Module\Analytics\AnalyticsController;
+use Guard51\Module\License\LicenseController;
+use Guard51\Module\Security\SecurityController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
 use Guard51\Module\Dispatch\DispatchController;
@@ -58,6 +61,10 @@ use Guard51\Repository\CustomReportSubmissionRepository;
 use Guard51\Repository\CustomReportTemplateRepository;
 use Guard51\Repository\DailyActivityReportRepository;
 use Guard51\Repository\DailySnapshotRepository;
+use Guard51\Repository\GuardLicenseRepository;
+use Guard51\Repository\GuardPerformanceIndexRepository;
+use Guard51\Repository\TwoFactorSecretRepository;
+use Guard51\Repository\PropertyRepository;
 use Guard51\Repository\DeviceTokenRepository;
 use Guard51\Repository\DispatchAssignmentRepository;
 use Guard51\Repository\DispatchCallRepository;
@@ -114,6 +121,10 @@ use Guard51\Repository\UserRepository;
 use Guard51\Service\AppDistributionService;
 use Guard51\Service\ClientService;
 use Guard51\Service\ChatService;
+use Guard51\Service\AuditService;
+use Guard51\Service\TwoFactorService;
+use Guard51\Service\LicenseService;
+use Guard51\Service\AnalyticsService;
 use Guard51\Service\DispatchService;
 use Guard51\Service\FeatureService;
 use Guard51\Service\GeofenceService;
@@ -265,9 +276,7 @@ $containerBuilder->addDefinitions([
         return new RefreshTokenRepository($c->get(EntityManagerInterface::class));
     },
 
-    AuditLogRepository::class => function (ContainerInterface $c): AuditLogRepository {
-        return new AuditLogRepository($c->get(EntityManagerInterface::class));
-    },
+    // AuditLogRepository moved to Phase 8 block
 
     FeatureModuleRepository::class => function (ContainerInterface $c): FeatureModuleRepository {
         return new FeatureModuleRepository($c->get(EntityManagerInterface::class));
@@ -764,6 +773,20 @@ $containerBuilder->addDefinitions([
     VehiclePatrolController::class => fn(ContainerInterface $c) => new VehiclePatrolController($c->get(VehiclePatrolService::class)),
     VisitorController::class => fn(ContainerInterface $c) => new VisitorController($c->get(VisitorService::class)),
     ParkingController::class => fn(ContainerInterface $c) => new ParkingController($c->get(ParkingService::class)),
+
+    // Phase 8: Advanced Features
+    GuardLicenseRepository::class => fn(ContainerInterface $c) => new GuardLicenseRepository($c->get(EntityManagerInterface::class)),
+    TwoFactorSecretRepository::class => fn(ContainerInterface $c) => new TwoFactorSecretRepository($c->get(EntityManagerInterface::class)),
+    AuditLogRepository::class => fn(ContainerInterface $c) => new AuditLogRepository($c->get(EntityManagerInterface::class)),
+    GuardPerformanceIndexRepository::class => fn(ContainerInterface $c) => new GuardPerformanceIndexRepository($c->get(EntityManagerInterface::class)),
+    PropertyRepository::class => fn(ContainerInterface $c) => new PropertyRepository($c->get(EntityManagerInterface::class)),
+    AuditService::class => fn(ContainerInterface $c) => new AuditService($c->get(AuditLogRepository::class)),
+    TwoFactorService::class => fn(ContainerInterface $c) => new TwoFactorService($c->get(TwoFactorSecretRepository::class)),
+    LicenseService::class => fn(ContainerInterface $c) => new LicenseService($c->get(GuardLicenseRepository::class), $c->get(LoggerInterface::class)),
+    AnalyticsService::class => fn(ContainerInterface $c) => new AnalyticsService($c->get(GuardPerformanceIndexRepository::class), $c->get(LoggerInterface::class)),
+    SecurityController::class => fn(ContainerInterface $c) => new SecurityController($c->get(TwoFactorService::class), $c->get(AuditService::class)),
+    LicenseController::class => fn(ContainerInterface $c) => new LicenseController($c->get(LicenseService::class)),
+    AnalyticsController::class => fn(ContainerInterface $c) => new AnalyticsController($c->get(AnalyticsService::class)),
 ]);
 
 return $containerBuilder->build();

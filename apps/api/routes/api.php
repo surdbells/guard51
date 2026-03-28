@@ -19,6 +19,9 @@ use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
 use Guard51\Module\Notification\NotificationController;
+use Guard51\Module\Analytics\AnalyticsController;
+use Guard51\Module\License\LicenseController;
+use Guard51\Module\Security\SecurityController;
 use Guard51\Module\Parking\ParkingController;
 use Guard51\Module\VehiclePatrol\VehiclePatrolController;
 use Guard51\Module\Visitor\VisitorController;
@@ -244,7 +247,8 @@ return function (App $app): void {
             $sites->post('/{siteId}/post-orders', [SiteController::class, 'createPostOrder']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // Post Orders (top-level for update/delete by ID)
         $group->put('/post-orders/{id}', [SiteController::class, 'updatePostOrder'])
@@ -274,7 +278,8 @@ return function (App $app): void {
             $guards->post('/bulk-import', [GuardController::class, 'bulkImport']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Clients ──────────────────────────────────
         $group->group('/clients', function (RouteCollectorProxy $clients): void {
@@ -289,7 +294,8 @@ return function (App $app): void {
             $clients->delete('/contacts/{contactId}', [ClientController::class, 'deleteContact']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Dashboard ────────────────────────────────
         $group->group('/dashboard', function (RouteCollectorProxy $dash): void {
@@ -298,7 +304,8 @@ return function (App $app): void {
             $dash->get('/today', [DashboardController::class, 'today']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER));
 
         // ══════════════════════════════════════════════
         // PHASE 2: Scheduling & Attendance
@@ -311,7 +318,8 @@ return function (App $app): void {
             $st->put('/{id}', [ShiftController::class, 'updateTemplate']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Shifts ───────────────────────────────────
         $group->group('/shifts', function (RouteCollectorProxy $shifts): void {
@@ -327,7 +335,8 @@ return function (App $app): void {
             $shifts->get('/available-guards', [ShiftController::class, 'availableGuards']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Shift Swap Requests ──────────────────────
         $group->group('/swap-requests', function (RouteCollectorProxy $swaps): void {
@@ -337,7 +346,8 @@ return function (App $app): void {
             $swaps->post('/{id}/reject', [ShiftController::class, 'rejectSwap']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD));
 
         // ── Time Clock ───────────────────────────────
         $group->group('/time-clock', function (RouteCollectorProxy $tc): void {
@@ -353,7 +363,8 @@ return function (App $app): void {
             $tc->post('/breaks/{id}/end', [TimeClockController::class, 'endBreak']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD));
 
         // ── Attendance ───────────────────────────────
         $group->group('/attendance', function (RouteCollectorProxy $att): void {
@@ -364,7 +375,8 @@ return function (App $app): void {
             $att->post('/{id}/reconcile', [TimeClockController::class, 'reconcile']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Passdown Logs ────────────────────────────
         $group->group('/passdowns', function (RouteCollectorProxy $pd): void {
@@ -374,7 +386,8 @@ return function (App $app): void {
             $pd->post('/{id}/acknowledge', [PassdownController::class, 'acknowledge']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD));
 
         // ══════════════════════════════════════════════
         // PHASE 3: Tracking, Tours & Panic
@@ -397,7 +410,8 @@ return function (App $app): void {
             $tr->post('/detect-idle', [TrackingController::class, 'detectIdle']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER));
 
         // ── Site Tours ───────────────────────────────
         $group->group('/tours', function (RouteCollectorProxy $tours): void {
@@ -414,7 +428,8 @@ return function (App $app): void {
             $tours->get('/guard/{guardId}/sessions', [TourController::class, 'sessionsByGuard']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Panic Alerts ─────────────────────────────
         $group->group('/panic', function (RouteCollectorProxy $panic): void {
@@ -427,7 +442,8 @@ return function (App $app): void {
             $panic->post('/{id}/false-alarm', [PanicController::class, 'falseAlarm']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER));
 
         // ══════════════════════════════════════════════
         // PHASE 4: Reporting, Incidents, Dispatch, Tasks
@@ -455,7 +471,8 @@ return function (App $app): void {
             $rpt->get('/client/site/{siteId}', [ReportController::class, 'clientReports']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Incidents ────────────────────────────────
         $group->group('/incidents', function (RouteCollectorProxy $inc): void {
@@ -468,7 +485,8 @@ return function (App $app): void {
             $inc->get('/{id}/escalations', [IncidentController::class, 'escalations']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER));
 
         // ── Dispatch ─────────────────────────────────
         $group->group('/dispatch', function (RouteCollectorProxy $dsp): void {
@@ -482,7 +500,8 @@ return function (App $app): void {
             $dsp->get('/{id}/assignments', [DispatchController::class, 'assignments']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER));
 
         // ── Tasks ────────────────────────────────────
         $group->group('/tasks', function (RouteCollectorProxy $tsk): void {
@@ -494,7 +513,8 @@ return function (App $app): void {
             $tsk->get('/overdue', [TaskController::class, 'overdue']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ══════════════════════════════════════════════
         // PHASE 5: Finance & Billing
@@ -513,7 +533,8 @@ return function (App $app): void {
             $inv->post('/generate', [InvoiceController::class, 'generateFromTimeClock']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN));
 
         // ── Payroll ──────────────────────────────────
         $group->group('/payroll', function (RouteCollectorProxy $pay): void {
@@ -529,7 +550,8 @@ return function (App $app): void {
             $pay->post('/rates', [PayrollController::class, 'createRate']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN));
 
         // ══════════════════════════════════════════════
         // PHASE 6: Client Portal, Chat, Notifications
@@ -545,7 +567,8 @@ return function (App $app): void {
             $cp->get('/attendance', [ClientPortalController::class, 'attendance']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::CLIENT));
 
         // ── Chat ─────────────────────────────────────
         $group->group('/chat', function (RouteCollectorProxy $ch): void {
@@ -569,6 +592,74 @@ return function (App $app): void {
             ->add($container->get(AuthMiddleware::class));
 
         // ══════════════════════════════════════════════
+        // ══════════════════════════════════════════════
+
+        // PHASE 8: Advanced Features
+
+        // ══════════════════════════════════════════════
+
+
+
+        // ── Security (2FA + Audit Log) ─────────────────
+
+        $group->group('/security', function (RouteCollectorProxy $sec): void {
+
+            $sec->post('/2fa/setup', [SecurityController::class, 'setup2FA']);
+
+            $sec->post('/2fa/verify', [SecurityController::class, 'verify2FA']);
+
+            $sec->post('/2fa/disable', [SecurityController::class, 'disable2FA']);
+
+            $sec->get('/2fa/status', [SecurityController::class, 'status2FA']);
+
+            $sec->get('/audit-log', [SecurityController::class, 'auditLog']);
+
+        })
+
+            ->add($container->get(TenantMiddleware::class))
+
+            ->add($container->get(AuthMiddleware::class));
+
+
+
+        // ── Guard Licenses ─────────────────────────────
+
+        $group->group('/licenses', function (RouteCollectorProxy $lic): void {
+
+            $lic->post(''  , [LicenseController::class, 'create']);
+
+            $lic->get('/guard/{guardId}', [LicenseController::class, 'byGuard']);
+
+            $lic->get('/expiring', [LicenseController::class, 'expiringSoon']);
+
+            $lic->get('/expired', [LicenseController::class, 'expired']);
+
+        })
+
+            ->add($container->get(TenantMiddleware::class))
+
+            ->add($container->get(AuthMiddleware::class))
+
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
+
+
+
+        // ── Analytics ──────────────────────────────────
+
+        $group->group('/analytics', function (RouteCollectorProxy $an): void {
+
+            $an->get('/kpis', [AnalyticsController::class, 'kpis']);
+
+            $an->get('/guard/{guardId}/performance', [AnalyticsController::class, 'guardPerformance']);
+
+        })
+
+            ->add($container->get(TenantMiddleware::class))
+
+            ->add($container->get(AuthMiddleware::class))
+
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
+
         // PHASE 7: Operations & Extended Apps
         // ══════════════════════════════════════════════
 
@@ -583,7 +674,8 @@ return function (App $app): void {
             $vp->get('/missed', [VehiclePatrolController::class, 'missedPatrols']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR));
 
         // ── Visitors ─────────────────────────────────
         $group->group('/visitors', function (RouteCollectorProxy $vis): void {
@@ -594,7 +686,8 @@ return function (App $app): void {
             $vis->get('/search', [VisitorController::class, 'search']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD));
 
         // ── Parking ──────────────────────────────────
         $group->group('/parking', function (RouteCollectorProxy $pk): void {
@@ -609,7 +702,8 @@ return function (App $app): void {
             $pk->post('/incident-types', [ParkingController::class, 'createIncidentType']);
         })
             ->add($container->get(TenantMiddleware::class))
-            ->add($container->get(AuthMiddleware::class));
+            ->add($container->get(AuthMiddleware::class))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD));
 
     });
 
