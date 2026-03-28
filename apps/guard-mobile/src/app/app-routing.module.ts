@@ -11,6 +11,7 @@ const routes: Routes = [
   { path: 'post-orders', loadChildren: () => import('./features/post-orders/post-orders.module').then(m => m.PostOrdersModule) },
   { path: 'passdown', loadChildren: () => import('./features/passdown/passdown.module').then(m => m.PassdownModule) },
   { path: 'tours', loadChildren: () => import('./features/tours/tours.module').then(m => m.ToursModule) },
+  { path: 'reports', loadChildren: () => import('./features/reports/reports.module').then(m => m.ReportsMobileModule) },
   { path: 'tasks', loadChildren: () => import('./features/tasks/tasks.module').then(m => m.TasksModule) },
   { path: 'panic', loadChildren: () => import('./features/panic/panic.module').then(m => m.PanicModule) },
 ];

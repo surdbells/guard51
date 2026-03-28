@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { LucideAngularModule, FileText, Plus, Eye, CheckCircle, Camera } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
@@ -43,7 +44,7 @@ import { ToastService } from '@core/services/toast.service';
       </div>
       <div class="space-y-2">
         @for (dar of dars(); track dar.id) {
-          <div class="card p-4 card-hover">
+          <div class="card p-4 card-hover cursor-pointer" (click)="openDAR(dar.id)">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium" [style.color]="'var(--text-primary)'">{{ dar.report_date }}</p>
@@ -165,6 +166,7 @@ import { ToastService } from '@core/services/toast.service';
 })
 export class ReportsComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService);
+  private router = inject(Router);
   readonly FileTextIcon = FileText; readonly PlusIcon = Plus; readonly EyeIcon = Eye;
   readonly CheckCircleIcon = CheckCircle; readonly CameraIcon = Camera;
   readonly activeTab = signal('Activity Reports');
@@ -197,5 +199,9 @@ export class ReportsComponent implements OnInit {
     this.api.post('/reports/templates', this.tplForm).subscribe({
       next: () => { this.showCreateTemplate.set(false); this.toast.success('Template created'); this.tplForm = { name: '', description: '', fields: [] }; this.ngOnInit(); },
     });
+  }
+
+  openDAR(id: string): void {
+    this.router.navigate(['/reports/dar', id]);
   }
 }
