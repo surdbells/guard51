@@ -41,6 +41,10 @@ import { ToastService } from '@core/services/toast.service';
                 <span class="text-sm font-medium" [style.color]="'var(--text-primary)'">{{ conv.name || 'Direct Message' }}</span>
               </div>
               <p class="text-[10px] ml-5" [style.color]="'var(--text-tertiary)'">{{ conv.last_message_at | date:'shortTime' }}</p>
+              @if (conv.unread_count > 0) {
+                <span class="ml-5 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full text-[9px] font-bold text-white"
+                  [style.background]="'var(--color-brand-500)'">{{ conv.unread_count }}</span>
+              }
             </div>
           } @empty {
             <p class="text-sm py-8 text-center" [style.color]="'var(--text-tertiary)'">No conversations yet</p>

@@ -13,8 +13,8 @@ final class ChatController
 
     public function listConversations(Request $request, Response $response): Response
     {
-        $convs = $this->chatService->getUserConversations($request->getAttribute('user_id'));
-        return JsonResponse::success($response, ['conversations' => array_map(fn($c) => $c->toArray(), $convs)]);
+        $convs = $this->chatService->getUserConversationsWithUnread($request->getAttribute('user_id'));
+        return JsonResponse::success($response, ['conversations' => $convs]);
     }
     public function createConversation(Request $request, Response $response): Response
     {

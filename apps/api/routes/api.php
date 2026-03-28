@@ -536,6 +536,10 @@ return function (App $app): void {
         $group->group('/client-portal', function (RouteCollectorProxy $cp): void {
             $cp->get('/profile', [ClientPortalController::class, 'profile']);
             $cp->get('/reports', [ClientPortalController::class, 'reports']);
+            $cp->get('/invoices', [ClientPortalController::class, 'invoices']);
+            $cp->get('/incidents', [ClientPortalController::class, 'incidents']);
+            $cp->get('/tracking', [ClientPortalController::class, 'tracking']);
+            $cp->get('/attendance', [ClientPortalController::class, 'attendance']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

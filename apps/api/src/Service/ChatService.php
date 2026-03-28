@@ -63,9 +63,15 @@ final class ChatService
         return $p;
     }
 
-    public function sendMessage(string $conversationId, string $senderId, array $data): ChatMessage
+    public function sendMessage(string $conversationId, string $senderId, array $data, bool $enforceCheckIn = false): ChatMessage
     {
         if (empty($data['content'])) throw ApiException::validation('content required.');
+
+        // Guard focus enforcement: guards can only chat when clocked in
+        if ($enforceCheckIn) {
+            $this->enforceGuardCheckedIn($senderId);
+        }
+
         $msg = new ChatMessage();
         $msg->setConversationId($conversationId)->setSenderId($senderId)->setContent($data['content']);
         if (isset($data['message_type'])) $msg->setMessageType(MessageType::from($data['message_type']));
@@ -79,6 +85,43 @@ final class ChatService
         $conv->updateLastMessageAt();
         $this->convRepo->save($conv);
         return $msg;
+    }
+
+    /**
+     * Guards can only chat when checked in to a site (focus enforcement).
+     * Checks the time_clocks table for an active (no clock_out) record.
+     */
+    private function enforceGuardCheckedIn(string $userId): void
+    {
+        $conn = $this->convRepo->getEntityManager()->getConnection();
+        $sql = "SELECT COUNT(*) FROM time_clocks WHERE guard_id = ? AND clock_out_time IS NULL";
+        $count = (int) $conn->fetchOne($sql, [$userId]);
+        if ($count === 0) {
+            throw ApiException::validation('Guards can only send messages while clocked in to a site.');
+        }
+    }
+
+    /**
+     * Get unread message count for a user in a specific conversation.
+     */
+    public function getUnreadCount(string $conversationId, string $userId): int
+    {
+        $parts = $this->partRepo->findByConversation($conversationId);
+        $lastRead = null;
+        foreach ($parts as $p) {
+            if ($p->getUserId() === $userId) {
+                $lastRead = $p->toArray()['last_read_at'];
+                break;
+            }
+        }
+        if (!$lastRead) {
+            // Never read — count all messages not from this user
+            $msgs = $this->msgRepo->findByConversation($conversationId, 999);
+            return count(array_filter($msgs, fn($m) => $m->getSenderId() !== $userId));
+        }
+        $conn = $this->convRepo->getEntityManager()->getConnection();
+        $sql = "SELECT COUNT(*) FROM chat_messages WHERE conversation_id = ? AND sender_id != ? AND created_at > ?";
+        return (int) $conn->fetchOne($sql, [$conversationId, $userId, $lastRead]);
     }
 
     public function getMessages(string $conversationId, int $limit = 50, int $offset = 0): array
@@ -97,6 +140,21 @@ final class ChatService
         }
         usort($convs, fn($a, $b) => ($b->toArray()['last_message_at'] ?? '') <=> ($a->toArray()['last_message_at'] ?? ''));
         return $convs;
+    }
+
+    /**
+     * Get conversations with unread counts for the user.
+     */
+    public function getUserConversationsWithUnread(string $userId): array
+    {
+        $convs = $this->getUserConversations($userId);
+        $result = [];
+        foreach ($convs as $conv) {
+            $arr = $conv->toArray();
+            $arr['unread_count'] = $this->getUnreadCount($conv->getId(), $userId);
+            $result[] = $arr;
+        }
+        return $result;
     }
 
     public function markRead(string $conversationId, string $userId): void
