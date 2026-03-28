@@ -81,6 +81,16 @@ export const routes: Routes = [
         loadChildren: () => import('./features/tasks/tasks.routes').then(m => m.TASKS_ROUTES),
       },
 
+      // Phase 5: Finance & Billing
+      {
+        path: 'invoices',
+        loadChildren: () => import('./features/invoices/invoices.routes').then(m => m.INVOICES_ROUTES),
+      },
+      {
+        path: 'payroll',
+        loadChildren: () => import('./features/payroll/payroll.routes').then(m => m.PAYROLL_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',
