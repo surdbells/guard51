@@ -118,4 +118,32 @@ final class ReportService
 
     public function getWatchFeed(string $siteId, int $limit = 50): array { return $this->watchRepo->findBySite($siteId, $limit); }
     public function getRecentWatchFeed(string $tenantId, int $hours = 24): array { return $this->watchRepo->findByTenantRecent($tenantId, $hours); }
+
+    // ── PDF Export ───────────────────────────────────
+
+    /**
+     * Generate a PDF export of a DAR. Returns an array with 'content' (HTML) for PdfService rendering.
+     */
+    public function exportDARAsHtml(string $darId): array
+    {
+        $dar = $this->darRepo->findOrFail($darId);
+        $html = '<h1>Daily Activity Report</h1>';
+        $html .= '<p><strong>Date:</strong> ' . $dar->getReportDate()->format('Y-m-d') . '</p>';
+        $html .= '<p><strong>Status:</strong> ' . $dar->getStatus()->label() . '</p>';
+        $html .= '<hr/>';
+        $html .= '<div>' . nl2br(htmlspecialchars($dar->getContent())) . '</div>';
+        return ['html' => $html, 'dar' => $dar->toArray()];
+    }
+
+    // ── Client Sharing ───────────────────────────────
+
+    /**
+     * Get DARs for a site that are approved and shareable with the client.
+     * Used by Client Portal to display reports for their sites.
+     */
+    public function getClientShareableReports(string $siteId, int $limit = 20): array
+    {
+        $approved = $this->darRepo->findByTenantFiltered('', $siteId, null, 'approved');
+        return array_slice($approved, 0, $limit);
+    }
 }

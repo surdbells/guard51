@@ -442,6 +442,9 @@ return function (App $app): void {
             $rpt->post('/watch', [ReportController::class, 'logWatch']);
             $rpt->get('/watch/site/{siteId}', [ReportController::class, 'watchFeed']);
             $rpt->get('/watch/recent', [ReportController::class, 'recentWatchFeed']);
+            // Export & sharing
+            $rpt->get('/dar/{id}/export', [ReportController::class, 'exportDAR']);
+            $rpt->get('/client/site/{siteId}', [ReportController::class, 'clientReports']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

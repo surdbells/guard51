@@ -75,4 +75,18 @@ final class ReportController
         $logs = $this->reportService->getRecentWatchFeed($request->getAttribute('tenant_id'));
         return JsonResponse::success($response, ['feed' => array_map(fn($l) => $l->toArray(), $logs)]);
     }
+
+    /** GET /api/v1/reports/dar/{id}/export — Export DAR as HTML (for PDF rendering) */
+    public function exportDAR(Request $request, Response $response, array $args): Response
+    {
+        $data = $this->reportService->exportDARAsHtml($args['id']);
+        return JsonResponse::success($response, $data);
+    }
+
+    /** GET /api/v1/reports/client/site/{siteId} — Get approved reports for client portal */
+    public function clientReports(Request $request, Response $response, array $args): Response
+    {
+        $reports = $this->reportService->getClientShareableReports($args['siteId']);
+        return JsonResponse::success($response, ['reports' => array_map(fn($r) => $r->toArray(), $reports)]);
+    }
 }

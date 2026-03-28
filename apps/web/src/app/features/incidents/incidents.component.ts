@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { LucideAngularModule, AlertTriangle, Plus, Shield, TrendingUp, CheckCircle } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
@@ -40,7 +41,7 @@ import { ToastService } from '@core/services/toast.service';
     @if (activeTab() !== 'Analytics') {
       <div class="space-y-2">
         @for (inc of incidents(); track inc.id) {
-          <div class="card p-4 card-hover border-l-4"
+          <div class="card p-4 card-hover border-l-4 cursor-pointer" (click)="openIncident(inc.id)"
             [style.borderLeftColor]="inc.severity === 'critical' ? 'var(--color-danger)' : inc.severity === 'high' ? 'var(--color-warning)' : inc.severity === 'medium' ? 'var(--color-brand-500)' : 'var(--text-tertiary)'">
             <div class="flex items-start justify-between">
               <div class="flex-1">
@@ -102,6 +103,7 @@ import { ToastService } from '@core/services/toast.service';
 })
 export class IncidentsComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService);
+  private router = inject(Router);
   readonly AlertTriangleIcon = AlertTriangle; readonly PlusIcon = Plus;
   readonly ShieldIcon = Shield; readonly TrendingUpIcon = TrendingUp; readonly CheckCircleIcon = CheckCircle;
   readonly activeTab = signal('Active');
@@ -125,5 +127,9 @@ export class IncidentsComponent implements OnInit {
   onCreate(): void {
     this.showCreate.set(false);
     this.toast.success('Incident reported');
+  }
+
+  openIncident(id: string): void {
+    this.router.navigate(['/incidents', id]);
   }
 }

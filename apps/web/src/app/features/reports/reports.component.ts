@@ -62,17 +62,72 @@ import { ToastService } from '@core/services/toast.service';
 
     @if (activeTab() === 'Custom Reports') {
       <div class="card p-5">
-        <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Report Templates</h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold" [style.color]="'var(--text-primary)'">Report Templates</h3>
+          <button (click)="showCreateTemplate.set(true)" class="btn-primary text-xs py-1.5 px-3 flex items-center gap-1">
+            <lucide-icon [img]="PlusIcon" [size]="12" /> New Template
+          </button>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           @for (t of templates(); track t.id) {
             <div class="card p-4 card-hover">
               <h4 class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ t.name }}</h4>
               <p class="text-xs mt-1" [style.color]="'var(--text-tertiary)'">{{ t.field_count }} fields</p>
+              @if (t.fields?.length) {
+                <div class="mt-2 space-y-1">
+                  @for (f of t.fields.slice(0, 3); track f.name) {
+                    <div class="text-[10px] flex items-center gap-1.5" [style.color]="'var(--text-secondary)'">
+                      <span class="badge text-[8px] bg-[var(--surface-muted)]">{{ f.type }}</span>
+                      <span>{{ f.name }}</span>
+                      @if (f.required) { <span class="text-red-400">*</span> }
+                    </div>
+                  }
+                  @if (t.fields.length > 3) {
+                    <p class="text-[10px]" [style.color]="'var(--text-tertiary)'">+{{ t.fields.length - 3 }} more fields</p>
+                  }
+                </div>
+              }
             </div>
           }
         </div>
       </div>
     }
+
+    <!-- Template Builder Modal -->
+    <g51-modal [open]="showCreateTemplate()" title="Create Report Template" maxWidth="600px" (closed)="showCreateTemplate.set(false)">
+      <div class="space-y-4">
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Template Name *</label>
+          <input type="text" [(ngModel)]="tplForm.name" class="input-base w-full" placeholder="Vehicle Inspection" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Description</label>
+          <input type="text" [(ngModel)]="tplForm.description" class="input-base w-full" placeholder="Optional description" /></div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-medium" [style.color]="'var(--text-secondary)'">Fields</label>
+            <button (click)="addField()" class="text-xs font-medium" [style.color]="'var(--color-brand-500)'">+ Add Field</button>
+          </div>
+          @for (field of tplForm.fields; track $index) {
+            <div class="flex items-center gap-2 mb-2">
+              <input type="text" [(ngModel)]="field.name" class="input-base flex-1 text-xs" placeholder="Field name" />
+              <select [(ngModel)]="field.type" class="input-base w-24 text-xs">
+                <option value="text">Text</option><option value="number">Number</option>
+                <option value="select">Select</option><option value="checkbox">Checkbox</option>
+                <option value="date">Date</option><option value="textarea">Textarea</option></select>
+              <label class="flex items-center gap-1 text-[10px] whitespace-nowrap" [style.color]="'var(--text-tertiary)'">
+                <input type="checkbox" [(ngModel)]="field.required" /> Req</label>
+              <button (click)="removeField($index)" class="text-xs p-1" [style.color]="'var(--color-danger)'">✕</button>
+            </div>
+          }
+          @if (tplForm.fields.length === 0) {
+            <p class="text-xs py-3 text-center" [style.color]="'var(--text-tertiary)'">No fields added yet</p>
+          }
+        </div>
+      </div>
+      <div modal-footer>
+        <button (click)="showCreateTemplate.set(false)" class="btn-secondary">Cancel</button>
+        <button (click)="onCreateTemplate()" class="btn-primary">Create Template</button>
+      </div>
+    </g51-modal>
 
     @if (activeTab() === 'Watch Feed') {
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -114,10 +169,12 @@ export class ReportsComponent implements OnInit {
   readonly CheckCircleIcon = CheckCircle; readonly CameraIcon = Camera;
   readonly activeTab = signal('Activity Reports');
   readonly showCreateDAR = signal(false);
+  readonly showCreateTemplate = signal(false);
   readonly dars = signal<any[]>([]);
   readonly templates = signal<any[]>([]);
   readonly stats = signal({ darsToday: 0, pendingReview: 0, approved: 0, watchPhotos: 0 });
   darForm = { content: '', weather: '', report_date: new Date().toISOString().substring(0, 10) };
+  tplForm: { name: string; description: string; fields: { name: string; type: string; required: boolean }[] } = { name: '', description: '', fields: [] };
   watchFeed = [
     { id: '1', caption: 'Broken fence near parking', guard: 'Musa I.', time: '06:30 AM' },
     { id: '2', caption: 'New visitor log', guard: 'Chika N.', time: '07:15 AM' },
@@ -130,6 +187,15 @@ export class ReportsComponent implements OnInit {
   onCreateDAR(): void {
     this.api.post('/reports/dar', this.darForm).subscribe({
       next: () => { this.showCreateDAR.set(false); this.toast.success('Report saved'); this.ngOnInit(); },
+    });
+  }
+
+  addField(): void { this.tplForm.fields.push({ name: '', type: 'text', required: false }); }
+  removeField(idx: number): void { this.tplForm.fields.splice(idx, 1); }
+
+  onCreateTemplate(): void {
+    this.api.post('/reports/templates', this.tplForm).subscribe({
+      next: () => { this.showCreateTemplate.set(false); this.toast.success('Template created'); this.tplForm = { name: '', description: '', fields: [] }; this.ngOnInit(); },
     });
   }
 }
