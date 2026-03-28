@@ -1,7 +1,7 @@
 import { NativeScriptConfig } from '@nativescript/core';
 
 export default {
-  id: 'com.dosthq.guard51.clientmobile',
+  id: 'com.dosthq.guard51.client',
   appPath: 'src',
   appResourcesPath: 'App_Resources',
   android: {

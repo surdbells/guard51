@@ -1,0 +1,7 @@
+node_modules/
+platforms/
+hooks/
+*.js.map
+*.d.ts
+!references.d.ts
+!webpack.config.js

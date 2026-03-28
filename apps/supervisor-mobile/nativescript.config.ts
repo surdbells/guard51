@@ -1,7 +1,7 @@
 import { NativeScriptConfig } from '@nativescript/core';
 
 export default {
-  id: 'com.dosthq.guard51.supervisormobile',
+  id: 'com.dosthq.guard51.supervisor',
   appPath: 'src',
   appResourcesPath: 'App_Resources',
   android: {

@@ -12,6 +12,6 @@
       "~/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "references.d.ts"],
   "exclude": ["node_modules", "platforms"]
 }
