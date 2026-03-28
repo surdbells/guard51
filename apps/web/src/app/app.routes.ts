@@ -119,6 +119,20 @@ export const routes: Routes = [
         loadChildren: () => import('./features/parking/parking.routes').then(m => m.PARKING_ROUTES),
       },
 
+      // Phase 8: Advanced Features
+      {
+        path: 'analytics',
+        loadChildren: () => import('./features/analytics/analytics.routes').then(m => m.ANALYTICS_ROUTES),
+      },
+      {
+        path: 'licenses',
+        loadChildren: () => import('./features/licenses/licenses.routes').then(m => m.LICENSES_ROUTES),
+      },
+      {
+        path: 'security',
+        loadChildren: () => import('./features/security/security.routes').then(m => m.SECURITY_ROUTES),
+      },
+
       // Guard Web Portal (guard role only)
       {
         path: 'portal',
