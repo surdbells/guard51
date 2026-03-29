@@ -11,7 +11,7 @@ $settings = require __DIR__ . '/settings.php';
 
 $config = ORMSetup::createAttributeMetadataConfiguration(
     paths: [__DIR__ . '/../src/Entity'],
-    isDevMode: ($settings['app']['env'] ?? 'development') !== 'production',
+    isDevMode: true, // Always true — metadata cache disabled for reliability
 );
 
 // Map camelCase PHP properties to snake_case DB columns
