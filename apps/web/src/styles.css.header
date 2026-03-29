@@ -1,0 +1,2 @@
+/* Guard51 Global Styles - Tailwind CSS v4 */
+@import "tailwindcss" source("../src");
