@@ -61,12 +61,13 @@ class Seeder
         echo "  ✅ Super admin created: admin@guard51.com\n";
 
         // Audit log
-        $this->em->persist(AuditLog::create(
-            action: 'seed',
-            entityType: 'User',
-            entityId: $user->getId(),
-            description: 'Super admin seeded during initial setup',
-        ));
+        $audit = new AuditLog();
+        $audit->setTenantId('system')
+            ->setAction(\Guard51\Entity\AuditAction::CREATE)
+            ->setResourceType('User')
+            ->setResourceId($user->getId())
+            ->setDescription('Super admin seeded during initial setup');
+        $this->em->persist($audit);
     }
 
     private function seedPlatformBankAccount(): void
@@ -192,12 +193,12 @@ class Seeder
         echo "  ✅ Tenant bank account created: First Bank - ShieldForce\n";
 
         // Audit log
-        $this->em->persist(AuditLog::create(
-            action: 'seed',
-            entityType: 'Tenant',
-            entityId: $tenant->getId(),
-            description: 'Demo private security company seeded',
-        ));
+        $this->em->persist((new AuditLog())
+            ->setTenantId('system')
+            ->setAction(\Guard51\Entity\AuditAction::CREATE)
+            ->setResourceType('Tenant')
+            ->setResourceId($tenant->getId())
+            ->setDescription('Demo private security company seeded'));
     }
 
     private function seedDemoNeighborhoodWatch(): void
@@ -245,11 +246,11 @@ class Seeder
         echo "  ✅ GOV coordinator created: coordinator@ikeja-watch.demo\n";
 
         // Audit log
-        $this->em->persist(AuditLog::create(
-            action: 'seed',
-            entityType: 'Tenant',
-            entityId: $tenant->getId(),
-            description: 'Demo neighborhood watch seeded (GOV tenant)',
-        ));
+        $this->em->persist((new AuditLog())
+            ->setTenantId('system')
+            ->setAction(\Guard51\Entity\AuditAction::CREATE)
+            ->setResourceType('Tenant')
+            ->setResourceId($tenant->getId())
+            ->setDescription('Demo neighborhood watch seeded (GOV tenant)'));
     }
 }
