@@ -23,7 +23,7 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
     {
         // ── Feature Modules ──────────────────────────
         $this->addSql("
-            CREATE TABLE feature_modules (
+            CREATE TABLE IF NOT EXISTS feature_modules (
                 id VARCHAR(36) NOT NULL,
                 module_key VARCHAR(100) NOT NULL,
                 name VARCHAR(200) NOT NULL,
@@ -41,12 +41,12 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_fm_key ON feature_modules (module_key)');
-        $this->addSql('CREATE INDEX idx_fm_category ON feature_modules (category)');
-        $this->addSql('CREATE INDEX idx_fm_tier ON feature_modules (minimum_tier)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_fm_category ON feature_modules (category)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_fm_tier ON feature_modules (minimum_tier)');
 
         // ── Tenant Feature Modules ───────────────────
         $this->addSql("
-            CREATE TABLE tenant_feature_modules (
+            CREATE TABLE IF NOT EXISTS tenant_feature_modules (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 module_key VARCHAR(100) NOT NULL,
@@ -60,12 +60,12 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_tfm_tenant_module ON tenant_feature_modules (tenant_id, module_key)');
-        $this->addSql('CREATE INDEX idx_tfm_tenant ON tenant_feature_modules (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tfm_tenant ON tenant_feature_modules (tenant_id)');
         $this->addSql('ALTER TABLE tenant_feature_modules ADD CONSTRAINT fk_tfm_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Subscription Plans ───────────────────────
         $this->addSql("
-            CREATE TABLE subscription_plans (
+            CREATE TABLE IF NOT EXISTS subscription_plans (
                 id VARCHAR(36) NOT NULL,
                 name VARCHAR(200) NOT NULL,
                 description TEXT DEFAULT NULL,
@@ -91,12 +91,12 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_sp_tier ON subscription_plans (tier)');
-        $this->addSql('CREATE INDEX idx_sp_active ON subscription_plans (is_active)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_sp_tier ON subscription_plans (tier)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_sp_active ON subscription_plans (is_active)');
 
         // ── Subscriptions ────────────────────────────
         $this->addSql("
-            CREATE TABLE subscriptions (
+            CREATE TABLE IF NOT EXISTS subscriptions (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 plan_id VARCHAR(36) NOT NULL,
@@ -122,15 +122,15 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_sub_tenant ON subscriptions (tenant_id)');
-        $this->addSql('CREATE INDEX idx_sub_status ON subscriptions (status)');
-        $this->addSql('CREATE INDEX idx_sub_plan ON subscriptions (plan_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_sub_tenant ON subscriptions (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_sub_status ON subscriptions (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_sub_plan ON subscriptions (plan_id)');
         $this->addSql('ALTER TABLE subscriptions ADD CONSTRAINT fk_sub_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE subscriptions ADD CONSTRAINT fk_sub_plan FOREIGN KEY (plan_id) REFERENCES subscription_plans (id)');
 
         // ── Subscription Invoices ────────────────────
         $this->addSql("
-            CREATE TABLE subscription_invoices (
+            CREATE TABLE IF NOT EXISTS subscription_invoices (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 subscription_id VARCHAR(36) NOT NULL,
@@ -153,15 +153,15 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_si_tenant ON subscription_invoices (tenant_id)');
-        $this->addSql('CREATE INDEX idx_si_subscription ON subscription_invoices (subscription_id)');
-        $this->addSql('CREATE INDEX idx_si_status ON subscription_invoices (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_si_tenant ON subscription_invoices (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_si_subscription ON subscription_invoices (subscription_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_si_status ON subscription_invoices (status)');
         $this->addSql('ALTER TABLE subscription_invoices ADD CONSTRAINT fk_si_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE subscription_invoices ADD CONSTRAINT fk_si_subscription FOREIGN KEY (subscription_id) REFERENCES subscriptions (id) ON DELETE CASCADE');
 
         // ── Tenant Usage Metrics ─────────────────────
         $this->addSql("
-            CREATE TABLE tenant_usage_metrics (
+            CREATE TABLE IF NOT EXISTS tenant_usage_metrics (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 guards_count INTEGER NOT NULL DEFAULT 0,

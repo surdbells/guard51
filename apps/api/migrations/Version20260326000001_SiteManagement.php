@@ -22,7 +22,7 @@ final class Version20260326000001_SiteManagement extends AbstractMigration
     {
         // ── Sites ────────────────────────────────────
         $this->addSql("
-            CREATE TABLE sites (
+            CREATE TABLE IF NOT EXISTS sites (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 client_id VARCHAR(36) DEFAULT NULL,
@@ -47,10 +47,10 @@ final class Version20260326000001_SiteManagement extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_site_tenant ON sites (tenant_id)');
-        $this->addSql('CREATE INDEX idx_site_client ON sites (client_id)');
-        $this->addSql('CREATE INDEX idx_site_status ON sites (status)');
-        $this->addSql('CREATE INDEX idx_site_coords ON sites (latitude, longitude) WHERE latitude IS NOT NULL');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_site_tenant ON sites (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_site_client ON sites (client_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_site_status ON sites (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_site_coords ON sites (latitude, longitude) WHERE latitude IS NOT NULL');
         $this->addSql('ALTER TABLE sites ADD CONSTRAINT fk_site_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // Polygon geofence storage — uses TEXT (GeoJSON) instead of PostGIS geometry
@@ -60,7 +60,7 @@ final class Version20260326000001_SiteManagement extends AbstractMigration
 
         // ── Post Orders ──────────────────────────────
         $this->addSql("
-            CREATE TABLE post_orders (
+            CREATE TABLE IF NOT EXISTS post_orders (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 site_id VARCHAR(36) NOT NULL,
@@ -79,9 +79,9 @@ final class Version20260326000001_SiteManagement extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_po_tenant ON post_orders (tenant_id)');
-        $this->addSql('CREATE INDEX idx_po_site ON post_orders (site_id)');
-        $this->addSql('CREATE INDEX idx_po_active ON post_orders (is_active)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_po_tenant ON post_orders (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_po_site ON post_orders (site_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_po_active ON post_orders (is_active)');
         $this->addSql('ALTER TABLE post_orders ADD CONSTRAINT fk_po_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE post_orders ADD CONSTRAINT fk_po_site FOREIGN KEY (site_id) REFERENCES sites (id) ON DELETE CASCADE');
     }

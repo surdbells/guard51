@@ -21,7 +21,7 @@ final class Version20260324000003_TenantInvitations extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql("
-            CREATE TABLE tenant_invitations (
+            CREATE TABLE IF NOT EXISTS tenant_invitations (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 email VARCHAR(255) NOT NULL,
@@ -43,10 +43,10 @@ final class Version20260324000003_TenantInvitations extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_ti_tenant ON tenant_invitations (tenant_id)');
-        $this->addSql('CREATE INDEX idx_ti_email ON tenant_invitations (email)');
-        $this->addSql('CREATE INDEX idx_ti_token ON tenant_invitations (token_hash)');
-        $this->addSql('CREATE INDEX idx_ti_status ON tenant_invitations (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ti_tenant ON tenant_invitations (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ti_email ON tenant_invitations (email)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ti_token ON tenant_invitations (token_hash)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ti_status ON tenant_invitations (status)');
         $this->addSql('ALTER TABLE tenant_invitations ADD CONSTRAINT fk_ti_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE tenant_invitations ADD CONSTRAINT fk_ti_invited_by FOREIGN KEY (invited_by) REFERENCES users (id)');
     }

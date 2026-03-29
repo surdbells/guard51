@@ -22,7 +22,7 @@ final class Version20260324000004_AppDistribution extends AbstractMigration
     {
         // ── App Releases ─────────────────────────────
         $this->addSql("
-            CREATE TABLE app_releases (
+            CREATE TABLE IF NOT EXISTS app_releases (
                 id VARCHAR(36) NOT NULL,
                 app_key VARCHAR(30) NOT NULL,
                 version VARCHAR(20) NOT NULL,
@@ -45,13 +45,13 @@ final class Version20260324000004_AppDistribution extends AbstractMigration
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_ar_version ON app_releases (app_key, platform, version)');
-        $this->addSql('CREATE INDEX idx_ar_app_platform ON app_releases (app_key, platform)');
-        $this->addSql('CREATE INDEX idx_ar_release_type ON app_releases (release_type)');
-        $this->addSql('CREATE INDEX idx_ar_active ON app_releases (is_active)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_app_platform ON app_releases (app_key, platform)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_release_type ON app_releases (release_type)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_active ON app_releases (is_active)');
 
         // ── App Download Logs ────────────────────────
         $this->addSql("
-            CREATE TABLE app_download_logs (
+            CREATE TABLE IF NOT EXISTS app_download_logs (
                 id VARCHAR(36) NOT NULL,
                 release_id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) DEFAULT NULL,
@@ -62,14 +62,14 @@ final class Version20260324000004_AppDistribution extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_adl_release ON app_download_logs (release_id)');
-        $this->addSql('CREATE INDEX idx_adl_tenant ON app_download_logs (tenant_id)');
-        $this->addSql('CREATE INDEX idx_adl_downloaded ON app_download_logs (downloaded_at)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_adl_release ON app_download_logs (release_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_adl_tenant ON app_download_logs (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_adl_downloaded ON app_download_logs (downloaded_at)');
         $this->addSql('ALTER TABLE app_download_logs ADD CONSTRAINT fk_adl_release FOREIGN KEY (release_id) REFERENCES app_releases (id) ON DELETE CASCADE');
 
         // ── Tenant App Configs ───────────────────────
         $this->addSql("
-            CREATE TABLE tenant_app_configs (
+            CREATE TABLE IF NOT EXISTS tenant_app_configs (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 app_key VARCHAR(50) NOT NULL,
@@ -82,7 +82,7 @@ final class Version20260324000004_AppDistribution extends AbstractMigration
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_tac_tenant_app ON tenant_app_configs (tenant_id, app_key)');
-        $this->addSql('CREATE INDEX idx_tac_tenant ON tenant_app_configs (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tac_tenant ON tenant_app_configs (tenant_id)');
         $this->addSql('ALTER TABLE tenant_app_configs ADD CONSTRAINT fk_tac_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
     }
 

@@ -54,7 +54,7 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
 
         // ── Tenants ──────────────────────────────────
         $this->addSql("
-            CREATE TABLE tenants (
+            CREATE TABLE IF NOT EXISTS tenants (
                 id VARCHAR(36) NOT NULL,
                 name VARCHAR(200) NOT NULL,
                 tenant_type VARCHAR(50) NOT NULL DEFAULT 'private_security',
@@ -81,13 +81,13 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_tenants_status ON tenants (status)');
-        $this->addSql('CREATE INDEX idx_tenants_type ON tenants (tenant_type)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tenants_status ON tenants (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tenants_type ON tenants (tenant_type)');
         $this->addSql('CREATE UNIQUE INDEX uq_tenants_custom_domain ON tenants (custom_domain) WHERE custom_domain IS NOT NULL');
 
         // ── Users ────────────────────────────────────
         $this->addSql("
-            CREATE TABLE users (
+            CREATE TABLE IF NOT EXISTS users (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) DEFAULT NULL,
                 email VARCHAR(255) NOT NULL,
@@ -112,14 +112,14 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_users_email ON users (email)');
-        $this->addSql('CREATE INDEX idx_users_tenant ON users (tenant_id)');
-        $this->addSql('CREATE INDEX idx_users_role ON users (role)');
-        $this->addSql('CREATE INDEX idx_users_status ON users (is_active)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_tenant ON users (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_role ON users (role)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_status ON users (is_active)');
         $this->addSql('ALTER TABLE users ADD CONSTRAINT fk_users_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE SET NULL');
 
         // ── Tenant Bank Accounts ─────────────────────
         $this->addSql("
-            CREATE TABLE tenant_bank_accounts (
+            CREATE TABLE IF NOT EXISTS tenant_bank_accounts (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) NOT NULL,
                 bank_name VARCHAR(100) NOT NULL,
@@ -133,12 +133,12 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_tba_tenant ON tenant_bank_accounts (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tba_tenant ON tenant_bank_accounts (tenant_id)');
         $this->addSql('ALTER TABLE tenant_bank_accounts ADD CONSTRAINT fk_tba_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Platform Bank Accounts ───────────────────
         $this->addSql("
-            CREATE TABLE platform_bank_accounts (
+            CREATE TABLE IF NOT EXISTS platform_bank_accounts (
                 id VARCHAR(36) NOT NULL,
                 bank_name VARCHAR(100) NOT NULL,
                 account_number VARCHAR(20) NOT NULL,
@@ -154,7 +154,7 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
 
         // ── Refresh Tokens ───────────────────────────
         $this->addSql("
-            CREATE TABLE refresh_tokens (
+            CREATE TABLE IF NOT EXISTS refresh_tokens (
                 id VARCHAR(36) NOT NULL,
                 user_id VARCHAR(36) NOT NULL,
                 token_hash VARCHAR(64) NOT NULL,
@@ -167,14 +167,14 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_rt_user ON refresh_tokens (user_id)');
-        $this->addSql('CREATE INDEX idx_rt_token ON refresh_tokens (token_hash)');
-        $this->addSql('CREATE INDEX idx_rt_expires ON refresh_tokens (expires_at)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_rt_user ON refresh_tokens (user_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_rt_token ON refresh_tokens (token_hash)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_rt_expires ON refresh_tokens (expires_at)');
         $this->addSql('ALTER TABLE refresh_tokens ADD CONSTRAINT fk_rt_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE');
 
         // ── Audit Logs ───────────────────────────────
         $this->addSql("
-            CREATE TABLE audit_logs (
+            CREATE TABLE IF NOT EXISTS audit_logs (
                 id VARCHAR(36) NOT NULL,
                 tenant_id VARCHAR(36) DEFAULT NULL,
                 user_id VARCHAR(36) DEFAULT NULL,
@@ -192,11 +192,11 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_audit_tenant ON audit_logs (tenant_id)');
-        $this->addSql('CREATE INDEX idx_audit_user ON audit_logs (user_id)');
-        $this->addSql('CREATE INDEX idx_audit_entity ON audit_logs (entity_type, entity_id)');
-        $this->addSql('CREATE INDEX idx_audit_action ON audit_logs (action)');
-        $this->addSql('CREATE INDEX idx_audit_created ON audit_logs (created_at)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_tenant ON audit_logs (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs (user_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs (entity_type, entity_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs (action)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs (created_at)');
     }
 
     public function down(Schema $schema): void

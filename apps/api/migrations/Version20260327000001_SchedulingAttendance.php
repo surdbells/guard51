@@ -23,7 +23,7 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
     {
         // ── Shift Templates ──────────────────────────
         $this->addSql("
-            CREATE TABLE shift_templates (
+            CREATE TABLE IF NOT EXISTS shift_templates (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 name VARCHAR(100) NOT NULL,
                 start_time TIME NOT NULL, end_time TIME NOT NULL,
@@ -38,12 +38,12 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_st_tenant ON shift_templates (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_st_tenant ON shift_templates (tenant_id)');
         $this->addSql('ALTER TABLE shift_templates ADD CONSTRAINT fk_st_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Shifts ───────────────────────────────────
         $this->addSql("
-            CREATE TABLE shifts (
+            CREATE TABLE IF NOT EXISTS shifts (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 site_id VARCHAR(36) NOT NULL, template_id VARCHAR(36) DEFAULT NULL,
                 guard_id VARCHAR(36) DEFAULT NULL,
@@ -61,17 +61,17 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_shift_tenant ON shifts (tenant_id)');
-        $this->addSql('CREATE INDEX idx_shift_site ON shifts (site_id)');
-        $this->addSql('CREATE INDEX idx_shift_guard ON shifts (guard_id)');
-        $this->addSql('CREATE INDEX idx_shift_date ON shifts (shift_date)');
-        $this->addSql('CREATE INDEX idx_shift_status ON shifts (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_shift_tenant ON shifts (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_shift_site ON shifts (site_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_shift_guard ON shifts (guard_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_shift_date ON shifts (shift_date)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_shift_status ON shifts (status)');
         $this->addSql('ALTER TABLE shifts ADD CONSTRAINT fk_shift_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE shifts ADD CONSTRAINT fk_shift_site FOREIGN KEY (site_id) REFERENCES sites (id) ON DELETE CASCADE');
 
         // ── Shift Swap Requests ──────────────────────
         $this->addSql("
-            CREATE TABLE shift_swap_requests (
+            CREATE TABLE IF NOT EXISTS shift_swap_requests (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 requesting_guard_id VARCHAR(36) NOT NULL, target_guard_id VARCHAR(36) NOT NULL,
                 shift_id VARCHAR(36) NOT NULL, reason TEXT NOT NULL,
@@ -84,15 +84,15 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_ssr_tenant ON shift_swap_requests (tenant_id)');
-        $this->addSql('CREATE INDEX idx_ssr_shift ON shift_swap_requests (shift_id)');
-        $this->addSql('CREATE INDEX idx_ssr_status ON shift_swap_requests (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ssr_tenant ON shift_swap_requests (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ssr_shift ON shift_swap_requests (shift_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ssr_status ON shift_swap_requests (status)');
         $this->addSql('ALTER TABLE shift_swap_requests ADD CONSTRAINT fk_ssr_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE shift_swap_requests ADD CONSTRAINT fk_ssr_shift FOREIGN KEY (shift_id) REFERENCES shifts (id) ON DELETE CASCADE');
 
         // ── Time Clocks ──────────────────────────────
         $this->addSql("
-            CREATE TABLE time_clocks (
+            CREATE TABLE IF NOT EXISTS time_clocks (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 guard_id VARCHAR(36) NOT NULL, shift_id VARCHAR(36) DEFAULT NULL,
                 site_id VARCHAR(36) NOT NULL,
@@ -113,16 +113,16 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_tc_tenant ON time_clocks (tenant_id)');
-        $this->addSql('CREATE INDEX idx_tc_guard ON time_clocks (guard_id)');
-        $this->addSql('CREATE INDEX idx_tc_site ON time_clocks (site_id)');
-        $this->addSql('CREATE INDEX idx_tc_status ON time_clocks (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tc_tenant ON time_clocks (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tc_guard ON time_clocks (guard_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tc_site ON time_clocks (site_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_tc_status ON time_clocks (status)');
         $this->addSql('ALTER TABLE time_clocks ADD CONSTRAINT fk_tc_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE time_clocks ADD CONSTRAINT fk_tc_guard FOREIGN KEY (guard_id) REFERENCES guards (id) ON DELETE CASCADE');
 
         // ── Attendance Records ────────────────────────
         $this->addSql("
-            CREATE TABLE attendance_records (
+            CREATE TABLE IF NOT EXISTS attendance_records (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 guard_id VARCHAR(36) NOT NULL, shift_id VARCHAR(36) NOT NULL,
                 site_id VARCHAR(36) NOT NULL, attendance_date DATE NOT NULL,
@@ -142,16 +142,16 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_ar_tenant ON attendance_records (tenant_id)');
-        $this->addSql('CREATE INDEX idx_ar_guard ON attendance_records (guard_id)');
-        $this->addSql('CREATE INDEX idx_ar_date ON attendance_records (attendance_date)');
-        $this->addSql('CREATE INDEX idx_ar_status ON attendance_records (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_tenant ON attendance_records (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_guard ON attendance_records (guard_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_date ON attendance_records (attendance_date)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_status ON attendance_records (status)');
         $this->addSql('CREATE UNIQUE INDEX uq_ar_guard_shift ON attendance_records (guard_id, shift_id)');
         $this->addSql('ALTER TABLE attendance_records ADD CONSTRAINT fk_ar_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Break Configs ────────────────────────────
         $this->addSql("
-            CREATE TABLE break_configs (
+            CREATE TABLE IF NOT EXISTS break_configs (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 name VARCHAR(100) NOT NULL,
                 break_type VARCHAR(10) NOT NULL DEFAULT 'paid',
@@ -165,12 +165,12 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_bc_tenant ON break_configs (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_bc_tenant ON break_configs (tenant_id)');
         $this->addSql('ALTER TABLE break_configs ADD CONSTRAINT fk_bc_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Break Logs ───────────────────────────────
         $this->addSql("
-            CREATE TABLE break_logs (
+            CREATE TABLE IF NOT EXISTS break_logs (
                 id VARCHAR(36) NOT NULL,
                 time_clock_id VARCHAR(36) NOT NULL,
                 break_config_id VARCHAR(36) NOT NULL,
@@ -181,13 +181,13 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_bl_tc ON break_logs (time_clock_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_bl_tc ON break_logs (time_clock_id)');
         $this->addSql('ALTER TABLE break_logs ADD CONSTRAINT fk_bl_tc FOREIGN KEY (time_clock_id) REFERENCES time_clocks (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE break_logs ADD CONSTRAINT fk_bl_bc FOREIGN KEY (break_config_id) REFERENCES break_configs (id) ON DELETE CASCADE');
 
         // ── Passdown Logs ────────────────────────────
         $this->addSql("
-            CREATE TABLE passdown_logs (
+            CREATE TABLE IF NOT EXISTS passdown_logs (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 site_id VARCHAR(36) NOT NULL, guard_id VARCHAR(36) NOT NULL,
                 shift_id VARCHAR(36) DEFAULT NULL,
@@ -202,8 +202,8 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_pl_tenant ON passdown_logs (tenant_id)');
-        $this->addSql('CREATE INDEX idx_pl_site ON passdown_logs (site_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_pl_tenant ON passdown_logs (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_pl_site ON passdown_logs (site_id)');
         $this->addSql('ALTER TABLE passdown_logs ADD CONSTRAINT fk_pl_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE passdown_logs ADD CONSTRAINT fk_pl_site FOREIGN KEY (site_id) REFERENCES sites (id) ON DELETE CASCADE');
     }

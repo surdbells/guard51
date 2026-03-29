@@ -21,7 +21,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
     {
         // ── Guards ───────────────────────────────────
         $this->addSql("
-            CREATE TABLE guards (
+            CREATE TABLE IF NOT EXISTS guards (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL, user_id VARCHAR(36) DEFAULT NULL,
                 employee_number VARCHAR(50) NOT NULL, first_name VARCHAR(100) NOT NULL, last_name VARCHAR(100) NOT NULL,
                 phone VARCHAR(50) NOT NULL, email VARCHAR(255) DEFAULT NULL,
@@ -37,41 +37,41 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_guard_tenant ON guards (tenant_id)');
-        $this->addSql('CREATE INDEX idx_guard_user ON guards (user_id)');
-        $this->addSql('CREATE INDEX idx_guard_status ON guards (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_guard_tenant ON guards (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_guard_user ON guards (user_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_guard_status ON guards (status)');
         $this->addSql('CREATE UNIQUE INDEX uq_guard_employee ON guards (tenant_id, employee_number)');
         $this->addSql('ALTER TABLE guards ADD CONSTRAINT fk_guard_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Guard Skills ─────────────────────────────
         $this->addSql("
-            CREATE TABLE guard_skills (
+            CREATE TABLE IF NOT EXISTS guard_skills (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 name VARCHAR(100) NOT NULL, description TEXT DEFAULT NULL,
                 created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL,
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_gs_tenant ON guard_skills (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_gs_tenant ON guard_skills (tenant_id)');
         $this->addSql('CREATE UNIQUE INDEX uq_gs_name ON guard_skills (tenant_id, name)');
         $this->addSql('ALTER TABLE guard_skills ADD CONSTRAINT fk_gs_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Guard Skill Assignments ──────────────────
         $this->addSql("
-            CREATE TABLE guard_skill_assignments (
+            CREATE TABLE IF NOT EXISTS guard_skill_assignments (
                 id VARCHAR(36) NOT NULL, guard_id VARCHAR(36) NOT NULL, skill_id VARCHAR(36) NOT NULL,
                 certified_at DATE DEFAULT NULL, expires_at DATE DEFAULT NULL,
                 PRIMARY KEY (id)
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_gsa ON guard_skill_assignments (guard_id, skill_id)');
-        $this->addSql('CREATE INDEX idx_gsa_guard ON guard_skill_assignments (guard_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_gsa_guard ON guard_skill_assignments (guard_id)');
         $this->addSql('ALTER TABLE guard_skill_assignments ADD CONSTRAINT fk_gsa_guard FOREIGN KEY (guard_id) REFERENCES guards (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE guard_skill_assignments ADD CONSTRAINT fk_gsa_skill FOREIGN KEY (skill_id) REFERENCES guard_skills (id) ON DELETE CASCADE');
 
         // ── Guard Documents ──────────────────────────
         $this->addSql("
-            CREATE TABLE guard_documents (
+            CREATE TABLE IF NOT EXISTS guard_documents (
                 id VARCHAR(36) NOT NULL, guard_id VARCHAR(36) NOT NULL,
                 document_type VARCHAR(30) NOT NULL, title VARCHAR(200) NOT NULL, file_url VARCHAR(500) NOT NULL,
                 issue_date DATE DEFAULT NULL, expiry_date DATE DEFAULT NULL,
@@ -80,13 +80,13 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_gd_guard ON guard_documents (guard_id)');
-        $this->addSql('CREATE INDEX idx_gd_expiry ON guard_documents (expiry_date)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_gd_guard ON guard_documents (guard_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_gd_expiry ON guard_documents (expiry_date)');
         $this->addSql('ALTER TABLE guard_documents ADD CONSTRAINT fk_gd_guard FOREIGN KEY (guard_id) REFERENCES guards (id) ON DELETE CASCADE');
 
         // ── Clients ──────────────────────────────────
         $this->addSql("
-            CREATE TABLE clients (
+            CREATE TABLE IF NOT EXISTS clients (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 company_name VARCHAR(200) NOT NULL, contact_name VARCHAR(200) NOT NULL,
                 contact_email VARCHAR(255) NOT NULL, contact_phone VARCHAR(50) NOT NULL,
@@ -98,8 +98,8 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_client_tenant ON clients (tenant_id)');
-        $this->addSql('CREATE INDEX idx_client_status ON clients (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_client_tenant ON clients (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_client_status ON clients (status)');
         $this->addSql('ALTER TABLE clients ADD CONSTRAINT fk_client_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // Add FK from sites.client_id → clients.id
@@ -107,7 +107,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
 
         // ── Client Contacts ──────────────────────────
         $this->addSql("
-            CREATE TABLE client_contacts (
+            CREATE TABLE IF NOT EXISTS client_contacts (
                 id VARCHAR(36) NOT NULL, client_id VARCHAR(36) NOT NULL,
                 name VARCHAR(200) NOT NULL, role VARCHAR(100) DEFAULT NULL,
                 email VARCHAR(255) NOT NULL, phone VARCHAR(50) NOT NULL,
@@ -116,12 +116,12 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE INDEX idx_cc_client ON client_contacts (client_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_cc_client ON client_contacts (client_id)');
         $this->addSql('ALTER TABLE client_contacts ADD CONSTRAINT fk_cc_client FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE');
 
         // ── Daily Snapshots ──────────────────────────
         $this->addSql("
-            CREATE TABLE daily_snapshots (
+            CREATE TABLE IF NOT EXISTS daily_snapshots (
                 id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL,
                 snapshot_date DATE NOT NULL,
                 total_guards INTEGER NOT NULL DEFAULT 0, guards_on_duty INTEGER NOT NULL DEFAULT 0,
@@ -134,7 +134,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
             )
         ");
         $this->addSql('CREATE UNIQUE INDEX uq_ds_tenant_date ON daily_snapshots (tenant_id, snapshot_date)');
-        $this->addSql('CREATE INDEX idx_ds_tenant ON daily_snapshots (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ds_tenant ON daily_snapshots (tenant_id)');
         $this->addSql('ALTER TABLE daily_snapshots ADD CONSTRAINT fk_ds_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
     }
 
