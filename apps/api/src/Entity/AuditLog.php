@@ -19,16 +19,16 @@ class AuditLog implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36, nullable: true)]
     private ?string $userId = null;
 
     #[ORM\Column(type: 'string', length: 30, enumType: AuditAction::class)]
     private AuditAction $action;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'resource_type', type: 'string', length: 100)]
     private string $resourceType;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'resource_id', type: 'string', length: 36, nullable: true)]
     private ?string $resourceId = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -37,13 +37,13 @@ class AuditLog implements TenantAwareInterface
     #[ORM\Column(type: 'json')]
     private array $metadata = [];
 
-    #[ORM\Column(type: 'string', length: 45, nullable: true)]
+    #[ORM\Column(name: 'ip_address', type: 'string', length: 45, nullable: true)]
     private ?string $ipAddress = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'user_agent', type: 'string', length: 500, nullable: true)]
     private ?string $userAgent = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

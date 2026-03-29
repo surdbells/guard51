@@ -30,43 +30,43 @@ class TenantInvitation implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 255)]
     private string $email;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'first_name', type: 'string', length: 100, nullable: true)]
     private ?string $firstName = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'last_name', type: 'string', length: 100, nullable: true)]
     private ?string $lastName = null;
 
     #[ORM\Column(type: 'string', length: 30, enumType: UserRole::class)]
     private UserRole $role = UserRole::GUARD;
 
-    #[ORM\Column(type: 'string', length: 64)]
+    #[ORM\Column(name: 'token_hash', type: 'string', length: 64)]
     private string $tokenHash;
 
     #[ORM\Column(type: 'string', length: 30, enumType: InvitationStatus::class)]
     private InvitationStatus $status = InvitationStatus::PENDING;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'invited_by', type: 'string', length: 36)]
     private string $invitedBy;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'expires_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $expiresAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'accepted_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $acceptedAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'accepted_user_id', type: 'string', length: 36, nullable: true)]
     private ?string $acceptedUserId = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'revoked_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $revokedAt = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'personal_message', type: 'text', nullable: true)]
     private ?string $personalMessage = null;
 
-    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    #[ORM\Column(name: 'resend_count', type: 'integer', nullable: false, options: ['default' => 0])]
     private int $resendCount = 0;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'last_resent_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastResentAt = null;
 
     public function __construct()

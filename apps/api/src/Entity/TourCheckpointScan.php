@@ -14,16 +14,16 @@ class TourCheckpointScan
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'session_id', type: 'string', length: 36)]
     private string $sessionId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'checkpoint_id', type: 'string', length: 36)]
     private string $checkpointId;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'scanned_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $scannedAt;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: ScanMethod::class)]
+    #[ORM\Column(name: 'scan_method', type: 'string', length: 20, enumType: ScanMethod::class)]
     private ScanMethod $scanMethod;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
@@ -35,10 +35,10 @@ class TourCheckpointScan
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $photoUrl = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->scannedAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

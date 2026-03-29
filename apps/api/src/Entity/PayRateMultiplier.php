@@ -24,10 +24,10 @@ class PayRateMultiplier implements TenantAwareInterface
     #[ORM\Column(type: 'decimal', precision: 4, scale: 2)]
     private string $multiplier;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: PayRateAppliesTo::class)]
+    #[ORM\Column(name: 'applies_to', type: 'string', length: 20, enumType: PayRateAppliesTo::class)]
     private PayRateAppliesTo $appliesTo;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

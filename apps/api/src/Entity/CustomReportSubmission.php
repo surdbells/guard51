@@ -17,13 +17,13 @@ class CustomReportSubmission implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'template_id', type: 'string', length: 36)]
     private string $templateId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
     #[ORM\Column(type: 'json')]
@@ -35,13 +35,13 @@ class CustomReportSubmission implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 20, enumType: ReportStatus::class)]
     private ReportStatus $status = ReportStatus::SUBMITTED;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'submitted_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $submittedAt;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'reviewed_by', type: 'string', length: 36, nullable: true)]
     private ?string $reviewedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->submittedAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

@@ -22,13 +22,13 @@ class ShiftSwapRequest implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'requesting_guard_id', type: 'string', length: 36)]
     private string $requestingGuardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'target_guard_id', type: 'string', length: 36)]
     private string $targetGuardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'shift_id', type: 'string', length: 36)]
     private string $shiftId;
 
     #[ORM\Column(type: 'text')]
@@ -37,13 +37,13 @@ class ShiftSwapRequest implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 20, enumType: SwapRequestStatus::class)]
     private SwapRequestStatus $status = SwapRequestStatus::PENDING;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'reviewed_by', type: 'string', length: 36, nullable: true)]
     private ?string $reviewedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'reviewed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $reviewedAt = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'review_notes', type: 'text', nullable: true)]
     private ?string $reviewNotes = null;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

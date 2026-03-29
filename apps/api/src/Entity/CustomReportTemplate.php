@@ -28,10 +28,10 @@ class CustomReportTemplate implements TenantAwareInterface
     #[ORM\Column(type: 'json')]
     private array $fields = [];
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'created_by', type: 'string', length: 36)]
     private string $createdBy;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

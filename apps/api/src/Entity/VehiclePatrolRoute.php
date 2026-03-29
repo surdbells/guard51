@@ -27,13 +27,13 @@ class VehiclePatrolRoute implements TenantAwareInterface
     #[ORM\Column(type: 'json')]
     private array $sites = [];
 
-    #[ORM\Column(type: 'integer', options: ['default' => 1])]
+    #[ORM\Column(name: 'expected_hits_per_day', type: 'integer', options: ['default' => 1])]
     private int $expectedHitsPerDay = 1;
 
-    #[ORM\Column(type: 'string', length: 5, options: ['default' => '00:00'])]
+    #[ORM\Column(name: 'reset_time', type: 'string', length: 5, options: ['default' => '00:00'])]
     private string $resetTime = '00:00';
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

@@ -14,19 +14,19 @@ class IncidentEscalation
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'incident_id', type: 'string', length: 36)]
     private string $incidentId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'escalated_to', type: 'string', length: 36)]
     private string $escalatedTo;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'escalated_by', type: 'string', length: 36)]
     private string $escalatedBy;
 
     #[ORM\Column(type: 'text')]
     private string $reason;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'escalated_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $escalatedAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->escalatedAt = new \DateTimeImmutable(); }

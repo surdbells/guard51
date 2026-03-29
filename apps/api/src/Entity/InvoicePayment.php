@@ -14,31 +14,31 @@ class InvoicePayment
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'invoice_id', type: 'string', length: 36)]
     private string $invoiceId;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     private string $amount;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: PaymentMethod::class)]
+    #[ORM\Column(name: 'payment_method', type: 'string', length: 20, enumType: PaymentMethod::class)]
     private PaymentMethod $paymentMethod;
 
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $reference = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'proof_url', type: 'string', length: 500, nullable: true)]
     private ?string $proofUrl = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'received_by', type: 'string', length: 36)]
     private string $receivedBy;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'payment_date', type: 'datetime_immutable')]
     private \DateTimeImmutable $paymentDate;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->paymentDate = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

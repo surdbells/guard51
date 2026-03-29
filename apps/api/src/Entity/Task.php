@@ -21,13 +21,13 @@ class Task implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'assigned_to', type: 'string', length: 36)]
     private string $assignedTo;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'assigned_by', type: 'string', length: 36)]
     private string $assignedBy;
 
     #[ORM\Column(type: 'string', length: 300)]
@@ -39,16 +39,16 @@ class Task implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 10, enumType: Severity::class)]
     private Severity $priority = Severity::MEDIUM;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'due_date', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $dueDate = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: TaskStatus::class)]
     private TaskStatus $status = TaskStatus::PENDING;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'completed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $completedAt = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'completion_notes', type: 'text', nullable: true)]
     private ?string $completionNotes = null;
 
     #[ORM\Column(type: 'json')]

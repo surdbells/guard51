@@ -17,16 +17,16 @@ class GuardSkillAssignment
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'skill_id', type: 'string', length: 36)]
     private string $skillId;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'certified_at', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $certifiedAt = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'expires_at', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $expiresAt = null;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

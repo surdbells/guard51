@@ -19,25 +19,25 @@ class GuardDocument
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: DocumentType::class)]
+    #[ORM\Column(name: 'document_type', type: 'string', length: 30, enumType: DocumentType::class)]
     private DocumentType $documentType;
 
     #[ORM\Column(type: 'string', length: 200)]
     private string $title;
 
-    #[ORM\Column(type: 'string', length: 500)]
+    #[ORM\Column(name: 'file_url', type: 'string', length: 500)]
     private string $fileUrl;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'issue_date', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $issueDate = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'expiry_date', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $expiryDate = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_verified', type: 'boolean', options: ['default' => false])]
     private bool $isVerified = false;
 
     #[ORM\Column(type: 'text', nullable: true)]

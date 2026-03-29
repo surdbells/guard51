@@ -20,22 +20,22 @@ class TenantBankAccount implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'bank_name', type: 'string', length: 100)]
     private string $bankName;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'account_number', type: 'string', length: 20)]
     private string $accountNumber;
 
-    #[ORM\Column(type: 'string', length: 200)]
+    #[ORM\Column(name: 'account_name', type: 'string', length: 200)]
     private string $accountName;
 
-    #[ORM\Column(type: 'string', length: 10, nullable: true)]
+    #[ORM\Column(name: 'bank_code', type: 'string', length: 10, nullable: true)]
     private ?string $bankCode = null;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_primary', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isPrimary = true;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct()

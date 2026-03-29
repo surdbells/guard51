@@ -18,28 +18,28 @@ class PayrollPeriod implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'period_start', type: 'date_immutable')]
     private \DateTimeImmutable $periodStart;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'period_end', type: 'date_immutable')]
     private \DateTimeImmutable $periodEnd;
 
     #[ORM\Column(type: 'string', length: 20, enumType: PayrollStatus::class)]
     private PayrollStatus $status = PayrollStatus::DRAFT;
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'total_gross', type: 'decimal', precision: 12, scale: 2)]
     private string $totalGross = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'total_deductions', type: 'decimal', precision: 12, scale: 2)]
     private string $totalDeductions = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'total_net', type: 'decimal', precision: 12, scale: 2)]
     private string $totalNet = '0';
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'approved_by', type: 'string', length: 36, nullable: true)]
     private ?string $approvedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'approved_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $approvedAt = null;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

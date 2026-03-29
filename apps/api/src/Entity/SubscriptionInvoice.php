@@ -25,10 +25,10 @@ class SubscriptionInvoice implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'subscription_id', type: 'string', length: 36)]
     private string $subscriptionId;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(name: 'invoice_number', type: 'string', length: 50)]
     private string $invoiceNumber;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
@@ -40,31 +40,31 @@ class SubscriptionInvoice implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 30, enumType: InvoiceStatus::class)]
     private InvoiceStatus $status = InvoiceStatus::PENDING;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: PaymentMethod::class)]
+    #[ORM\Column(name: 'payment_method', type: 'string', length: 30, enumType: PaymentMethod::class)]
     private PaymentMethod $paymentMethod;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'paystack_reference', type: 'string', length: 200, nullable: true)]
     private ?string $paystackReference = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'bank_transfer_reference', type: 'string', length: 200, nullable: true)]
     private ?string $bankTransferReference = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'bank_transfer_proof_url', type: 'string', length: 500, nullable: true)]
     private ?string $bankTransferProofUrl = null;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'period_start', type: 'date_immutable')]
     private \DateTimeImmutable $periodStart;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'period_end', type: 'date_immutable')]
     private \DateTimeImmutable $periodEnd;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'due_date', type: 'date_immutable')]
     private \DateTimeImmutable $dueDate;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'paid_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $paidAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'confirmed_by', type: 'string', length: 36, nullable: true)]
     private ?string $confirmedBy = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

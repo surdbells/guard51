@@ -20,10 +20,10 @@ class Invoice implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'client_id', type: 'string', length: 36)]
     private string $clientId;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(name: 'invoice_number', type: 'string', length: 50)]
     private string $invoiceNumber;
 
     #[ORM\Column(type: 'string', length: 10, enumType: InvoiceType::class)]
@@ -32,28 +32,28 @@ class Invoice implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 20, enumType: InvoiceStatus::class)]
     private InvoiceStatus $status = InvoiceStatus::DRAFT;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'issue_date', type: 'date_immutable')]
     private \DateTimeImmutable $issueDate;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'due_date', type: 'date_immutable')]
     private \DateTimeImmutable $dueDate;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     private string $subtotal = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[ORM\Column(name: 'tax_rate', type: 'decimal', precision: 5, scale: 2)]
     private string $taxRate = '7.50';
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'tax_amount', type: 'decimal', precision: 12, scale: 2)]
     private string $taxAmount = '0';
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     private string $total = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'amount_paid', type: 'decimal', precision: 12, scale: 2)]
     private string $amountPaid = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'balance_due', type: 'decimal', precision: 12, scale: 2)]
     private string $balanceDue = '0';
 
     #[ORM\Column(type: 'string', length: 3)]
@@ -62,13 +62,13 @@ class Invoice implements TenantAwareInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'payment_terms', type: 'text', nullable: true)]
     private ?string $paymentTerms = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'created_by', type: 'string', length: 36)]
     private string $createdBy;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'sent_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $sentAt = null;
 
     public function __construct()

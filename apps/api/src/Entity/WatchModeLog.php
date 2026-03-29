@@ -17,16 +17,16 @@ class WatchModeLog implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 10, enumType: MediaType::class)]
+    #[ORM\Column(name: 'media_type', type: 'string', length: 10, enumType: MediaType::class)]
     private MediaType $mediaType;
 
-    #[ORM\Column(type: 'string', length: 500)]
+    #[ORM\Column(name: 'media_url', type: 'string', length: 500)]
     private string $mediaUrl;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -38,10 +38,10 @@ class WatchModeLog implements TenantAwareInterface
     #[ORM\Column(type: 'decimal', precision: 11, scale: 8, nullable: true)]
     private ?string $longitude = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'recorded_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $recordedAt;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->recordedAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

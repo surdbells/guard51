@@ -18,7 +18,7 @@ class ClientContact
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'client_id', type: 'string', length: 36)]
     private string $clientId;
 
     #[ORM\Column(type: 'string', length: 200)]
@@ -33,7 +33,7 @@ class ClientContact
     #[ORM\Column(type: 'string', length: 50)]
     private string $phone;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_primary', type: 'boolean', options: ['default' => false])]
     private bool $isPrimary = false;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 trait TenantAwareTrait
 {
-    #[ORM\Column(type: 'string', length: 36, nullable: false)]
+    #[ORM\Column(name: 'tenant_id', type: 'string', length: 36, nullable: false)]
     private ?string $tenantId = null;
 
     public function getTenantId(): ?string

@@ -18,13 +18,13 @@ class ParkingIncident implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'vehicle_id', type: 'string', length: 36, nullable: true)]
     private ?string $vehicleId = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'incident_type_id', type: 'string', length: 36)]
     private string $incidentTypeId;
 
     #[ORM\Column(type: 'text')]
@@ -33,7 +33,7 @@ class ParkingIncident implements TenantAwareInterface
     #[ORM\Column(type: 'json')]
     private array $attachments = [];
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'reported_by', type: 'string', length: 36)]
     private string $reportedBy;
 
     #[ORM\Column(type: 'string', length: 10, enumType: ParkingIncidentStatus::class)]

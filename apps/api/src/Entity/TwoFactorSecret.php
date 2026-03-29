@@ -14,22 +14,22 @@ class TwoFactorSecret
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36)]
     private string $userId;
 
     #[ORM\Column(type: 'string', length: 64)]
     private string $secret;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_enabled', type: 'boolean', options: ['default' => false])]
     private bool $isEnabled = false;
 
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(name: 'backup_codes', type: 'json')]
     private array $backupCodes = [];
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'verified_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $verifiedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

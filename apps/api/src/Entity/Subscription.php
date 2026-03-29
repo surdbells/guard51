@@ -25,10 +25,10 @@ class Subscription implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'plan_id', type: 'string', length: 36)]
     private string $planId;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'billing_cycle', type: 'string', length: 20)]
     private string $billingCycle = 'monthly';
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
@@ -40,46 +40,46 @@ class Subscription implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 30, enumType: SubscriptionStatus::class)]
     private SubscriptionStatus $status = SubscriptionStatus::PENDING;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: PaymentMethod::class)]
+    #[ORM\Column(name: 'payment_method', type: 'string', length: 30, enumType: PaymentMethod::class)]
     private PaymentMethod $paymentMethod = PaymentMethod::PAYSTACK;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'paystack_subscription_code', type: 'string', length: 200, nullable: true)]
     private ?string $paystackSubscriptionCode = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'paystack_customer_code', type: 'string', length: 200, nullable: true)]
     private ?string $paystackCustomerCode = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'paystack_authorization_code', type: 'string', length: 200, nullable: true)]
     private ?string $paystackAuthorizationCode = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'current_period_start', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $currentPeriodStart = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'current_period_end', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $currentPeriodEnd = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'trial_ends_at', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $trialEndsAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'cancelled_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $cancelledAt = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'cancellation_reason', type: 'string', length: 500, nullable: true)]
     private ?string $cancellationReason = null;
 
     /** For bank transfer: reference provided by the tenant */
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'bank_transfer_reference', type: 'string', length: 200, nullable: true)]
     private ?string $bankTransferReference = null;
 
     /** For bank transfer: proof of payment file URL */
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'bank_transfer_proof_url', type: 'string', length: 500, nullable: true)]
     private ?string $bankTransferProofUrl = null;
 
     /** For bank transfer: confirmed by super admin */
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'payment_confirmed_by', type: 'string', length: 36, nullable: true)]
     private ?string $paymentConfirmedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'payment_confirmed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $paymentConfirmedAt = null;
 
     public function __construct()

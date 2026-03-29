@@ -18,31 +18,31 @@ class Permission implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36)]
     private string $userId;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'module_key', type: 'string', length: 100)]
     private string $moduleKey;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'can_view', type: 'boolean', options: ['default' => false])]
     private bool $canView = false;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'can_create', type: 'boolean', options: ['default' => false])]
     private bool $canCreate = false;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'can_edit', type: 'boolean', options: ['default' => false])]
     private bool $canEdit = false;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'can_delete', type: 'boolean', options: ['default' => false])]
     private bool $canDelete = false;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'can_export', type: 'boolean', options: ['default' => false])]
     private bool $canExport = false;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'can_approve', type: 'boolean', options: ['default' => false])]
     private bool $canApprove = false;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

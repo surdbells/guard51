@@ -26,49 +26,49 @@ class User implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     private string $email;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(name: 'password_hash', type: 'string', length: 255)]
     private string $passwordHash;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'first_name', type: 'string', length: 100)]
     private string $firstName;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'last_name', type: 'string', length: 100)]
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $photoUrl = null;
 
     #[ORM\Column(type: 'string', length: 30, enumType: UserRole::class)]
     private UserRole $role = UserRole::GUARD;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
+    #[ORM\Column(name: 'is_email_verified', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isEmailVerified = false;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'email_verified_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $emailVerifiedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'last_login_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastLoginAt = null;
 
-    #[ORM\Column(type: 'string', length: 45, nullable: true)]
+    #[ORM\Column(name: 'last_login_ip', type: 'string', length: 45, nullable: true)]
     private ?string $lastLoginIp = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(name: 'password_reset_token', type: 'string', length: 255, nullable: true)]
     private ?string $passwordResetToken = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'password_reset_expires_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $passwordResetExpiresAt = null;
 
-    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    #[ORM\Column(name: 'failed_login_attempts', type: 'integer', nullable: false, options: ['default' => 0])]
     private int $failedLoginAttempts = 0;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'locked_until', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lockedUntil = null;
 
     public function __construct()

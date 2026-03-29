@@ -17,19 +17,19 @@ class VehiclePatrolHit implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'route_id', type: 'string', length: 36)]
     private string $routeId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'vehicle_id', type: 'string', length: 36)]
     private string $vehicleId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'hit_number', type: 'integer')]
     private int $hitNumber;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
@@ -41,13 +41,13 @@ class VehiclePatrolHit implements TenantAwareInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $photoUrl = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'recorded_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $recordedAt;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->recordedAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

@@ -28,24 +28,24 @@ class ShiftTemplate implements TenantAwareInterface
     private string $name;
 
     /** Time of day shift starts, e.g. "06:00" */
-    #[ORM\Column(type: 'string', length: 8)]
+    #[ORM\Column(name: 'start_time', type: 'string', length: 8)]
     private string $startTime;
 
     /** Time of day shift ends, e.g. "18:00" */
-    #[ORM\Column(type: 'string', length: 8)]
+    #[ORM\Column(name: 'end_time', type: 'string', length: 8)]
     private string $endTime;
 
     /** JSONB array of ISO day numbers: 1=Mon … 7=Sun, e.g. [1,2,3,4,5] */
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(name: 'days_of_week', type: 'json')]
     private array $daysOfWeek = [1, 2, 3, 4, 5];
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36, nullable: true)]
     private ?string $siteId = null;
 
     #[ORM\Column(type: 'string', length: 7, nullable: true)]
     private ?string $color = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct()

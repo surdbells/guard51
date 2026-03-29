@@ -24,13 +24,13 @@ class TenantAppConfig implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(name: 'app_key', type: 'string', length: 50)]
     private string $appKey;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'auto_update', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $autoUpdate = true;
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    #[ORM\Column(name: 'pinned_version', type: 'string', length: 20, nullable: true)]
     private ?string $pinnedVersion = null;
 
     #[ORM\Column(type: 'json', nullable: false, options: ['default' => '{}'])]

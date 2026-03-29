@@ -19,34 +19,34 @@ class GuardLicense implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: LicenseType::class)]
+    #[ORM\Column(name: 'license_type', type: 'string', length: 30, enumType: LicenseType::class)]
     private LicenseType $licenseType;
 
     #[ORM\Column(type: 'string', length: 200)]
     private string $name;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'license_number', type: 'string', length: 100, nullable: true)]
     private ?string $licenseNumber = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'issuing_authority', type: 'string', length: 200, nullable: true)]
     private ?string $issuingAuthority = null;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'issue_date', type: 'date_immutable')]
     private \DateTimeImmutable $issueDate;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'expiry_date', type: 'date_immutable')]
     private \DateTimeImmutable $expiryDate;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'document_url', type: 'string', length: 500, nullable: true)]
     private ?string $documentUrl = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_valid', type: 'boolean', options: ['default' => true])]
     private bool $isValid = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'expiry_alert_sent', type: 'boolean', options: ['default' => false])]
     private bool $expiryAlertSent = false;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

@@ -26,7 +26,7 @@ class PostOrder implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
     #[ORM\Column(type: 'string', length: 200)]
@@ -41,19 +41,19 @@ class PostOrder implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 30, enumType: PostOrderCategory::class)]
     private PostOrderCategory $category = PostOrderCategory::GENERAL;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'effective_from', type: 'date_immutable')]
     private \DateTimeImmutable $effectiveFrom;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'effective_to', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $effectiveTo = null;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'created_by', type: 'string', length: 36)]
     private string $createdBy;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'last_updated_by', type: 'string', length: 36, nullable: true)]
     private ?string $lastUpdatedBy = null;
 
     #[ORM\Column(type: 'integer', options: ['default' => 1])]

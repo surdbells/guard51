@@ -26,7 +26,7 @@ class FeatureModule
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 100, unique: true)]
+    #[ORM\Column(name: 'module_key', type: 'string', length: 100, unique: true)]
     private string $moduleKey;
 
     #[ORM\Column(type: 'string', length: 200)]
@@ -38,22 +38,22 @@ class FeatureModule
     #[ORM\Column(type: 'string', length: 50)]
     private string $category;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: SubscriptionTier::class)]
+    #[ORM\Column(name: 'minimum_tier', type: 'string', length: 30, enumType: SubscriptionTier::class)]
     private SubscriptionTier $minimumTier = SubscriptionTier::ALL;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
+    #[ORM\Column(name: 'is_core', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isCore = false;
 
     #[ORM\Column(type: 'json', nullable: false, options: ['default' => '[]'])]
     private array $dependencies = [];
 
-    #[ORM\Column(type: 'json', nullable: false, options: ['default' => '["private_security","state_police","neighborhood_watch","lg_security","nscdc"]'])]
+    #[ORM\Column(name: 'tenant_types', type: 'json', nullable: false, options: ['default' => '["private_security","state_police","neighborhood_watch","lg_security","nscdc"]'])]
     private array $tenantTypes = ['private_security', 'state_police', 'neighborhood_watch', 'lg_security', 'nscdc'];
 
-    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    #[ORM\Column(name: 'sort_order', type: 'integer', nullable: false, options: ['default' => 0])]
     private int $sortOrder = 0;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct()

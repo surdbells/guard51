@@ -18,10 +18,10 @@ class GuardLocation implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36, nullable: true)]
     private ?string $siteId = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
@@ -42,19 +42,19 @@ class GuardLocation implements TenantAwareInterface
     #[ORM\Column(type: 'decimal', precision: 8, scale: 2, nullable: true)]
     private ?string $altitude = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(name: 'battery_level', type: 'integer', nullable: true)]
     private ?int $batteryLevel = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_moving', type: 'boolean', options: ['default' => true])]
     private bool $isMoving = true;
 
     #[ORM\Column(type: 'string', length: 20, enumType: LocationSource::class)]
     private LocationSource $source;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'recorded_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $recordedAt;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'received_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $receivedAt;
 
     public function __construct()

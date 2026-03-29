@@ -24,40 +24,40 @@ class Shift implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'template_id', type: 'string', length: 36, nullable: true)]
     private ?string $templateId = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36, nullable: true)]
     private ?string $guardId = null;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'shift_date', type: 'date_immutable')]
     private \DateTimeImmutable $shiftDate;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'start_time', type: 'datetime_immutable')]
     private \DateTimeImmutable $startTime;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'end_time', type: 'datetime_immutable')]
     private \DateTimeImmutable $endTime;
 
     #[ORM\Column(type: 'string', length: 20, enumType: ShiftStatus::class)]
     private ShiftStatus $status = ShiftStatus::DRAFT;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_open', type: 'boolean', options: ['default' => false])]
     private bool $isOpen = false;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'created_by', type: 'string', length: 36)]
     private string $createdBy;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'confirmed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $confirmedAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'confirmed_by', type: 'string', length: 36, nullable: true)]
     private ?string $confirmedBy = null;
 
     public function __construct()

@@ -18,13 +18,13 @@ class ParkingArea implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
     #[ORM\Column(type: 'string', length: 200)]
     private string $name;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'total_spaces', type: 'integer')]
     private int $totalSpaces;
 
     #[ORM\Column(type: 'string', length: 10, enumType: AreaStatus::class)]

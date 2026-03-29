@@ -17,7 +17,7 @@ class DeviceToken
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36)]
     private string $userId;
 
     #[ORM\Column(type: 'string', length: 500)]
@@ -26,7 +26,7 @@ class DeviceToken
     #[ORM\Column(type: 'string', length: 10, enumType: DevicePlatform::class)]
     private DevicePlatform $platform;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

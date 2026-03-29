@@ -20,25 +20,25 @@ class ClientUser implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'client_id', type: 'string', length: 36)]
     private string $clientId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36)]
     private string $userId;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'can_view_reports', type: 'boolean', options: ['default' => true])]
     private bool $canViewReports = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'can_view_tracking', type: 'boolean', options: ['default' => true])]
     private bool $canViewTracking = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'can_view_invoices', type: 'boolean', options: ['default' => true])]
     private bool $canViewInvoices = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'can_view_incidents', type: 'boolean', options: ['default' => true])]
     private bool $canViewIncidents = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'can_message', type: 'boolean', options: ['default' => true])]
     private bool $canMessage = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

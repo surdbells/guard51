@@ -16,22 +16,22 @@ class BreakLog
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'time_clock_id', type: 'string', length: 36)]
     private string $timeClockId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'break_config_id', type: 'string', length: 36)]
     private string $breakConfigId;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'start_time', type: 'datetime_immutable')]
     private \DateTimeImmutable $startTime;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'end_time', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $endTime = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(name: 'duration_minutes', type: 'integer', nullable: true)]
     private ?int $durationMinutes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct()

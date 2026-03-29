@@ -26,49 +26,49 @@ class AppRelease
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: AppKey::class)]
+    #[ORM\Column(name: 'app_key', type: 'string', length: 30, enumType: AppKey::class)]
     private AppKey $appKey;
 
     #[ORM\Column(type: 'string', length: 20)]
     private string $version;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'version_code', type: 'integer')]
     private int $versionCode;
 
     #[ORM\Column(type: 'string', length: 20, enumType: AppPlatform::class)]
     private AppPlatform $platform;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: ReleaseType::class)]
+    #[ORM\Column(name: 'release_type', type: 'string', length: 20, enumType: ReleaseType::class)]
     private ReleaseType $releaseType = ReleaseType::STABLE;
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    #[ORM\Column(name: 'min_api_version', type: 'string', length: 20, nullable: true)]
     private ?string $minApiVersion = null;
 
-    #[ORM\Column(type: 'string', length: 500)]
+    #[ORM\Column(name: 'file_url', type: 'string', length: 500)]
     private string $fileUrl;
 
-    #[ORM\Column(type: 'bigint')]
+    #[ORM\Column(name: 'file_size_bytes', type: 'bigint')]
     private string $fileSizeBytes;
 
-    #[ORM\Column(type: 'string', length: 64)]
+    #[ORM\Column(name: 'file_hash_sha256', type: 'string', length: 64)]
     private string $fileHashSha256;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'release_notes', type: 'text', nullable: true)]
     private ?string $releaseNotes = null;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
+    #[ORM\Column(name: 'is_mandatory', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isMandatory = false;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'uploaded_by', type: 'string', length: 36)]
     private string $uploadedBy;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'uploaded_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $uploadedAt;
 
-    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    #[ORM\Column(name: 'download_count', type: 'integer', nullable: false, options: ['default' => 0])]
     private int $downloadCount = 0;
 
     public function __construct()

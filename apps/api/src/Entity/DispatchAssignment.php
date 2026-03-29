@@ -14,22 +14,22 @@ class DispatchAssignment
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'dispatch_id', type: 'string', length: 36)]
     private string $dispatchId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'assigned_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $assignedAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'acknowledged_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $acknowledgedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'arrived_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $arrivedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'completed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $completedAt = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: DispatchAssignmentStatus::class)]
@@ -38,7 +38,7 @@ class DispatchAssignment
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->assignedAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

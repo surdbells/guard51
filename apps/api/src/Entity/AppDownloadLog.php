@@ -22,22 +22,22 @@ class AppDownloadLog
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'release_id', type: 'string', length: 36)]
     private string $releaseId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'tenant_id', type: 'string', length: 36, nullable: true)]
     private ?string $tenantId = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'downloaded_by', type: 'string', length: 36, nullable: true)]
     private ?string $downloadedBy = null;
 
-    #[ORM\Column(type: 'string', length: 45)]
+    #[ORM\Column(name: 'ip_address', type: 'string', length: 45)]
     private string $ipAddress;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'user_agent', type: 'text', nullable: true)]
     private ?string $userAgent = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'downloaded_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $downloadedAt;
 
     public function __construct()

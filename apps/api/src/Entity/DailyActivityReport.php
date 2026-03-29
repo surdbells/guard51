@@ -20,16 +20,16 @@ class DailyActivityReport implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'shift_id', type: 'string', length: 36, nullable: true)]
     private ?string $shiftId = null;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'report_date', type: 'date_immutable')]
     private \DateTimeImmutable $reportDate;
 
     #[ORM\Column(type: 'text')]
@@ -41,13 +41,13 @@ class DailyActivityReport implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 20, enumType: ReportStatus::class)]
     private ReportStatus $status = ReportStatus::DRAFT;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'submitted_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $submittedAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'reviewed_by', type: 'string', length: 36, nullable: true)]
     private ?string $reviewedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'reviewed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $reviewedAt = null;
 
     #[ORM\Column(type: 'json')]

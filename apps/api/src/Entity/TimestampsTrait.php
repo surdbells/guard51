@@ -12,10 +12,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 trait TimestampsTrait
 {
-    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable', nullable: false)]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'updated_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function getCreatedAt(): ?\DateTimeImmutable

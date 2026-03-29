@@ -21,10 +21,10 @@ class ParkingIncidentType implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 100)]
     private string $name;
 
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(name: 'form_fields', type: 'json')]
     private array $formFields = [];
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

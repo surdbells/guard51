@@ -25,19 +25,19 @@ class TenantFeatureModule implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'module_key', type: 'string', length: 100)]
     private string $moduleKey;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_enabled', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isEnabled = true;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(name: 'enabled_by', type: 'string', length: 50, nullable: true)]
     private ?string $enabledBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'enabled_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $enabledAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'disabled_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $disabledAt = null;
 
     public function __construct()

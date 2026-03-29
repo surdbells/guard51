@@ -17,31 +17,31 @@ class IdleAlert implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'idle_start_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $idleStartAt;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'idle_duration_minutes', type: 'integer')]
     private int $idleDurationMinutes;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
+    #[ORM\Column(name: 'last_known_lat', type: 'decimal', precision: 10, scale: 8)]
     private string $lastKnownLat;
 
-    #[ORM\Column(type: 'decimal', precision: 11, scale: 8)]
+    #[ORM\Column(name: 'last_known_lng', type: 'decimal', precision: 11, scale: 8)]
     private string $lastKnownLng;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_acknowledged', type: 'boolean', options: ['default' => false])]
     private bool $isAcknowledged = false;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'acknowledged_by', type: 'string', length: 36, nullable: true)]
     private ?string $acknowledgedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

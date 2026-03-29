@@ -14,7 +14,7 @@ class InvoiceItem
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'invoice_id', type: 'string', length: 36)]
     private string $invoiceId;
 
     #[ORM\Column(type: 'string', length: 500)]
@@ -23,16 +23,16 @@ class InvoiceItem
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private string $quantity;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'unit_price', type: 'decimal', precision: 10, scale: 2)]
     private string $unitPrice;
 
     #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
     private string $amount;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_taxable', type: 'boolean', options: ['default' => true])]
     private bool $isTaxable = true;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

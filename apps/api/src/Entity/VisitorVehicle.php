@@ -14,10 +14,10 @@ class VisitorVehicle
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'visitor_id', type: 'string', length: 36)]
     private string $visitorId;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'plate_number', type: 'string', length: 20)]
     private string $plateNumber;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
@@ -29,7 +29,7 @@ class VisitorVehicle
     #[ORM\Column(type: 'string', length: 30, nullable: true)]
     private ?string $color = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

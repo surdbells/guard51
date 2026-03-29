@@ -17,13 +17,13 @@ class ParkingVehicle implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'parking_lot_id', type: 'string', length: 36, nullable: true)]
     private ?string $parkingLotId = null;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'plate_number', type: 'string', length: 20)]
     private string $plateNumber;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
@@ -35,31 +35,31 @@ class ParkingVehicle implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 30, nullable: true)]
     private ?string $color = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'owner_name', type: 'string', length: 200, nullable: true)]
     private ?string $ownerName = null;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(name: 'owner_phone', type: 'string', length: 50, nullable: true)]
     private ?string $ownerPhone = null;
 
-    #[ORM\Column(type: 'string', length: 10, enumType: OwnerType::class)]
+    #[ORM\Column(name: 'owner_type', type: 'string', length: 10, enumType: OwnerType::class)]
     private OwnerType $ownerType = OwnerType::UNKNOWN;
 
     #[ORM\Column(type: 'string', length: 10, enumType: ParkingVehicleStatus::class)]
     private ParkingVehicleStatus $status = ParkingVehicleStatus::PARKED;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'entry_time', type: 'datetime_immutable')]
     private \DateTimeImmutable $entryTime;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'exit_time', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $exitTime = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'logged_by', type: 'string', length: 36)]
     private string $loggedBy;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->entryTime = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

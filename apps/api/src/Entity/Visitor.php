@@ -17,13 +17,13 @@ class Visitor implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'first_name', type: 'string', length: 100)]
     private string $firstName;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'last_name', type: 'string', length: 100)]
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
@@ -38,40 +38,40 @@ class Visitor implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 300)]
     private string $purpose;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'host_name', type: 'string', length: 200, nullable: true)]
     private ?string $hostName = null;
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true, enumType: IdDocType::class)]
+    #[ORM\Column(name: 'id_type', type: 'string', length: 20, nullable: true, enumType: IdDocType::class)]
     private ?IdDocType $idType = null;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(name: 'id_number', type: 'string', length: 50, nullable: true)]
     private ?string $idNumber = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $photoUrl = null;
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    #[ORM\Column(name: 'vehicle_plate', type: 'string', length: 20, nullable: true)]
     private ?string $vehiclePlate = null;
 
     #[ORM\Column(type: 'string', length: 15, enumType: VisitorStatus::class)]
     private VisitorStatus $status = VisitorStatus::CHECKED_IN;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'check_in_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $checkInAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'check_out_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $checkOutAt = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'checked_in_by', type: 'string', length: 36)]
     private string $checkedInBy;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'checked_out_by', type: 'string', length: 36, nullable: true)]
     private ?string $checkedOutBy = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->checkInAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

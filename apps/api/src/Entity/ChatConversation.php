@@ -24,13 +24,13 @@ class ChatConversation implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 200, nullable: true)]
     private ?string $name = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36, nullable: true)]
     private ?string $siteId = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'created_by', type: 'string', length: 36)]
     private string $createdBy;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'last_message_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastMessageAt = null;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

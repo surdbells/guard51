@@ -15,22 +15,22 @@ class ChatParticipant
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'conversation_id', type: 'string', length: 36)]
     private string $conversationId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36)]
     private string $userId;
 
     #[ORM\Column(type: 'string', length: 10, enumType: ChatParticipantRole::class)]
     private ChatParticipantRole $role = ChatParticipantRole::MEMBER;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'joined_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $joinedAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'left_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $leftAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'last_read_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastReadAt = null;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->joinedAt = new \DateTimeImmutable(); }

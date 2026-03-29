@@ -21,16 +21,16 @@ class Client implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 200)]
+    #[ORM\Column(name: 'company_name', type: 'string', length: 200)]
     private string $companyName;
 
-    #[ORM\Column(type: 'string', length: 200)]
+    #[ORM\Column(name: 'contact_name', type: 'string', length: 200)]
     private string $contactName;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(name: 'contact_email', type: 'string', length: 255)]
     private string $contactEmail;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(name: 'contact_phone', type: 'string', length: 50)]
     private string $contactPhone;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -42,16 +42,16 @@ class Client implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $state = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'contract_start', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $contractStart = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'contract_end', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $contractEnd = null;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(name: 'billing_rate', type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $billingRate = null;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: BillingType::class, nullable: true)]
+    #[ORM\Column(name: 'billing_type', type: 'string', length: 20, enumType: BillingType::class, nullable: true)]
     private ?BillingType $billingType = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: ClientStatus::class)]

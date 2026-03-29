@@ -14,34 +14,34 @@ class Payslip
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'payroll_item_id', type: 'string', length: 36)]
     private string $payrollItemId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'period_start', type: 'date_immutable')]
     private \DateTimeImmutable $periodStart;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'period_end', type: 'date_immutable')]
     private \DateTimeImmutable $periodEnd;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'gross_pay', type: 'decimal', precision: 10, scale: 2)]
     private string $grossPay;
 
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(name: 'deductions_breakdown', type: 'json')]
     private array $deductionsBreakdown = [];
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'net_pay', type: 'decimal', precision: 10, scale: 2)]
     private string $netPay;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'pdf_url', type: 'string', length: 500, nullable: true)]
     private ?string $pdfUrl = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'emailed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $emailedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

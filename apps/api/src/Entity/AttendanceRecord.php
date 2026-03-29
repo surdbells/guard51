@@ -24,46 +24,46 @@ class AttendanceRecord implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'shift_id', type: 'string', length: 36)]
     private string $shiftId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'attendance_date', type: 'date_immutable')]
     private \DateTimeImmutable $attendanceDate;
 
     #[ORM\Column(type: 'string', length: 20, enumType: AttendanceStatus::class)]
     private AttendanceStatus $status = AttendanceStatus::ABSENT;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'scheduled_start', type: 'datetime_immutable')]
     private \DateTimeImmutable $scheduledStart;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'actual_start', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $actualStart = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'scheduled_end', type: 'datetime_immutable')]
     private \DateTimeImmutable $scheduledEnd;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'actual_end', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $actualEnd = null;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'late_minutes', type: 'integer', options: ['default' => 0])]
     private int $lateMinutes = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'early_leave_minutes', type: 'integer', options: ['default' => 0])]
     private int $earlyLeaveMinutes = 0;
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2, options: ['default' => '0'])]
+    #[ORM\Column(name: 'total_worked_hours', type: 'decimal', precision: 5, scale: 2, options: ['default' => '0'])]
     private string $totalWorkedHours = '0';
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $reconciled = false;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'reconciled_by', type: 'string', length: 36, nullable: true)]
     private ?string $reconciledBy = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

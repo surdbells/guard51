@@ -30,10 +30,10 @@ class Property implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $state = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'manager_id', type: 'string', length: 36, nullable: true)]
     private ?string $managerId = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

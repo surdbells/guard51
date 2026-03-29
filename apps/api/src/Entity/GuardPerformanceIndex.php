@@ -19,25 +19,25 @@ class GuardPerformanceIndex implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'period_month', type: 'string', length: 20)]
     private string $periodMonth; // "2026-03"
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[ORM\Column(name: 'punctuality_score', type: 'decimal', precision: 5, scale: 2)]
     private string $punctualityScore = '0'; // 0-100
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[ORM\Column(name: 'tour_compliance_score', type: 'decimal', precision: 5, scale: 2)]
     private string $tourComplianceScore = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[ORM\Column(name: 'report_completion_score', type: 'decimal', precision: 5, scale: 2)]
     private string $reportCompletionScore = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[ORM\Column(name: 'incident_response_score', type: 'decimal', precision: 5, scale: 2)]
     private string $incidentResponseScore = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
+    #[ORM\Column(name: 'overall_score', type: 'decimal', precision: 5, scale: 2)]
     private string $overallScore = '0';
 
     #[ORM\Column(type: 'string', length: 2)]

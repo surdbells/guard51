@@ -19,38 +19,38 @@ class PayrollItem implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'payroll_period_id', type: 'string', length: 36)]
     private string $payrollPeriodId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'decimal', precision: 6, scale: 2)]
+    #[ORM\Column(name: 'regular_hours', type: 'decimal', precision: 6, scale: 2)]
     private string $regularHours = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 6, scale: 2)]
+    #[ORM\Column(name: 'overtime_hours', type: 'decimal', precision: 6, scale: 2)]
     private string $overtimeHours = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 6, scale: 2)]
+    #[ORM\Column(name: 'holiday_hours', type: 'decimal', precision: 6, scale: 2)]
     private string $holidayHours = '0';
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'regular_rate', type: 'decimal', precision: 10, scale: 2)]
     private string $regularRate;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'overtime_rate', type: 'decimal', precision: 10, scale: 2)]
     private string $overtimeRate;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'holiday_rate', type: 'decimal', precision: 10, scale: 2)]
     private string $holidayRate;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'gross_pay', type: 'decimal', precision: 10, scale: 2)]
     private string $grossPay = '0';
 
     /** @var array{paye?: float, pension?: float, nhf?: float, other?: float} */
     #[ORM\Column(type: 'json')]
     private array $deductions = [];
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[ORM\Column(name: 'net_pay', type: 'decimal', precision: 10, scale: 2)]
     private string $netPay = '0';
 
     #[ORM\Column(type: 'string', length: 20, enumType: PayrollItemStatus::class)]

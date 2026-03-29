@@ -27,16 +27,16 @@ class Guard implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36, nullable: true)]
     private ?string $userId = null;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(name: 'employee_number', type: 'string', length: 50)]
     private string $employeeNumber;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'first_name', type: 'string', length: 100)]
     private string $firstName;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'last_name', type: 'string', length: 100)]
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 50)]
@@ -45,7 +45,7 @@ class Guard implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $email = null;
 
-    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[ORM\Column(name: 'date_of_birth', type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $dateOfBirth = null;
 
     #[ORM\Column(type: 'string', length: 10, nullable: true)]
@@ -60,34 +60,34 @@ class Guard implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $state = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $photoUrl = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'emergency_contact_name', type: 'string', length: 200, nullable: true)]
     private ?string $emergencyContactName = null;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(name: 'emergency_contact_phone', type: 'string', length: 50, nullable: true)]
     private ?string $emergencyContactPhone = null;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'hire_date', type: 'date_immutable')]
     private \DateTimeImmutable $hireDate;
 
     #[ORM\Column(type: 'string', length: 20, enumType: GuardStatus::class)]
     private GuardStatus $status = GuardStatus::ACTIVE;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: PayType::class, nullable: true)]
+    #[ORM\Column(name: 'pay_type', type: 'string', length: 20, enumType: PayType::class, nullable: true)]
     private ?PayType $payType = null;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(name: 'pay_rate', type: 'decimal', precision: 10, scale: 2, nullable: true)]
     private ?string $payRate = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'bank_name', type: 'string', length: 100, nullable: true)]
     private ?string $bankName = null;
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    #[ORM\Column(name: 'bank_account_number', type: 'string', length: 20, nullable: true)]
     private ?string $bankAccountNumber = null;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'bank_account_name', type: 'string', length: 200, nullable: true)]
     private ?string $bankAccountName = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

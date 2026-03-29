@@ -17,7 +17,7 @@ class Notification implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'user_id', type: 'string', length: 36)]
     private string $userId;
 
     #[ORM\Column(type: 'string', length: 20, enumType: NotificationType::class)]
@@ -35,16 +35,16 @@ class Notification implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 10, enumType: NotificationChannel::class)]
     private NotificationChannel $channel = NotificationChannel::IN_APP;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_read', type: 'boolean', options: ['default' => false])]
     private bool $isRead = false;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'read_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $readAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'sent_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $sentAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

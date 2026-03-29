@@ -19,19 +19,19 @@ class DispatchCall implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 200)]
+    #[ORM\Column(name: 'caller_name', type: 'string', length: 200)]
     private string $callerName;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(name: 'caller_phone', type: 'string', length: 50, nullable: true)]
     private ?string $callerPhone = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'client_id', type: 'string', length: 36, nullable: true)]
     private ?string $clientId = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36, nullable: true)]
     private ?string $siteId = null;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: DispatchCallType::class)]
+    #[ORM\Column(name: 'call_type', type: 'string', length: 20, enumType: DispatchCallType::class)]
     private DispatchCallType $callType;
 
     #[ORM\Column(type: 'string', length: 10, enumType: Severity::class)]
@@ -43,19 +43,19 @@ class DispatchCall implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 20, enumType: DispatchStatus::class)]
     private DispatchStatus $status = DispatchStatus::RECEIVED;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'received_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $receivedAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'dispatched_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $dispatchedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'resolved_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $resolvedAt = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $resolution = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'created_by', type: 'string', length: 36)]
     private string $createdBy;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->receivedAt = new \DateTimeImmutable(); }

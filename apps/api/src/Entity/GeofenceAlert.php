@@ -17,13 +17,13 @@ class GeofenceAlert implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: GeofenceAlertType::class)]
+    #[ORM\Column(name: 'alert_type', type: 'string', length: 30, enumType: GeofenceAlertType::class)]
     private GeofenceAlertType $alertType;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
@@ -35,16 +35,16 @@ class GeofenceAlert implements TenantAwareInterface
     #[ORM\Column(type: 'text')]
     private string $message;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_acknowledged', type: 'boolean', options: ['default' => false])]
     private bool $isAcknowledged = false;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'acknowledged_by', type: 'string', length: 36, nullable: true)]
     private ?string $acknowledgedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'acknowledged_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $acknowledgedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

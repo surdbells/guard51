@@ -33,55 +33,55 @@ class SubscriptionPlan
     #[ORM\Column(type: 'string', length: 30, enumType: SubscriptionTier::class)]
     private SubscriptionTier $tier;
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2)]
+    #[ORM\Column(name: 'monthly_price', type: 'decimal', precision: 12, scale: 2)]
     private string $monthlyPrice;
 
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, nullable: true)]
+    #[ORM\Column(name: 'annual_price', type: 'decimal', precision: 12, scale: 2, nullable: true)]
     private ?string $annualPrice = null;
 
     #[ORM\Column(type: 'string', length: 3, options: ['default' => 'NGN'])]
     private string $currency = 'NGN';
 
-    #[ORM\Column(type: 'integer', options: ['default' => 25])]
+    #[ORM\Column(name: 'max_guards', type: 'integer', options: ['default' => 25])]
     private int $maxGuards = 25;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 5])]
+    #[ORM\Column(name: 'max_sites', type: 'integer', options: ['default' => 5])]
     private int $maxSites = 5;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 5])]
+    #[ORM\Column(name: 'max_clients', type: 'integer', options: ['default' => 5])]
     private int $maxClients = 5;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(name: 'max_staff', type: 'integer', nullable: true)]
     private ?int $maxStaff = null;
 
     /** @var string[] List of module_keys included in this plan */
-    #[ORM\Column(type: 'json', nullable: false, options: ['default' => '[]'])]
+    #[ORM\Column(name: 'included_modules', type: 'json', nullable: false, options: ['default' => '[]'])]
     private array $includedModules = [];
 
     /** @var string[] Tenant types this plan is available for */
-    #[ORM\Column(type: 'json', nullable: false, options: ['default' => '["private_security"]'])]
+    #[ORM\Column(name: 'tenant_types', type: 'json', nullable: false, options: ['default' => '["private_security"]'])]
     private array $tenantTypes = ['private_security'];
 
-    #[ORM\Column(type: 'json', nullable: false, options: ['default' => '{}'])]
+    #[ORM\Column(name: 'feature_flags', type: 'json', nullable: false, options: ['default' => '{}'])]
     private array $featureFlags = [];
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
+    #[ORM\Column(name: 'is_custom', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isCustom = false;
 
     /** If set, plan is only visible to this specific tenant (private/enterprise deal) */
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'private_tenant_id', type: 'string', length: 36, nullable: true)]
     private ?string $privateTenantId = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'paystack_plan_code', type: 'string', length: 100, nullable: true)]
     private ?string $paystackPlanCode = null;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 14])]
+    #[ORM\Column(name: 'trial_days', type: 'integer', options: ['default' => 14])]
     private int $trialDays = 14;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'sort_order', type: 'integer', options: ['default' => 0])]
     private int $sortOrder = 0;
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct()

@@ -19,37 +19,37 @@ class DailySnapshot implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'date_immutable')]
+    #[ORM\Column(name: 'snapshot_date', type: 'date_immutable')]
     private \DateTimeImmutable $snapshotDate;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'total_guards', type: 'integer', options: ['default' => 0])]
     private int $totalGuards = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'guards_on_duty', type: 'integer', options: ['default' => 0])]
     private int $guardsOnDuty = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'guards_late', type: 'integer', options: ['default' => 0])]
     private int $guardsLate = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'guards_absent', type: 'integer', options: ['default' => 0])]
     private int $guardsAbsent = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'total_sites', type: 'integer', options: ['default' => 0])]
     private int $totalSites = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'sites_covered', type: 'integer', options: ['default' => 0])]
     private int $sitesCovered = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'incidents_count', type: 'integer', options: ['default' => 0])]
     private int $incidentsCount = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'shifts_total', type: 'integer', options: ['default' => 0])]
     private int $shiftsTotal = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'shifts_filled', type: 'integer', options: ['default' => 0])]
     private int $shiftsFilled = 0;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct()

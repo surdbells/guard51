@@ -17,10 +17,10 @@ class PanicAlert implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36, nullable: true)]
     private ?string $siteId = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
@@ -32,28 +32,28 @@ class PanicAlert implements TenantAwareInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $message = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'audio_url', type: 'string', length: 500, nullable: true)]
     private ?string $audioUrl = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: PanicAlertStatus::class)]
     private PanicAlertStatus $status = PanicAlertStatus::TRIGGERED;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'acknowledged_by', type: 'string', length: 36, nullable: true)]
     private ?string $acknowledgedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'acknowledged_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $acknowledgedAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'resolved_by', type: 'string', length: 36, nullable: true)]
     private ?string $resolvedBy = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'resolved_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $resolvedAt = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'resolution_notes', type: 'text', nullable: true)]
     private ?string $resolutionNotes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

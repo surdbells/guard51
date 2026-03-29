@@ -26,7 +26,7 @@ class Site implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'client_id', type: 'string', length: 36, nullable: true)]
     private ?string $clientId = null;
 
     #[ORM\Column(type: 'string', length: 200)]
@@ -47,23 +47,23 @@ class Site implements TenantAwareInterface
     #[ORM\Column(type: 'decimal', precision: 11, scale: 8, nullable: true)]
     private ?string $longitude = null;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    #[ORM\Column(name: 'geofence_radius', type: 'integer', options: ['default' => 100])]
     private int $geofenceRadius = 100;
 
     /** PostGIS polygon stored as GeoJSON text — parsed by GeofenceService */
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(name: 'geofence_polygon', type: 'text', nullable: true)]
     private ?string $geofencePolygon = null;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: GeofenceType::class)]
+    #[ORM\Column(name: 'geofence_type', type: 'string', length: 20, enumType: GeofenceType::class)]
     private GeofenceType $geofenceType = GeofenceType::CIRCLE;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'contact_name', type: 'string', length: 200, nullable: true)]
     private ?string $contactName = null;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(name: 'contact_phone', type: 'string', length: 50, nullable: true)]
     private ?string $contactPhone = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(name: 'contact_email', type: 'string', length: 255, nullable: true)]
     private ?string $contactEmail = null;
 
     #[ORM\Column(type: 'string', length: 50, options: ['default' => 'Africa/Lagos'])]
@@ -75,7 +75,7 @@ class Site implements TenantAwareInterface
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $photoUrl = null;
 
     public function __construct()

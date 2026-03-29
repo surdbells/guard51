@@ -23,52 +23,52 @@ class TimeClock implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'shift_id', type: 'string', length: 36, nullable: true)]
     private ?string $shiftId = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'clock_in_time', type: 'datetime_immutable')]
     private \DateTimeImmutable $clockInTime;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 8)]
+    #[ORM\Column(name: 'clock_in_lat', type: 'decimal', precision: 10, scale: 8)]
     private string $clockInLat;
 
-    #[ORM\Column(type: 'decimal', precision: 11, scale: 8)]
+    #[ORM\Column(name: 'clock_in_lng', type: 'decimal', precision: 11, scale: 8)]
     private string $clockInLng;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: ClockMethod::class)]
+    #[ORM\Column(name: 'clock_in_method', type: 'string', length: 20, enumType: ClockMethod::class)]
     private ClockMethod $clockInMethod;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'clock_in_photo_url', type: 'string', length: 500, nullable: true)]
     private ?string $clockInPhotoUrl = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'clock_out_time', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $clockOutTime = null;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 8, nullable: true)]
+    #[ORM\Column(name: 'clock_out_lat', type: 'decimal', precision: 10, scale: 8, nullable: true)]
     private ?string $clockOutLat = null;
 
-    #[ORM\Column(type: 'decimal', precision: 11, scale: 8, nullable: true)]
+    #[ORM\Column(name: 'clock_out_lng', type: 'decimal', precision: 11, scale: 8, nullable: true)]
     private ?string $clockOutLng = null;
 
-    #[ORM\Column(type: 'string', length: 20, enumType: ClockMethod::class, nullable: true)]
+    #[ORM\Column(name: 'clock_out_method', type: 'string', length: 20, enumType: ClockMethod::class, nullable: true)]
     private ?ClockMethod $clockOutMethod = null;
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 2, nullable: true)]
+    #[ORM\Column(name: 'total_hours', type: 'decimal', precision: 5, scale: 2, nullable: true)]
     private ?string $totalHours = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: TimeClockStatus::class)]
     private TimeClockStatus $status = TimeClockStatus::CLOCKED_IN;
 
-    #[ORM\Column(type: 'boolean')]
+    #[ORM\Column(name: 'is_within_geofence_in', type: 'boolean')]
     private bool $isWithinGeofenceIn;
 
-    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[ORM\Column(name: 'is_within_geofence_out', type: 'boolean', nullable: true)]
     private ?bool $isWithinGeofenceOut = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

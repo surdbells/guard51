@@ -15,19 +15,19 @@ class ChatMessage
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'conversation_id', type: 'string', length: 36)]
     private string $conversationId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'sender_id', type: 'string', length: 36)]
     private string $senderId;
 
     #[ORM\Column(type: 'text')]
     private string $content;
 
-    #[ORM\Column(type: 'string', length: 10, enumType: MessageType::class)]
+    #[ORM\Column(name: 'message_type', type: 'string', length: 10, enumType: MessageType::class)]
     private MessageType $messageType = MessageType::TEXT;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'media_url', type: 'string', length: 500, nullable: true)]
     private ?string $mediaUrl = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8, nullable: true)]
@@ -36,10 +36,10 @@ class ChatMessage
     #[ORM\Column(type: 'decimal', precision: 11, scale: 8, nullable: true)]
     private ?string $longitude = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_deleted', type: 'boolean', options: ['default' => false])]
     private bool $isDeleted = false;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->createdAt = new \DateTimeImmutable(); }

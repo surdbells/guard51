@@ -23,22 +23,22 @@ class BreakConfig implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 100)]
     private string $name;
 
-    #[ORM\Column(type: 'string', length: 10, enumType: BreakType::class)]
+    #[ORM\Column(name: 'break_type', type: 'string', length: 10, enumType: BreakType::class)]
     private BreakType $breakType = BreakType::PAID;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'duration_minutes', type: 'integer')]
     private int $durationMinutes;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'auto_start', type: 'boolean', options: ['default' => false])]
     private bool $autoStart = false;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(name: 'auto_start_after_minutes', type: 'integer', nullable: true)]
     private ?int $autoStartAfterMinutes = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'can_end_early', type: 'boolean', options: ['default' => true])]
     private bool $canEndEarly = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(name: 'is_active', type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

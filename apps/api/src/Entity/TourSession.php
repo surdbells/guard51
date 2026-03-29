@@ -18,31 +18,31 @@ class TourSession implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'shift_id', type: 'string', length: 36, nullable: true)]
     private ?string $shiftId = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'started_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $startedAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'completed_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $completedAt = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: TourSessionStatus::class)]
     private TourSessionStatus $status = TourSessionStatus::IN_PROGRESS;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: 'total_checkpoints', type: 'integer')]
     private int $totalCheckpoints;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'scanned_checkpoints', type: 'integer', options: ['default' => 0])]
     private int $scannedCheckpoints = 0;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->startedAt = new \DateTimeImmutable(); $this->createdAt = new \DateTimeImmutable(); }

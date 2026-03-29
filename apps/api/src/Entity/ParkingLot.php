@@ -17,7 +17,7 @@ class ParkingLot
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'parking_area_id', type: 'string', length: 36)]
     private string $parkingAreaId;
 
     #[ORM\Column(type: 'string', length: 100)]
@@ -26,7 +26,7 @@ class ParkingLot
     #[ORM\Column(type: 'integer')]
     private int $capacity;
 
-    #[ORM\Column(type: 'string', length: 10, enumType: ParkingLotType::class)]
+    #[ORM\Column(name: 'lot_type', type: 'string', length: 10, enumType: ParkingLotType::class)]
     private ParkingLotType $lotType = ParkingLotType::REGULAR;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

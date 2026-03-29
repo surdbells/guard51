@@ -24,28 +24,28 @@ class TenantUsageMetric implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'guards_count', type: 'integer', options: ['default' => 0])]
     private int $guardsCount = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'sites_count', type: 'integer', options: ['default' => 0])]
     private int $sitesCount = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'clients_count', type: 'integer', options: ['default' => 0])]
     private int $clientsCount = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'staff_count', type: 'integer', options: ['default' => 0])]
     private int $staffCount = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'reports_this_month', type: 'integer', options: ['default' => 0])]
     private int $reportsThisMonth = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'storage_used_bytes', type: 'integer', options: ['default' => 0])]
     private int $storageUsedBytes = 0;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'sms_used_this_month', type: 'integer', options: ['default' => 0])]
     private int $smsUsedThisMonth = 0;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'last_recalculated_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $lastRecalculatedAt = null;
 
     public function __construct()

@@ -18,19 +18,19 @@ class PatrolVehicle implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\Column(name: 'vehicle_name', type: 'string', length: 100)]
     private string $vehicleName;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'plate_number', type: 'string', length: 20)]
     private string $plateNumber;
 
-    #[ORM\Column(type: 'string', length: 15, enumType: VehicleType::class)]
+    #[ORM\Column(name: 'vehicle_type', type: 'string', length: 15, enumType: VehicleType::class)]
     private VehicleType $vehicleType;
 
     #[ORM\Column(type: 'string', length: 15, enumType: VehicleStatus::class)]
     private VehicleStatus $status = VehicleStatus::ACTIVE;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'assigned_guard_id', type: 'string', length: 36, nullable: true)]
     private ?string $assignedGuardId = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

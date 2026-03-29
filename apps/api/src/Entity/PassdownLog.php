@@ -21,16 +21,16 @@ class PassdownLog implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId; // outgoing guard
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'shift_id', type: 'string', length: 36, nullable: true)]
     private ?string $shiftId = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'incoming_guard_id', type: 'string', length: 36, nullable: true)]
     private ?string $incomingGuardId = null;
 
     #[ORM\Column(type: 'text')]
@@ -42,10 +42,10 @@ class PassdownLog implements TenantAwareInterface
     #[ORM\Column(type: 'json')]
     private array $attachments = [];
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'acknowledged_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $acknowledgedAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'acknowledged_by', type: 'string', length: 36, nullable: true)]
     private ?string $acknowledgedBy = null;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); }

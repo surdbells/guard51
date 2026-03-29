@@ -20,13 +20,13 @@ class IncidentReport implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'guard_id', type: 'string', length: 36)]
     private string $guardId;
 
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Column(name: 'site_id', type: 'string', length: 36)]
     private string $siteId;
 
-    #[ORM\Column(type: 'string', length: 30, enumType: IncidentType::class)]
+    #[ORM\Column(name: 'incident_type', type: 'string', length: 30, enumType: IncidentType::class)]
     private IncidentType $incidentType;
 
     #[ORM\Column(type: 'string', length: 10, enumType: Severity::class)]
@@ -38,7 +38,7 @@ class IncidentReport implements TenantAwareInterface
     #[ORM\Column(type: 'text')]
     private string $description;
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'location_detail', type: 'string', length: 200, nullable: true)]
     private ?string $locationDetail = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 8, nullable: true)]
@@ -47,10 +47,10 @@ class IncidentReport implements TenantAwareInterface
     #[ORM\Column(type: 'decimal', precision: 11, scale: 8, nullable: true)]
     private ?string $longitude = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'occurred_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $occurredAt;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(name: 'reported_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $reportedAt;
 
     #[ORM\Column(type: 'json')]
@@ -59,19 +59,19 @@ class IncidentReport implements TenantAwareInterface
     #[ORM\Column(type: 'string', length: 20, enumType: IncidentStatus::class)]
     private IncidentStatus $status = IncidentStatus::REPORTED;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'assigned_to', type: 'string', length: 36, nullable: true)]
     private ?string $assignedTo = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $resolution = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'resolved_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $resolvedAt = null;
 
-    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[ORM\Column(name: 'resolved_by', type: 'string', length: 36, nullable: true)]
     private ?string $resolvedBy = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'client_notified', type: 'boolean', options: ['default' => false])]
     private bool $clientNotified = false;
 
     public function __construct() { $this->id = Uuid::uuid4()->toString(); $this->reportedAt = new \DateTimeImmutable(); $this->occurredAt = new \DateTimeImmutable(); }

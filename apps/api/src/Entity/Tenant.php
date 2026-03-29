@@ -23,13 +23,13 @@ class Tenant
     #[ORM\Column(type: 'string', length: 200)]
     private string $name;
 
-    #[ORM\Column(type: 'string', length: 50, enumType: TenantType::class)]
+    #[ORM\Column(name: 'tenant_type', type: 'string', length: 50, enumType: TenantType::class)]
     private TenantType $tenantType = TenantType::PRIVATE_SECURITY;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'org_subtype', type: 'string', length: 100, nullable: true)]
     private ?string $orgSubtype = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'rc_number', type: 'string', length: 100, nullable: true)]
     private ?string $rcNumber = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -50,13 +50,13 @@ class Tenant
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $country = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'logo_url', type: 'string', length: 500, nullable: true)]
     private ?string $logoUrl = null;
 
     #[ORM\Column(type: 'json', nullable: false, options: ['default' => '{}'])]
     private array $branding = [];
 
-    #[ORM\Column(type: 'string', length: 200, nullable: true)]
+    #[ORM\Column(name: 'custom_domain', type: 'string', length: 200, nullable: true)]
     private ?string $customDomain = null;
 
     #[ORM\Column(type: 'string', length: 50, enumType: TenantStatus::class)]
@@ -68,16 +68,16 @@ class Tenant
     #[ORM\Column(type: 'string', length: 3, nullable: false, options: ['default' => 'NGN'])]
     private string $currency = 'NGN';
 
-    #[ORM\Column(type: 'boolean', nullable: false, options: ['default' => false])]
+    #[ORM\Column(name: 'is_onboarded', type: 'boolean', nullable: false, options: ['default' => false])]
     private bool $isOnboarded = false;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'onboarded_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $onboardedAt = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ORM\Column(name: 'suspended_at', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $suspendedAt = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'suspension_reason', type: 'string', length: 500, nullable: true)]
     private ?string $suspensionReason = null;
 
     public function __construct()
