@@ -53,9 +53,10 @@ final class Version20260326000001_SiteManagement extends AbstractMigration
         $this->addSql('CREATE INDEX idx_site_coords ON sites (latitude, longitude) WHERE latitude IS NOT NULL');
         $this->addSql('ALTER TABLE sites ADD CONSTRAINT fk_site_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
-        // PostGIS spatial column for complex geofences (optional, used when geofence_type = polygon)
-        $this->addSql("SELECT AddGeometryColumn('sites', 'geom', 4326, 'POLYGON', 2)");
-        $this->addSql('CREATE INDEX idx_site_geom ON sites USING GIST (geom)');
+        // Polygon geofence storage — uses TEXT (GeoJSON) instead of PostGIS geometry
+        // If PostGIS is installed later, this can be migrated to a proper geometry column
+        $this->addSql("ALTER TABLE sites ADD COLUMN geom TEXT DEFAULT NULL");
+        $this->addSql('COMMENT ON COLUMN sites.geom IS $$GeoJSON polygon for complex geofences (optional PostGIS upgrade)$$');
 
         // ── Post Orders ──────────────────────────────
         $this->addSql("
