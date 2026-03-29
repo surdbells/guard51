@@ -172,31 +172,8 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_rt_expires ON refresh_tokens (expires_at)');
         $this->addSql('ALTER TABLE refresh_tokens ADD CONSTRAINT fk_rt_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE');
 
-        // ── Audit Logs ───────────────────────────────
-        $this->addSql("
-            CREATE TABLE IF NOT EXISTS audit_logs (
-                id VARCHAR(36) NOT NULL,
-                tenant_id VARCHAR(36) DEFAULT NULL,
-                user_id VARCHAR(36) DEFAULT NULL,
-                user_name VARCHAR(200) DEFAULT NULL,
-                action VARCHAR(50) NOT NULL,
-                entity_type VARCHAR(100) NOT NULL,
-                entity_id VARCHAR(36) DEFAULT NULL,
-                description TEXT DEFAULT NULL,
-                old_values JSONB DEFAULT NULL,
-                new_values JSONB DEFAULT NULL,
-                ip_address VARCHAR(45) DEFAULT NULL,
-                user_agent VARCHAR(500) DEFAULT NULL,
-                request_id VARCHAR(36) DEFAULT NULL,
-                created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-                PRIMARY KEY (id)
-            )
-        ");
-        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_tenant ON audit_logs (tenant_id)');
-        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs (user_id)');
-        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs (entity_type, entity_id)');
-        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs (action)');
-        $this->addSql('CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs (created_at)');
+        // Audit logs table moved to Phase 8 migration (Version20260328000004)
+        // with updated schema (resource_type/resource_id instead of entity_type/entity_id)
     }
 
     public function down(Schema $schema): void
