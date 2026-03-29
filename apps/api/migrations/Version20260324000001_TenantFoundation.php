@@ -21,8 +21,9 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
     public function up(Schema $schema): void
     {
         // Ensure extensions are available
-        $this->addSql('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
-        $this->addSql('CREATE EXTENSION IF NOT EXISTS postgis');
+        // UUIDs generated in PHP via Ramsey\Uuid — no DB extension needed
+        // PostGIS extension for geospatial queries (optional — install postgis package first)
+        $this->addSql("DO $$ BEGIN CREATE EXTENSION IF NOT EXISTS postgis; EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'PostGIS not available — geofence features will use basic radius mode'; END $$;");
         $this->addSql('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
         // ── Create enum types ────────────────────────
