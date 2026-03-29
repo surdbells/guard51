@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: '/api/v1',
+  apiUrl: 'https://api.guard51.com/api/v1',
   wsUrl: '',
   appName: 'Guard51',
   defaultLang: 'en',
