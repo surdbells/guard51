@@ -96,7 +96,19 @@ export class LoginComponent {
     if (!this.email || !this.password) { this.error.set('Please enter your email and password.'); return; }
     this.loading.set(true); this.error.set('');
     this.authService.login(this.email, this.password).subscribe({
-      next: (res) => { this.loading.set(false); if (res.success) this.router.navigateByUrl(this.route.snapshot.queryParams['returnUrl'] || '/dashboard'); },
+      next: (res) => {
+        this.loading.set(false);
+        if (res.success && res.data) {
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+          if (returnUrl) {
+            this.router.navigateByUrl(returnUrl);
+          } else if (res.data.user.role === 'super_admin') {
+            this.router.navigateByUrl('/super-admin/dashboard');
+          } else {
+            this.router.navigateByUrl('/dashboard');
+          }
+        }
+      },
       error: (err) => { this.loading.set(false); this.error.set(err.error?.message || 'Login failed.'); },
     });
   }
