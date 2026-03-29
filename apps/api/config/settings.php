@@ -64,7 +64,12 @@ return [
     ],
 
     'cors' => [
-        'allowed_origins' => ['http://localhost:4200', 'http://localhost:8080'],
+        'allowed_origins' => [
+            'https://app.guard51.com',
+            'https://guard51.com',
+            'http://localhost:4200',
+            'http://localhost:8080',
+        ],
         'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         'allowed_headers' => ['Content-Type', 'Authorization', 'X-Request-ID', 'X-Tenant-ID'],
         'max_age' => 86400,

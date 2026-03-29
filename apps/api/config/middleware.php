@@ -8,14 +8,8 @@ use Guard51\Middleware\RequestIdMiddleware;
 use Slim\App;
 
 return function (App $app): void {
-    // Parse JSON request bodies
-    $app->add(JsonBodyParserMiddleware::class);
-
-    // Add unique request ID to every request
-    $app->add(RequestIdMiddleware::class);
-
-    // CORS headers
-    $app->add(CorsMiddleware::class);
+    // Slim routing (innermost — runs last)
+    $app->addRoutingMiddleware();
 
     // Slim error handling
     $app->addErrorMiddleware(
@@ -24,6 +18,13 @@ return function (App $app): void {
         logErrorDetails: true,
     );
 
-    // Slim routing
-    $app->addRoutingMiddleware();
+    // Parse JSON request bodies
+    $app->add(JsonBodyParserMiddleware::class);
+
+    // Add unique request ID to every request
+    $app->add(RequestIdMiddleware::class);
+
+    // CORS headers (outermost — runs first, added last in Slim's LIFO order)
+    // Must be outermost so OPTIONS preflight is handled before routing
+    $app->add(CorsMiddleware::class);
 };
