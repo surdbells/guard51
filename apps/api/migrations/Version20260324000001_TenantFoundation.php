@@ -22,9 +22,9 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
     {
         // Ensure extensions are available
         // UUIDs generated in PHP via Ramsey\Uuid — no DB extension needed
-        // PostGIS extension for geospatial queries (optional — install postgis package first)
-        $this->addSql("DO $$ BEGIN CREATE EXTENSION IF NOT EXISTS postgis; EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'PostGIS not available — geofence features will use basic radius mode'; END $$;");
-        $this->addSql("DO $$ BEGIN CREATE EXTENSION IF NOT EXISTS pg_trgm; EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'pg_trgm not available — fuzzy text search will use LIKE instead'; END $$;");
+        // Extensions (postgis, pg_trgm) are optional — install manually if needed:
+        //   sudo -u postgres psql -d guard51 -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+        //   sudo -u postgres psql -d guard51 -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 
         // ── Create enum types ────────────────────────
         $this->addSql("
