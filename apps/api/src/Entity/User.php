@@ -173,11 +173,18 @@ class User implements TenantAwareInterface
 
     public function setPassword(string $plainPassword): static
     {
-        $this->passwordHash = password_hash($plainPassword, PASSWORD_ARGON2ID, [
-            'memory_cost' => 65536,
-            'time_cost' => 4,
-            'threads' => 3,
-        ]);
+        // Use BCRYPT (universally supported) or Argon2id if available without threads
+        if (defined('PASSWORD_ARGON2ID')) {
+            $this->passwordHash = password_hash($plainPassword, PASSWORD_ARGON2ID, [
+                'memory_cost' => 65536,
+                'time_cost' => 4,
+                'threads' => 1,
+            ]);
+        } else {
+            $this->passwordHash = password_hash($plainPassword, PASSWORD_BCRYPT, [
+                'cost' => 12,
+            ]);
+        }
         return $this;
     }
 
