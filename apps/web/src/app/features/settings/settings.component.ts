@@ -51,8 +51,15 @@ import { ToastService } from '@core/services/toast.service';
         <p class="text-xs" [style.color]="'var(--text-secondary)'">Customize your company branding. These settings affect client-facing portals and generated PDFs.</p>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Primary Color</label>
           <input type="color" [(ngModel)]="form.brand_color" class="h-10 w-20 rounded cursor-pointer" /></div>
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Company Logo URL</label>
-          <input type="text" [(ngModel)]="form.logo_url" class="input-base w-full" placeholder="https://..." /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Company Logo</label>
+          @if (logoPreview) {
+            <div class="relative inline-block mb-2"><img [src]="logoPreview" class="h-14 rounded border" [style.borderColor]="'var(--border-default)'" />
+              <button (click)="logoPreview = null" class="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px]">✕</button></div>
+          }
+          <label class="btn-secondary inline-flex items-center gap-2 cursor-pointer text-xs">
+            Upload Logo
+            <input type="file" accept="image/*" (change)="onLogoSelect($event)" class="hidden" />
+          </label></div>
         <button (click)="saveBranding()" class="btn-primary">Save Branding</button>
       </div>
     }
@@ -90,6 +97,8 @@ export class SettingsComponent implements OnInit {
   readonly SettingsIcon = Settings;
   readonly activeTab = signal('General');
   form: any = {};
+  logoPreview: string | null = null;
+  onLogoSelect(e: Event): void { const f = (e.target as HTMLInputElement).files?.[0]; if (f) { const r = new FileReader(); r.onload = () => this.logoPreview = r.result as string; r.readAsDataURL(f); } }
   notifPrefs = [
     { key: 'shift_assigned', label: 'Shift Assigned' }, { key: 'clock_reminder', label: 'Clock-in Reminder' },
     { key: 'incident', label: 'New Incident' }, { key: 'panic', label: 'Panic Alert' },

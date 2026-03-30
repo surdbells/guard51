@@ -31,7 +31,7 @@ export const SUPER_ADMIN_ROUTES: Routes = [
   },
   {
     path: 'settings',
-    loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
+    loadComponent: () => import('./settings/settings.component').then(m => m.SaSettingsComponent),
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
