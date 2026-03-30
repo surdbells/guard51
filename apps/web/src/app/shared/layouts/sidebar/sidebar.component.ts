@@ -236,7 +236,12 @@ export class SidebarComponent {
         ...section,
         items: section.items.filter(item => {
           if (item.roles && !item.roles.includes(this.auth.userRole() ?? '')) return false;
-          if (item.moduleKey && !this.features.isEnabled(item.moduleKey)) return false;
+          // Only hide if feature service has loaded AND module is explicitly disabled
+          if (item.moduleKey && this.features.loaded() && !this.features.isEnabled(item.moduleKey)) {
+            // Still show core modules even if not in tenant_feature_modules
+            const mod = this.features.modules().find(m => m.module_key === item.moduleKey);
+            if (mod && !mod.is_enabled && !mod.is_core) return false;
+          }
           return true;
         }),
       }))

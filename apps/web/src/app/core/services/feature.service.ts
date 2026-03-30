@@ -29,8 +29,10 @@ export class FeatureService {
   }
 
   isEnabled(moduleKey: string): boolean {
+    if (!this.loaded()) return true; // Show all until loaded
     const mod = this.modules().find(m => m.module_key === moduleKey);
-    return mod?.is_enabled ?? false;
+    if (!mod) return true; // If module not in list, show by default
+    return mod.is_enabled || mod.is_core;
   }
 
   getEnabledModules(): string[] {
