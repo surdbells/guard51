@@ -44,8 +44,13 @@ final class GuardService
     {
         $this->enforceMaxGuards($tenantId);
 
-        if (empty($data['employee_number']) || empty($data['first_name']) || empty($data['last_name']) || empty($data['phone'])) {
-            throw ApiException::validation('Employee number, first name, last name, and phone are required.');
+        if (empty($data['first_name']) || empty($data['last_name']) || empty($data['phone'])) {
+            throw ApiException::validation('First name, last name, and phone are required.');
+        }
+
+        // Auto-generate employee number if not provided
+        if (empty($data['employee_number'])) {
+            $data['employee_number'] = $this->generateEmployeeNumber($tenantId);
         }
 
         // Check employee number uniqueness
@@ -269,5 +274,17 @@ final class GuardService
         if (isset($data['bank_account_name'])) $guard->setBankAccountName($data['bank_account_name']);
         if (isset($data['notes'])) $guard->setNotes($data['notes']);
         if (isset($data['status'])) $guard->setStatus(GuardStatus::from($data['status']));
+    }
+
+    private function generateEmployeeNumber(string $tenantId): string
+    {
+        $count = $this->guardRepo->countByTenant($tenantId);
+        $next = $count + 1;
+        // Format: GRD-XXXX (zero-padded to 4 digits)
+        do {
+            $number = 'GRD-' . str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+            $next++;
+        } while ($this->guardRepo->findByEmployeeNumber($tenantId, $number));
+        return $number;
     }
 }

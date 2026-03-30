@@ -578,6 +578,7 @@ return function (App $app): void {
             $ch->get('/conversations/{id}/messages', [ChatController::class, 'messages']);
             $ch->post('/conversations/{id}/messages', [ChatController::class, 'sendMessage']);
             $ch->post('/conversations/{id}/read', [ChatController::class, 'markRead']);
+            $ch->get('/unread-count', [ChatController::class, 'unreadCount']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));

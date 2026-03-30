@@ -52,7 +52,7 @@ import { ToastService } from '@core/services/toast.service';
           <input type="date" [(ngModel)]="form.contract_end" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Type</label>
           <select [(ngModel)]="form.billing_type" class="input-base w-full">
-            <option value="">Select</option><option value="fixed">Fixed Monthly</option><option value="hourly">Hourly Rate</option><option value="per_guard">Per Guard</option><option value="custom">Custom</option></select></div>
+            <option value="">Select</option><option value="hourly">Hourly</option><option value="daily">Daily</option><option value="monthly">Monthly</option><option value="per_guard">Per Guard</option><option value="contract">Contract</option><option value="fixed">Fixed</option><option value="custom">Custom</option></select></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Rate (₦)</label>
           <input type="number" [(ngModel)]="form.billing_rate" class="input-base w-full" placeholder="0.00" /></div>
       </div>

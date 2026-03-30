@@ -23,8 +23,9 @@ import { ToastService } from '@core/services/toast.service';
           <input type="text" [(ngModel)]="form.first_name" class="input-base w-full" required /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Last Name *</label>
           <input type="text" [(ngModel)]="form.last_name" class="input-base w-full" required /></div>
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Employee Number *</label>
-          <input type="text" [(ngModel)]="form.employee_number" class="input-base w-full" required placeholder="e.g. GRD-001" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Employee Number</label>
+          <input type="text" [(ngModel)]="form.employee_number" class="input-base w-full" placeholder="Auto-generated (GRD-0001)" />
+          <p class="text-[10px] mt-0.5" [style.color]="'var(--text-tertiary)'">Leave blank to auto-generate</p></div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Phone *</label>

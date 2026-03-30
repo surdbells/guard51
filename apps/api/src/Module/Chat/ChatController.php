@@ -37,4 +37,10 @@ final class ChatController
         $this->chatService->markRead($args['id'], $request->getAttribute('user_id'));
         return JsonResponse::success($response, ['ok' => true]);
     }
+
+    public function unreadCount(Request $request, Response $response): Response
+    {
+        $count = $this->chatService->getTotalUnreadCount($request->getAttribute('user_id'));
+        return JsonResponse::success($response, ['unread_count' => $count]);
+    }
 }

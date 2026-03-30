@@ -166,4 +166,14 @@ final class ChatService
     }
 
     public function listTenantConversations(string $tenantId): array { return $this->convRepo->findByTenant($tenantId); }
+
+    public function getTotalUnreadCount(string $userId): int
+    {
+        $conversations = $this->getUserConversations($userId);
+        $total = 0;
+        foreach ($conversations as $conv) {
+            $total += $this->getUnreadCount($conv->getId(), $userId);
+        }
+        return $total;
+    }
 }
