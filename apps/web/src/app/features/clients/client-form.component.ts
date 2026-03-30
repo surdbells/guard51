@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, ArrowLeft, Save, Loader2 } from 'lucide-angular';
+import { LucideAngularModule, Save, ArrowLeft } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
@@ -9,65 +9,82 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-client-form',
   standalone: true,
-  imports: [RouterLink, FormsModule, LucideAngularModule, PageHeaderComponent],
+  imports: [FormsModule, LucideAngularModule, PageHeaderComponent],
   template: `
-    <g51-page-header [title]="isEdit() ? 'Edit Client' : 'Add New Client'" subtitle="Enter client company and contact details">
-      <a routerLink="/clients" class="btn-secondary flex items-center gap-1.5"><lucide-icon [img]="ArrowLeftIcon" [size]="16" /> Back</a>
+    <g51-page-header [title]="isEdit() ? 'Edit Client' : 'Add New Client'" subtitle="Client company details and contract">
+      <button class="btn-secondary flex items-center gap-2" (click)="goBack()"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
     </g51-page-header>
+    <div class="card p-6 max-w-3xl">
+      <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--text-primary)'">Company Information</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="sm:col-span-2"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Company Name *</label>
+          <input type="text" [(ngModel)]="form.company_name" class="input-base w-full" required /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Industry / Sector</label>
+          <select [(ngModel)]="form.industry" class="input-base w-full">
+            <option value="">Select</option><option value="banking">Banking & Finance</option><option value="oil_gas">Oil & Gas</option><option value="real_estate">Real Estate</option><option value="retail">Retail</option><option value="manufacturing">Manufacturing</option><option value="telecom">Telecom</option><option value="government">Government</option><option value="education">Education</option><option value="healthcare">Healthcare</option><option value="hospitality">Hospitality</option><option value="other">Other</option>
+          </select></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">City</label>
+          <input type="text" [(ngModel)]="form.city" class="input-base w-full" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">State</label>
+          <select [(ngModel)]="form.state" class="input-base w-full">
+            <option value="">Select</option>
+            @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
+          </select></div>
+      </div>
+      <div class="mb-6"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Address</label>
+        <textarea [(ngModel)]="form.address" rows="2" class="input-base w-full resize-none"></textarea></div>
 
-    <form (ngSubmit)="onSubmit()" class="max-w-3xl space-y-6">
-      <div class="card p-5">
-        <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--text-primary)'">Company Information</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="sm:col-span-2"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Company Name *</label>
-            <input type="text" [(ngModel)]="form.company_name" name="company_name" class="input-base w-full" required /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contact Name *</label>
-            <input type="text" [(ngModel)]="form.contact_name" name="contact_name" class="input-base w-full" required /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contact Phone *</label>
-            <input type="tel" [(ngModel)]="form.contact_phone" name="contact_phone" class="input-base w-full" required /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contact Email *</label>
-            <input type="email" [(ngModel)]="form.contact_email" name="contact_email" class="input-base w-full" required /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">City</label>
-            <input type="text" [(ngModel)]="form.city" name="city" class="input-base w-full" /></div>
-        </div>
+      <h3 class="text-sm font-semibold mb-4 mt-6" [style.color]="'var(--text-primary)'">Primary Contact</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contact Name *</label>
+          <input type="text" [(ngModel)]="form.contact_name" class="input-base w-full" required /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contact Phone *</label>
+          <input type="tel" [(ngModel)]="form.contact_phone" class="input-base w-full" required /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contact Email *</label>
+          <input type="email" [(ngModel)]="form.contact_email" class="input-base w-full" required /></div>
       </div>
 
-      <div class="card p-5">
-        <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--text-primary)'">Contract & Billing</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contract Start</label>
-            <input type="date" [(ngModel)]="form.contract_start" name="contract_start" class="input-base w-full" /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contract End</label>
-            <input type="date" [(ngModel)]="form.contract_end" name="contract_end" class="input-base w-full" /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Type</label>
-            <select [(ngModel)]="form.billing_type" name="billing_type" class="input-base w-full">
-              <option value="">—</option><option value="hourly">Hourly</option><option value="daily">Daily</option><option value="monthly">Monthly</option><option value="contract">Contract</option></select></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Rate (₦)</label>
-            <input type="number" [(ngModel)]="form.billing_rate" name="billing_rate" class="input-base w-full" /></div>
-        </div>
+      <h3 class="text-sm font-semibold mb-4 mt-6" [style.color]="'var(--text-primary)'">Contract & Billing</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contract Start</label>
+          <input type="date" [(ngModel)]="form.contract_start" class="input-base w-full" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Contract End</label>
+          <input type="date" [(ngModel)]="form.contract_end" class="input-base w-full" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Type</label>
+          <select [(ngModel)]="form.billing_type" class="input-base w-full">
+            <option value="">Select</option><option value="fixed">Fixed Monthly</option><option value="hourly">Hourly Rate</option><option value="per_guard">Per Guard</option><option value="custom">Custom</option></select></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Billing Rate (₦)</label>
+          <input type="number" [(ngModel)]="form.billing_rate" class="input-base w-full" placeholder="0.00" /></div>
       </div>
 
-      <button type="submit" [disabled]="saving()" class="btn-primary flex items-center gap-2">
-        @if (saving()) { <lucide-icon [img]="Loader2Icon" [size]="16" class="animate-spin" /> }
-        <lucide-icon [img]="SaveIcon" [size]="16" /> {{ isEdit() ? 'Update Client' : 'Create Client' }}
-      </button>
-    </form>
+      <div class="mb-6"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Notes</label>
+        <textarea [(ngModel)]="form.notes" rows="3" class="input-base w-full resize-none"></textarea></div>
+
+      <div class="flex justify-end gap-3 pt-4 border-t" [style.borderColor]="'var(--border-default)'">
+        <button (click)="goBack()" class="btn-secondary">Cancel</button>
+        <button (click)="onSave()" class="btn-primary flex items-center gap-2" [disabled]="saving()">
+          <lucide-icon [img]="SaveIcon" [size]="14" /> {{ isEdit() ? 'Update Client' : 'Create Client' }}
+        </button>
+      </div>
+    </div>
   `,
 })
 export class ClientFormComponent implements OnInit {
-  private api = inject(ApiService); private router = inject(Router);
-  private route = inject(ActivatedRoute); private toast = inject(ToastService);
-  readonly ArrowLeftIcon = ArrowLeft; readonly SaveIcon = Save; readonly Loader2Icon = Loader2;
+  private api = inject(ApiService); private toast = inject(ToastService);
+  private router = inject(Router); private route = inject(ActivatedRoute);
+  readonly SaveIcon = Save; readonly ArrowLeftIcon = ArrowLeft;
   readonly isEdit = signal(false); readonly saving = signal(false);
-  form: Record<string, any> = { company_name: '', contact_name: '', contact_email: '', contact_phone: '', city: '', contract_start: '', contract_end: '', billing_type: '', billing_rate: null };
+  private clientId: string | null = null;
+  form: any = { company_name: '', contact_name: '', contact_phone: '', contact_email: '', city: '', state: '', address: '', industry: '', contract_start: '', contract_end: '', billing_type: '', billing_rate: '', notes: '' };
+  states = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
 
   ngOnInit(): void {
-    const id = this.route.snapshot.params['id'];
-    if (id) { this.isEdit.set(true); this.api.get<any>(`/clients/${id}`).subscribe({ next: res => { if (res.data?.client) Object.assign(this.form, res.data.client); } }); }
+    this.clientId = this.route.snapshot.paramMap.get('id');
+    if (this.clientId && this.clientId !== 'new') {
+      this.isEdit.set(true);
+      this.api.get<any>(`/clients/${this.clientId}`).subscribe({ next: res => { if (res.data) { const c = res.data.client || res.data; Object.keys(this.form).forEach(k => { if (c[k] !== undefined) this.form[k] = c[k] || ''; }); } } });
+    }
   }
-  onSubmit(): void {
-    this.saving.set(true);
-    const req = this.isEdit() ? this.api.put(`/clients/${this.route.snapshot.params['id']}`, this.form) : this.api.post('/clients', this.form);
-    req.subscribe({ next: () => { this.saving.set(false); this.toast.success(this.isEdit() ? 'Client updated' : 'Client created'); this.router.navigate(['/clients']); }, error: () => this.saving.set(false) });
-  }
+  onSave(): void { this.saving.set(true); const url = this.isEdit() ? `/clients/${this.clientId}` : '/clients'; const req = this.isEdit() ? this.api.put(url, this.form) : this.api.post(url, this.form); req.subscribe({ next: () => { this.saving.set(false); this.toast.success(this.isEdit() ? 'Client updated' : 'Client created'); this.router.navigate(['/clients']); }, error: () => this.saving.set(false) }); }
+  goBack(): void { this.router.navigate(['/clients']); }
 }

@@ -4,6 +4,7 @@ import { NgClass } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
 import { MobileNavComponent } from '../mobile-nav/mobile-nav.component';
+import { ChatFabComponent } from '../../components/chat-fab/chat-fab.component';
 import { FeatureService } from '@core/services/feature.service';
 import { BrandingService } from '@core/services/branding.service';
 import { AuthStore } from '@core/services/auth.store';
@@ -11,7 +12,7 @@ import { AuthStore } from '@core/services/auth.store';
 @Component({
   selector: 'g51-shell',
   standalone: true,
-  imports: [RouterOutlet, NgClass, SidebarComponent, HeaderComponent, MobileNavComponent],
+  imports: [RouterOutlet, NgClass, SidebarComponent, HeaderComponent, MobileNavComponent, ChatFabComponent],
   template: `
     <!-- Desktop sidebar (hidden on mobile) -->
     <div class="hidden lg:block">
@@ -39,6 +40,9 @@ import { AuthStore } from '@core/services/auth.store';
 
     <!-- Mobile bottom nav (hidden on desktop) -->
     <g51-mobile-nav />
+
+    <!-- Floating chat button -->
+    <g51-chat-fab />
 
     <!-- Mobile sidebar overlay -->
     @if (mobileSidebarOpen()) {
