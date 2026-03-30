@@ -267,13 +267,13 @@ final class GuardService
         if (isset($data['emergency_contact_name'])) $guard->setEmergencyContactName($data['emergency_contact_name']);
         if (isset($data['emergency_contact_phone'])) $guard->setEmergencyContactPhone($data['emergency_contact_phone']);
         if (isset($data['hire_date'])) $guard->setHireDate(new \DateTimeImmutable($data['hire_date']));
-        if (isset($data['pay_type'])) $guard->setPayType(PayType::from($data['pay_type']));
+        if (!empty($data['pay_type'])) $guard->setPayType(PayType::from($data['pay_type']));
         if (isset($data['pay_rate'])) $guard->setPayRate((float) $data['pay_rate']);
         if (isset($data['bank_name'])) $guard->setBankName($data['bank_name']);
         if (isset($data['bank_account_number'])) $guard->setBankAccountNumber($data['bank_account_number']);
         if (isset($data['bank_account_name'])) $guard->setBankAccountName($data['bank_account_name']);
         if (isset($data['notes'])) $guard->setNotes($data['notes']);
-        if (isset($data['status'])) $guard->setStatus(GuardStatus::from($data['status']));
+        if (!empty($data['status'])) $guard->setStatus(GuardStatus::from($data['status']));
     }
 
     private function generateEmployeeNumber(string $tenantId): string

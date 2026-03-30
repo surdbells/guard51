@@ -33,7 +33,7 @@ import { ToastService } from '@core/services/toast.service';
               <div><p class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ p.title || 'Passdown' }}</p>
                 <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ p.from_guard_name || 'Guard' }} → {{ p.to_guard_name || 'Next shift' }} · {{ p.site_name || '' }} · {{ p.created_at }}</p></div>
               <div class="flex items-center gap-2">
-                <span class="badge text-[10px]" [ngClass]="p.priority === 'high' ? 'bg-red-50 text-red-600' : p.priority === 'medium' ? 'bg-amber-50 text-amber-600' : 'bg-gray-100 text-gray-500'">{{ p.priority }}</span>
+                <span class="badge text-[10px]" [ngClass]="p.priority === 'high' || p.priority === 'urgent' ? 'bg-red-50 text-red-600' : p.priority === 'medium' || p.priority === 'important' ? 'bg-amber-50 text-amber-600' : 'bg-gray-100 text-gray-500'">{{ p.priority }}</span>
                 @if (!p.is_acknowledged) { <button (click)="acknowledge(p)" class="btn-secondary text-xs py-1 px-2 flex items-center gap-1"><lucide-icon [img]="CheckIcon" [size]="12" /> Ack</button> }
                 @else { <span class="text-[10px] text-emerald-500 font-medium">Acknowledged</span> }
               </div>

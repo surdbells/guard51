@@ -183,7 +183,7 @@ final class ShiftService
             $shift->setGuardId($data['guard_id']);
         }
         if (isset($data['notes'])) $shift->setNotes($data['notes']);
-        if (isset($data['status'])) $shift->setStatus(ShiftStatus::from($data['status']));
+        if (!empty($data['status'])) $shift->setStatus(ShiftStatus::from($data['status']));
         if (isset($data['is_open'])) $shift->setIsOpen((bool) $data['is_open']);
         $this->shiftRepo->save($shift);
         return $shift;

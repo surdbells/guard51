@@ -170,7 +170,7 @@ final class TimeClockService
         $bc->setTenantId($tenantId)
             ->setName($data['name'])
             ->setDurationMinutes((int) $data['duration_minutes']);
-        if (isset($data['break_type'])) $bc->setBreakType(BreakType::from($data['break_type']));
+        if (!empty($data['break_type'])) $bc->setBreakType(BreakType::from($data['break_type']));
         if (isset($data['auto_start'])) $bc->setAutoStart((bool) $data['auto_start']);
         if (isset($data['auto_start_after_minutes'])) $bc->setAutoStartAfterMinutes((int) $data['auto_start_after_minutes']);
         if (isset($data['can_end_early'])) $bc->setCanEndEarly((bool) $data['can_end_early']);

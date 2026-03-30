@@ -109,6 +109,8 @@ export class SiteFormComponent implements OnInit {
   }
   onPhotoSelect(e: Event): void { const f = (e.target as HTMLInputElement).files?.[0]; if (f) { this.photoFile = f; const r = new FileReader(); r.onload = () => this.photoPreview.set(r.result as string); r.readAsDataURL(f); } }
   removePhoto(): void { this.photoPreview.set(null); this.photoFile = null; }
-  onSave(): void { this.saving.set(true); const url = this.isEdit() ? `/sites/${this.siteId}` : '/sites'; const req = this.isEdit() ? this.api.put(url, this.form) : this.api.post(url, this.form); req.subscribe({ next: () => { this.saving.set(false); this.toast.success(this.isEdit() ? 'Site updated' : 'Site created'); this.router.navigate(['/sites']); }, error: () => this.saving.set(false) }); }
+  submitted = false;
+  validate(): boolean { if (!this.form.name?.trim()) { this.toast.warning("Site name is required"); return false; } if (!this.form.latitude && !this.form.longitude) { this.toast.warning("GPS coordinates are recommended"); } return true; }
+  onSave(): void { this.submitted = true; if (!this.validate()) return; this.saving.set(true); const url = this.isEdit() ? `/sites/${this.siteId}` : '/sites'; const req = this.isEdit() ? this.api.put(url, this.form) : this.api.post(url, this.form); req.subscribe({ next: () => { this.saving.set(false); this.toast.success(this.isEdit() ? 'Site updated' : 'Site created'); this.router.navigate(['/sites']); }, error: () => this.saving.set(false) }); }
   goBack(): void { this.router.navigate(['/sites']); }
 }

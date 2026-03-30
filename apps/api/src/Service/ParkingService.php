@@ -46,7 +46,7 @@ final class ParkingService
         if (empty($data['name']) || !isset($data['capacity'])) throw ApiException::validation('name, capacity required.');
         $l = new ParkingLot();
         $l->setParkingAreaId($areaId)->setName($data['name'])->setCapacity((int) $data['capacity']);
-        if (isset($data['lot_type'])) $l->setLotType(ParkingLotType::from($data['lot_type']));
+        if (!empty($data['lot_type'])) $l->setLotType(ParkingLotType::from($data['lot_type']));
         $this->lotRepo->save($l);
         return $l;
     }
@@ -63,7 +63,7 @@ final class ParkingService
         if (isset($data['color'])) $v->setColor($data['color']);
         if (isset($data['owner_name'])) $v->setOwnerName($data['owner_name']);
         if (isset($data['owner_phone'])) $v->setOwnerPhone($data['owner_phone']);
-        if (isset($data['owner_type'])) $v->setOwnerType(OwnerType::from($data['owner_type']));
+        if (!empty($data['owner_type'])) $v->setOwnerType(OwnerType::from($data['owner_type']));
         $this->vehicleRepo->save($v);
         return $v;
     }

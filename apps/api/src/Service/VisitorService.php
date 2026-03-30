@@ -30,7 +30,7 @@ final class VisitorService
         if (isset($data['email'])) $v->setEmail($data['email']);
         if (isset($data['company'])) $v->setCompany($data['company']);
         if (isset($data['host_name'])) $v->setHostName($data['host_name']);
-        if (isset($data['id_type'])) $v->setIdType(IdDocType::from($data['id_type']));
+        if (!empty($data['id_type'])) $v->setIdType(IdDocType::from($data['id_type']));
         if (isset($data['id_number'])) $v->setIdNumber($data['id_number']);
         if (isset($data['photo_url'])) $v->setPhotoUrl($data['photo_url']);
         if (isset($data['vehicle_plate'])) $v->setVehiclePlate($data['vehicle_plate']);

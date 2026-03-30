@@ -24,7 +24,7 @@ final class TaskService
         $task = new Task();
         $task->setTenantId($tenantId)->setSiteId($data['site_id'])->setAssignedTo($data['assigned_to'])
             ->setAssignedBy($assignedBy)->setTitle($data['title'])->setDescription($data['description']);
-        if (isset($data['priority'])) $task->setPriority(Severity::from($data['priority']));
+        if (!empty($data['priority'])) $task->setPriority(Severity::from($data['priority']));
         if (isset($data['due_date'])) $task->setDueDate(new \DateTimeImmutable($data['due_date']));
         if (isset($data['attachments'])) $task->setAttachments($data['attachments']);
         $this->taskRepo->save($task);

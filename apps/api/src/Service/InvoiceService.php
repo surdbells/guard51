@@ -30,7 +30,7 @@ final class InvoiceService
         $inv = new Invoice();
         $inv->setTenantId($tenantId)->setClientId($data['client_id'])->setCreatedBy($createdBy)
             ->setInvoiceNumber($this->invoiceRepo->getNextInvoiceNumber($tenantId));
-        if (isset($data['type'])) $inv->setType(InvoiceType::from($data['type']));
+        if (!empty($data['type'])) $inv->setType(InvoiceType::from($data['type']));
         if (isset($data['issue_date'])) $inv->setIssueDate(new \DateTimeImmutable($data['issue_date']));
         if (isset($data['due_date'])) $inv->setDueDate(new \DateTimeImmutable($data['due_date']));
         if (isset($data['tax_rate'])) $inv->setTaxRate((float) $data['tax_rate']);

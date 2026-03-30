@@ -134,8 +134,8 @@ final class SiteService
             $updatedBy,
         );
 
-        if (isset($data['priority'])) $order->setPriority(PostOrderPriority::from($data['priority']));
-        if (isset($data['category'])) $order->setCategory(PostOrderCategory::from($data['category']));
+        if (!empty($data['priority'])) $order->setPriority(PostOrderPriority::from($data['priority']));
+        if (!empty($data['category'])) $order->setCategory(PostOrderCategory::from($data['category']));
         if (isset($data['effective_from'])) $order->setEffectiveFrom(new \DateTimeImmutable($data['effective_from']));
         if (array_key_exists('effective_to', $data)) {
             $order->setEffectiveTo($data['effective_to'] ? new \DateTimeImmutable($data['effective_to']) : null);
@@ -191,7 +191,7 @@ final class SiteService
         if (isset($data['longitude'])) $site->setLongitude((float) $data['longitude']);
         if (isset($data['geofence_radius'])) $site->setGeofenceRadius((int) $data['geofence_radius']);
         if (isset($data['geofence_polygon'])) $site->setGeofencePolygon($data['geofence_polygon']);
-        if (isset($data['geofence_type'])) $site->setGeofenceType(GeofenceType::from($data['geofence_type']));
+        if (!empty($data['geofence_type'])) $site->setGeofenceType(GeofenceType::from($data['geofence_type']));
         if (isset($data['contact_name'])) $site->setContactName($data['contact_name']);
         if (isset($data['contact_phone'])) $site->setContactPhone($data['contact_phone']);
         if (isset($data['contact_email'])) $site->setContactEmail($data['contact_email']);
@@ -199,15 +199,15 @@ final class SiteService
         if (isset($data['client_id'])) $site->setClientId($data['client_id']);
         if (isset($data['notes'])) $site->setNotes($data['notes']);
         if (isset($data['photo_url'])) $site->setPhotoUrl($data['photo_url']);
-        if (isset($data['status'])) $site->setStatus(SiteStatus::from($data['status']));
+        if (!empty($data['status'])) $site->setStatus(SiteStatus::from($data['status']));
     }
 
     private function hydratePostOrder(PostOrder $order, array $data): void
     {
         if (isset($data['title'])) $order->setTitle($data['title']);
         if (isset($data['instructions'])) $order->setInstructions($data['instructions']);
-        if (isset($data['priority'])) $order->setPriority(PostOrderPriority::from($data['priority']));
-        if (isset($data['category'])) $order->setCategory(PostOrderCategory::from($data['category']));
+        if (!empty($data['priority'])) $order->setPriority(PostOrderPriority::from($data['priority']));
+        if (!empty($data['category'])) $order->setCategory(PostOrderCategory::from($data['category']));
         if (isset($data['effective_from'])) $order->setEffectiveFrom(new \DateTimeImmutable($data['effective_from']));
         if (array_key_exists('effective_to', $data)) {
             $order->setEffectiveTo($data['effective_to'] ? new \DateTimeImmutable($data['effective_to']) : null);

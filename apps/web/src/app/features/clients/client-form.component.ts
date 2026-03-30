@@ -85,6 +85,8 @@ export class ClientFormComponent implements OnInit {
       this.api.get<any>(`/clients/${this.clientId}`).subscribe({ next: res => { if (res.data) { const c = res.data.client || res.data; Object.keys(this.form).forEach(k => { if (c[k] !== undefined) this.form[k] = c[k] || ''; }); } } });
     }
   }
-  onSave(): void { this.saving.set(true); const url = this.isEdit() ? `/clients/${this.clientId}` : '/clients'; const req = this.isEdit() ? this.api.put(url, this.form) : this.api.post(url, this.form); req.subscribe({ next: () => { this.saving.set(false); this.toast.success(this.isEdit() ? 'Client updated' : 'Client created'); this.router.navigate(['/clients']); }, error: () => this.saving.set(false) }); }
+  submitted = false;
+  validate(): boolean { if (!this.form.company_name?.trim()) { this.toast.warning("Company name is required"); return false; } if (!this.form.contact_name?.trim()) { this.toast.warning("Contact name is required"); return false; } if (!this.form.contact_email?.trim()) { this.toast.warning("Contact email is required"); return false; } if (this.form.contact_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.contact_email)) { this.toast.warning("Invalid email format"); return false; } return true; }
+  onSave(): void { this.submitted = true; if (!this.validate()) return; this.saving.set(true); const url = this.isEdit() ? `/clients/${this.clientId}` : '/clients'; const req = this.isEdit() ? this.api.put(url, this.form) : this.api.post(url, this.form); req.subscribe({ next: () => { this.saving.set(false); this.toast.success(this.isEdit() ? 'Client updated' : 'Client created'); this.router.navigate(['/clients']); }, error: () => this.saving.set(false) }); }
   goBack(): void { this.router.navigate(['/clients']); }
 }

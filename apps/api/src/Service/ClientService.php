@@ -140,8 +140,8 @@ final class ClientService
         if (isset($data['contract_start'])) $client->setContractStart(new \DateTimeImmutable($data['contract_start']));
         if (isset($data['contract_end'])) $client->setContractEnd(new \DateTimeImmutable($data['contract_end']));
         if (isset($data['billing_rate'])) $client->setBillingRate((float) $data['billing_rate']);
-        if (isset($data['billing_type'])) $client->setBillingType(BillingType::from($data['billing_type']));
-        if (isset($data['status'])) $client->setStatus(ClientStatus::from($data['status']));
+        if (!empty($data['billing_type'])) $client->setBillingType(BillingType::from($data['billing_type']));
+        if (!empty($data['status'])) $client->setStatus(ClientStatus::from($data['status']));
         if (isset($data['notes'])) $client->setNotes($data['notes']);
     }
 }

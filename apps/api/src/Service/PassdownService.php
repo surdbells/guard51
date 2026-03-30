@@ -29,7 +29,7 @@ final class PassdownService
             ->setContent($data['content']);
         if (isset($data['shift_id'])) $log->setShiftId($data['shift_id']);
         if (isset($data['incoming_guard_id'])) $log->setIncomingGuardId($data['incoming_guard_id']);
-        if (isset($data['priority'])) $log->setPriority(PassdownPriority::from($data['priority']));
+        if (!empty($data['priority'])) $log->setPriority(PassdownPriority::from($data['priority']));
         if (isset($data['attachments'])) $log->setAttachments($data['attachments']);
         $this->passdownRepo->save($log);
         $this->logger->info('Passdown created.', ['site_id' => $data['site_id']]);

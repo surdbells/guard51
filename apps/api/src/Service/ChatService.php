@@ -74,7 +74,7 @@ final class ChatService
 
         $msg = new ChatMessage();
         $msg->setConversationId($conversationId)->setSenderId($senderId)->setContent($data['content']);
-        if (isset($data['message_type'])) $msg->setMessageType(MessageType::from($data['message_type']));
+        if (!empty($data['message_type'])) $msg->setMessageType(MessageType::from($data['message_type']));
         if (isset($data['media_url'])) $msg->setMediaUrl($data['media_url']);
         if (isset($data['lat'])) $msg->setLatitude((float) $data['lat']);
         if (isset($data['lng'])) $msg->setLongitude((float) $data['lng']);
