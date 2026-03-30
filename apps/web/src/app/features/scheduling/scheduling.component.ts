@@ -119,10 +119,31 @@ export class SchedulingComponent implements OnInit {
 
   weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   chartSeries: StackedBarSeries[] = [
-    { name: 'Confirmed', data: [8, 10, 9, 8, 10, 4, 3], color: 'var(--color-success)' },
-    { name: 'Open', data: [2, 0, 1, 2, 0, 2, 1], color: 'var(--color-warning)' },
-    { name: 'Missed', data: [0, 1, 0, 0, 1, 0, 0], color: 'var(--color-danger)' },
+    { name: 'Confirmed', data: [0, 0, 0, 0, 0, 0, 0], color: 'var(--color-success)' },
+    { name: 'Open', data: [0, 0, 0, 0, 0, 0, 0], color: 'var(--color-warning)' },
+    { name: 'Missed', data: [0, 0, 0, 0, 0, 0, 0], color: 'var(--color-danger)' },
   ];
+
+  private updateChartFromShifts(): void {
+    const confirmed = [0, 0, 0, 0, 0, 0, 0];
+    const open = [0, 0, 0, 0, 0, 0, 0];
+    const missed = [0, 0, 0, 0, 0, 0, 0];
+    for (const s of this.shifts()) {
+      const d = new Date(s.shift_date || s.date);
+      const day = (d.getDay() + 6) % 7; // Mon=0
+      if (day >= 0 && day < 7) {
+        if (s.status === 'confirmed' || s.status === 'completed' || s.status === 'in_progress') confirmed[day]++;
+        else if (s.status === 'draft' || s.status === 'published' || s.is_open) open[day]++;
+        else if (s.status === 'missed' || s.status === 'cancelled') missed[day]++;
+        else confirmed[day]++;
+      }
+    }
+    this.chartSeries = [
+      { name: 'Confirmed', data: confirmed, color: 'var(--color-success)' },
+      { name: 'Open', data: open, color: 'var(--color-warning)' },
+      { name: 'Missed', data: missed, color: 'var(--color-danger)' },
+    ];
+  }
 
   weekLabel = () => {
     const d = new Date();
@@ -157,7 +178,19 @@ export class SchedulingComponent implements OnInit {
     if (this.filterSiteId) url += `site_id=${this.filterSiteId}&`;
     if (this.filterGuardId) url += `guard_id=${this.filterGuardId}&`;
     this.api.get<any>(url).subscribe({
-      next: res => { if (res.data) { this.shifts.set(res.data.shifts || []); this.stats.set({ total: res.data.total || 0, confirmed: 0, open: 0, swaps: 0 }); } }
+      next: res => {
+        if (res.data) {
+          this.shifts.set(res.data.shifts || []);
+          const s = res.data.shifts || [];
+          this.stats.set({
+            total: s.length,
+            confirmed: s.filter((x: any) => x.status === 'confirmed' || x.status === 'completed').length,
+            open: s.filter((x: any) => x.is_open || x.status === 'draft' || x.status === 'published').length,
+            swaps: 0,
+          });
+          this.updateChartFromShifts();
+        }
+      }
     });
   }
 }

@@ -131,35 +131,117 @@ import { ToastService } from '@core/services/toast.service';
     </g51-modal>
 
     @if (activeTab() === 'Watch Feed') {
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        @for (w of watchFeed; track w.id) {
-          <div class="card overflow-hidden card-hover">
-            <div class="aspect-video bg-[var(--surface-muted)] flex items-center justify-center">
-              <lucide-icon [img]="CameraIcon" [size]="24" [style.color]="'var(--text-tertiary)'" />
-            </div>
-            <div class="p-3">
-              <p class="text-xs font-medium" [style.color]="'var(--text-primary)'">{{ w.caption }}</p>
-              <p class="text-[10px]" [style.color]="'var(--text-tertiary)'">{{ w.guard }} • {{ w.time }}</p>
-            </div>
+      <div class="max-w-2xl">
+        @if (!watchFeed().length) {
+          <g51-empty-state title="No Watch Feed" message="Guard watch mode entries will appear here as a live timeline." [icon]="CameraIcon" />
+        } @else {
+          <div class="relative pl-8 space-y-0">
+            <!-- Timeline line -->
+            <div class="absolute left-3 top-2 bottom-2 w-px" [style.background]="'var(--border-default)'"></div>
+            @for (w of watchFeed(); track w.id || $index) {
+              <div class="relative pb-6">
+                <!-- Timeline dot -->
+                <div class="absolute left-[-21px] top-1 h-3 w-3 rounded-full border-2" [style.borderColor]="'var(--color-brand-500)'" [style.background]="'var(--surface-card)'"></div>
+                <div class="card p-4 card-hover ml-2">
+                  <div class="flex items-start gap-3">
+                    @if (w.media_url || w.photo_url) {
+                      <img [src]="w.media_url || w.photo_url" class="h-16 w-16 rounded-lg object-cover shrink-0" />
+                    } @else {
+                      <div class="h-16 w-16 rounded-lg flex items-center justify-center shrink-0" [style.background]="'var(--surface-muted)'">
+                        <lucide-icon [img]="CameraIcon" [size]="20" [style.color]="'var(--text-tertiary)'" />
+                      </div>
+                    }
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium" [style.color]="'var(--text-primary)'">{{ w.caption || w.description || w.content || 'Watch entry' }}</p>
+                      <p class="text-xs mt-1" [style.color]="'var(--text-tertiary)'">
+                        {{ w.guard_name || w.guard || 'Guard' }} · {{ w.site_name || '' }}
+                      </p>
+                      <div class="flex items-center gap-3 mt-2">
+                        <span class="text-[10px] px-1.5 py-0.5 rounded" [style.background]="'var(--surface-muted)'" [style.color]="'var(--text-tertiary)'">
+                          {{ w.media_type || 'photo' }}
+                        </span>
+                        <span class="text-[10px]" [style.color]="'var(--text-tertiary)'">{{ w.recorded_at || w.time || w.created_at }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         }
       </div>
     }
 
-    <g51-modal [open]="showCreateDAR()" title="New Daily Activity Report" maxWidth="560px" (closed)="showCreateDAR.set(false)">
-      <div class="space-y-3">
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Report *</label>
-          <textarea [(ngModel)]="darForm.content" rows="6" class="input-base w-full resize-none" placeholder="Describe activities, incidents, observations..."></textarea></div>
+    <g51-modal [open]="showCreateDAR()" title="New Daily Activity Report" maxWidth="680px" (closed)="showCreateDAR.set(false)">
+      <div class="space-y-4">
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Weather</label>
-            <input type="text" [(ngModel)]="darForm.weather" class="input-base w-full" placeholder="Clear skies" /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Date</label>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Report Date *</label>
             <input type="date" [(ngModel)]="darForm.report_date" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
+            <select [(ngModel)]="darForm.site_id" class="input-base w-full">
+              <option value="">Select site</option>
+              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+            </select></div>
         </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Shift Start</label>
+            <input type="time" [(ngModel)]="darForm.shift_start" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Shift End</label>
+            <input type="time" [(ngModel)]="darForm.shift_end" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Weather</label>
+            <select [(ngModel)]="darForm.weather" class="input-base w-full">
+              <option value="">Select</option><option value="clear">Clear</option><option value="cloudy">Cloudy</option>
+              <option value="rain">Rain</option><option value="storm">Storm</option><option value="harmattan">Harmattan</option>
+            </select></div>
+        </div>
+
+        <div><label class="block text-xs font-semibold mb-2" [style.color]="'var(--text-primary)'">Activities Performed</label>
+          <div class="space-y-2">
+            @for (act of darForm.activities; track $index; let i = $index) {
+              <div class="flex items-center gap-2">
+                <input type="time" [(ngModel)]="act.time" class="input-base w-24 text-xs" />
+                <input type="text" [(ngModel)]="act.description" class="input-base flex-1 text-xs" placeholder="Activity description..." />
+                <button (click)="darForm.activities.splice(i, 1)" class="text-red-400 text-xs">✕</button>
+              </div>
+            }
+            <button (click)="darForm.activities.push({time: '', description: ''})" class="text-xs text-blue-500 hover:underline">+ Add Activity</button>
+          </div>
+        </div>
+
+        <div><label class="block text-xs font-semibold mb-2" [style.color]="'var(--text-primary)'">Incidents / Observations</label>
+          <textarea [(ngModel)]="darForm.incidents_summary" rows="3" class="input-base w-full resize-none" placeholder="Any incidents, suspicious activity, or notable observations..."></textarea></div>
+
+        <div><label class="block text-xs font-semibold mb-2" [style.color]="'var(--text-primary)'">Patrol Summary</label>
+          <div class="grid grid-cols-3 gap-3">
+            <div><label class="block text-[10px] mb-0.5" [style.color]="'var(--text-tertiary)'">Patrols Completed</label>
+              <input type="number" [(ngModel)]="darForm.patrols_completed" class="input-base w-full" min="0" /></div>
+            <div><label class="block text-[10px] mb-0.5" [style.color]="'var(--text-tertiary)'">Checkpoints Scanned</label>
+              <input type="number" [(ngModel)]="darForm.checkpoints_scanned" class="input-base w-full" min="0" /></div>
+            <div><label class="block text-[10px] mb-0.5" [style.color]="'var(--text-tertiary)'">Visitors Processed</label>
+              <input type="number" [(ngModel)]="darForm.visitors_processed" class="input-base w-full" min="0" /></div>
+          </div>
+        </div>
+
+        <div><label class="block text-xs font-semibold mb-2" [style.color]="'var(--text-primary)'">Equipment Status</label>
+          <textarea [(ngModel)]="darForm.equipment_status" rows="2" class="input-base w-full resize-none" placeholder="Radio, flashlight, keys, uniform condition..."></textarea></div>
+
+        <div><label class="block text-xs font-semibold mb-2" [style.color]="'var(--text-primary)'">Evidence / Photos</label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            @for (f of darEvidence; track f.name; let i = $index) {
+              <span class="px-2 py-1 rounded text-[10px] flex items-center gap-1" [style.background]="'var(--surface-muted)'" [style.color]="'var(--text-secondary)'">{{ f.name }} <button (click)="darEvidence.splice(i, 1)" class="text-red-400">✕</button></span>
+            }
+          </div>
+          <label class="btn-secondary inline-flex items-center gap-2 cursor-pointer text-xs">
+            Attach Files <input type="file" accept="image/*,.pdf" multiple (change)="onDarEvidence($event)" class="hidden" />
+          </label>
+        </div>
+
+        <div><label class="block text-xs font-semibold mb-2" [style.color]="'var(--text-primary)'">Handover Notes</label>
+          <textarea [(ngModel)]="darForm.handover_notes" rows="2" class="input-base w-full resize-none" placeholder="Notes for the incoming shift..."></textarea></div>
       </div>
       <div modal-footer>
         <button (click)="showCreateDAR.set(false)" class="btn-secondary">Cancel</button>
-        <button (click)="onCreateDAR()" class="btn-primary">Save as Draft</button>
+        <button (click)="onCreateDAR()" class="btn-primary">Submit Report</button>
       </div>
     </g51-modal>
   `,
@@ -175,20 +257,46 @@ export class ReportsComponent implements OnInit {
   readonly dars = signal<any[]>([]);
   readonly templates = signal<any[]>([]);
   readonly stats = signal({ darsToday: 0, pendingReview: 0, approved: 0, watchPhotos: 0 });
-  darForm = { content: '', weather: '', report_date: new Date().toISOString().substring(0, 10) };
+  darForm: any = {
+    report_date: new Date().toISOString().substring(0, 10), site_id: '',
+    shift_start: '', shift_end: '', weather: '',
+    activities: [{ time: '', description: '' }],
+    incidents_summary: '', patrols_completed: 0, checkpoints_scanned: 0,
+    visitors_processed: 0, equipment_status: '', handover_notes: '',
+  };
+  darEvidence: File[] = [];
+  readonly sites = signal<any[]>([]);
   tplForm: { name: string; description: string; fields: { name: string; type: string; required: boolean }[] } = { name: '', description: '', fields: [] };
-  watchFeed = [
-    { id: '1', caption: 'Broken fence near parking', guard: 'Musa I.', time: '06:30 AM' },
-    { id: '2', caption: 'New visitor log', guard: 'Chika N.', time: '07:15 AM' },
-    { id: '3', caption: 'Gate lock replaced', guard: 'Musa I.', time: '09:00 AM' },
-  ];
+  readonly watchFeed = signal<any[]>([]);
   ngOnInit(): void {
     this.api.get<any>('/reports/dar').subscribe({ next: res => { if (res.data) this.dars.set(res.data.reports || []); } });
     this.api.get<any>('/reports/templates').subscribe({ next: res => { if (res.data) this.templates.set(res.data.templates || []); } });
+    this.api.get<any>('/sites').subscribe({ next: res => this.sites.set(res.data?.sites || res.data || []) });
+    this.api.get<any>('/reports/watch-feed').subscribe({ next: res => { if (res.data) this.watchFeed.set(res.data.feed || res.data || []); }, error: () => {} });
+  }
+  onDarEvidence(e: Event): void {
+    const files = (e.target as HTMLInputElement).files;
+    if (files) for (let i = 0; i < files.length && this.darEvidence.length < 5; i++) this.darEvidence.push(files[i]);
+    (e.target as HTMLInputElement).value = '';
   }
   onCreateDAR(): void {
-    this.api.post('/reports/dar', this.darForm).subscribe({
-      next: () => { this.showCreateDAR.set(false); this.toast.success('Report saved'); this.ngOnInit(); },
+    const fd = new FormData();
+    // Flatten the form — serialize activities as JSON
+    fd.append('report_date', this.darForm.report_date);
+    fd.append('site_id', this.darForm.site_id);
+    fd.append('shift_start', this.darForm.shift_start);
+    fd.append('shift_end', this.darForm.shift_end);
+    fd.append('weather', this.darForm.weather);
+    fd.append('activities', JSON.stringify(this.darForm.activities.filter((a: any) => a.description)));
+    fd.append('incidents_summary', this.darForm.incidents_summary);
+    fd.append('patrols_completed', String(this.darForm.patrols_completed));
+    fd.append('checkpoints_scanned', String(this.darForm.checkpoints_scanned));
+    fd.append('visitors_processed', String(this.darForm.visitors_processed));
+    fd.append('equipment_status', this.darForm.equipment_status);
+    fd.append('handover_notes', this.darForm.handover_notes);
+    this.darEvidence.forEach((f, i) => fd.append(`evidence_${i}`, f));
+    this.api.post('/reports/dar', fd).subscribe({
+      next: () => { this.showCreateDAR.set(false); this.toast.success('Report submitted'); this.darEvidence = []; this.ngOnInit(); },
     });
   }
 

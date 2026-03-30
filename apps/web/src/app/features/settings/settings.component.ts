@@ -13,7 +13,7 @@ import { ToastService } from '@core/services/toast.service';
   template: `
     <g51-page-header title="Company Settings" subtitle="Manage your organization, branding, and preferences" />
     <div class="flex gap-1 mb-6">
-      @for (tab of ['General', 'Branding', 'Notifications', 'Integrations']; track tab) {
+      @for (tab of ['General', 'Branding', 'Notifications']; track tab) {
         <button (click)="activeTab.set(tab)" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
           [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
           [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>

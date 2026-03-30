@@ -2,7 +2,7 @@ import { Component, inject, input, output, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { LucideAngularModule, LayoutDashboard, Users, Building2, MapPin, Calendar, Clock, Navigation, FileText, AlertTriangle, Radio, Receipt, Wallet, MessageSquare, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, Search, Shield, Boxes, AppWindow, BarChart3, Bell } from 'lucide-angular';
+import { LucideAngularModule, LayoutDashboard, Users, Building2, MapPin, Calendar, Clock, Navigation, FileText, AlertTriangle, Radio, Receipt, Wallet, MessageSquare, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, Search, Shield, Boxes, AppWindow, BarChart3, Bell, UserCheck, Route, Car, DoorOpen, KeyRound, Award } from 'lucide-angular';
 import { AuthStore } from '@core/services/auth.store';
 import { FeatureService } from '@core/services/feature.service';
 import { BrandingService } from '@core/services/branding.service';
@@ -177,9 +177,13 @@ export class SidebarComponent {
         { label: 'Scheduling', translateKey: 'nav.scheduling', icon: Calendar, route: '/scheduling', moduleKey: 'scheduling' },
         { label: 'Attendance', translateKey: 'nav.attendance', icon: Clock, route: '/attendance', moduleKey: 'time_clock' },
         { label: 'Live Tracker', translateKey: 'nav.tracker', icon: Navigation, route: '/tracker', moduleKey: 'live_tracker' },
+        { label: 'Site Tours', translateKey: 'nav.tours', icon: Route, route: '/tours', moduleKey: 'guard_tour' },
         { label: 'Reports', translateKey: 'nav.reports', icon: FileText, route: '/reports', moduleKey: 'daily_activity_report' },
         { label: 'Incidents', translateKey: 'nav.incidents', icon: AlertTriangle, route: '/incidents', moduleKey: 'incident_reporting' },
         { label: 'Dispatch', translateKey: 'nav.dispatch', icon: Radio, route: '/dispatch', moduleKey: 'dispatcher_console' },
+        { label: 'Visitors', translateKey: 'nav.visitors', icon: DoorOpen, route: '/visitors', moduleKey: 'visitor_management' },
+        { label: 'Vehicle Patrol', translateKey: 'nav.vehicle_patrol', icon: Car, route: '/vehicle-patrol', moduleKey: 'vehicle_patrol' },
+        { label: 'Parking', translateKey: 'nav.parking', icon: Car, route: '/parking', moduleKey: 'parking' },
       ],
     },
     {
@@ -192,12 +196,15 @@ export class SidebarComponent {
     {
       label: 'Communication', translateKey: 'nav_sections.communication',
       items: [
-        { label: 'Messenger', translateKey: 'nav.messenger', icon: MessageSquare, route: '/messenger', moduleKey: 'messenger' },
+        { label: 'Messenger', translateKey: 'nav.messenger', icon: MessageSquare, route: '/chat', moduleKey: 'messenger' },
       ],
     },
     {
       label: 'Administration', translateKey: 'nav_sections.admin',
       items: [
+        { label: 'Team Management', translateKey: 'nav.users', icon: UserCheck, route: '/users' },
+        { label: 'Licenses', translateKey: 'nav.licenses', icon: Award, route: '/licenses' },
+        { label: 'Security', translateKey: 'nav.security', icon: KeyRound, route: '/security' },
         { label: 'Settings', translateKey: 'nav.settings', icon: Settings, route: '/settings' },
       ],
     },
