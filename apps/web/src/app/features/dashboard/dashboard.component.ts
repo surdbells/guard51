@@ -1,124 +1,140 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
-import { LucideAngularModule, Shield, MapPin, AlertTriangle, Clock, Users, Building2, TrendingUp, Plus } from 'lucide-angular';
+import { RouterLink } from '@angular/router';
+import { LucideAngularModule, Shield, MapPin, AlertTriangle, Clock, Users, Plus, RefreshCw } from 'lucide-angular';
 import { AuthStore } from '@core/services/auth.store';
+import { ApiService } from '@core/services/api.service';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
 import { BarChartComponent, BarChartData } from '@shared/components/charts/bar-chart.component';
 import { LineChartComponent, LineChartSeries } from '@shared/components/charts/line-chart.component';
 import { DonutChartComponent, DonutChartData } from '@shared/components/charts/donut-chart.component';
-import { SparklineComponent } from '@shared/components/charts/sparkline.component';
+import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'g51-dashboard',
   standalone: true,
   imports: [
-    TranslateModule, LucideAngularModule, PageHeaderComponent, StatsCardComponent,
-    BarChartComponent, LineChartComponent, DonutChartComponent, SparklineComponent,
+    RouterLink, LucideAngularModule, PageHeaderComponent, StatsCardComponent,
+    BarChartComponent, LineChartComponent, DonutChartComponent, LoadingSpinnerComponent,
   ],
   template: `
-    <g51-page-header [title]="greeting()" [subtitle]="'dashboard.overview' | translate">
-      <button class="btn-primary flex items-center gap-2">
+    <g51-page-header [title]="greeting()" subtitle="Company overview and operational metrics">
+      <button class="btn-secondary flex items-center gap-2" (click)="refresh()">
+        <lucide-icon [img]="RefreshIcon" [size]="14" /> Refresh
+      </button>
+      <button class="btn-primary flex items-center gap-2" routerLink="/sites/new">
         <lucide-icon [img]="PlusIcon" [size]="16" /> Add Site
       </button>
     </g51-page-header>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
-      <g51-stats-card label="{{ 'dashboard.guards_on_duty' | translate }}" value="24" [icon]="ShieldIcon" [trend]="4.2" [trendLabel]="'dashboard.from_last_month' | translate" />
-      <g51-stats-card label="{{ 'dashboard.total_sites' | translate }}" value="12" [icon]="MapPinIcon" [trend]="1.2" [trendLabel]="'dashboard.from_last_month' | translate" />
-      <g51-stats-card label="{{ 'dashboard.incidents_today' | translate }}" value="2" [icon]="AlertTriangleIcon" [trend]="-15" [trendLabel]="'dashboard.from_last_month' | translate" />
-      <g51-stats-card label="{{ 'dashboard.attendance_rate' | translate }}" value="96.4%" [icon]="ClockIcon" [trend]="2.1" [trendLabel]="'dashboard.from_last_month' | translate" />
-    </div>
+    @if (loading()) {
+      <g51-loading [fullPage]="false" />
+    } @else {
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
+        <g51-stats-card label="Total Guards" [value]="stats().total_guards" [icon]="ShieldIcon" />
+        <g51-stats-card label="Active Guards" [value]="stats().active_guards" [icon]="UsersIcon" />
+        <g51-stats-card label="Total Sites" [value]="stats().total_sites" [icon]="MapPinIcon" />
+        <g51-stats-card label="Total Clients" [value]="stats().total_clients" [icon]="ClockIcon" />
+      </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-      <!-- Attendance Trend (2/3) -->
-      <div class="lg:col-span-2 card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-semibold" [style.color]="'var(--text-primary)'">Attendance Trend</h3>
-          <div class="flex items-center gap-1 text-xs">
-            <button class="px-3 py-1 rounded-md font-medium" [style.background]="'var(--surface-muted)'" [style.color]="'var(--text-primary)'">Last 7 days</button>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="lg:col-span-2 card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold" [style.color]="'var(--text-primary)'">Attendance ({{ stats().attendance_rate }}%)</h3>
           </div>
-        </div>
-        <g51-line-chart [seriesData]="attendanceSeries" [labels]="attendanceLabels" [height]="240" />
-      </div>
-
-      <!-- Incidents by Category (1/3) -->
-      <div class="card p-5">
-        <h3 class="text-base font-semibold mb-4" [style.color]="'var(--text-primary)'">Incidents by Category</h3>
-        <g51-donut-chart [data]="incidentData" [size]="130" [strokeWidth]="20" centerValue="14" centerLabel="Total" />
-      </div>
-    </div>
-
-    <!-- Bottom Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <!-- Guard Hours -->
-      <div class="card p-5">
-        <h3 class="text-base font-semibold mb-4" [style.color]="'var(--text-primary)'">Guard Hours This Week</h3>
-        <g51-bar-chart [data]="guardHoursData" [height]="220" />
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="card p-5">
-        <h3 class="text-base font-semibold mb-4" [style.color]="'var(--text-primary)'">Recent Activity</h3>
-        <div class="space-y-3">
-          @for (item of recentActivity; track item.id) {
-            <div class="flex items-start gap-3 py-2 border-b last:border-b-0" [style.borderColor]="'var(--border-default)'">
-              <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium"
-                [style.background]="'var(--surface-muted)'" [style.color]="'var(--text-secondary)'">
-                {{ item.initials }}
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm" [style.color]="'var(--text-primary)'">{{ item.text }}</p>
-                <p class="text-xs mt-0.5" [style.color]="'var(--text-tertiary)'">{{ item.time }}</p>
-              </div>
+          @if (snapshotSeries().length) {
+            <g51-line-chart [seriesData]="snapshotSeries()" [labels]="snapshotLabels()" [height]="240" />
+          } @else {
+            <div class="h-60 flex items-center justify-center" [style.color]="'var(--text-tertiary)'">
+              <p class="text-sm">No snapshot data yet. Data appears after the first day of operations.</p>
             </div>
           }
         </div>
+
+        <div class="card p-5">
+          <h3 class="text-base font-semibold mb-4" [style.color]="'var(--text-primary)'">Quick Stats</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between py-2 border-b" [style.borderColor]="'var(--border-default)'">
+              <span class="text-xs" [style.color]="'var(--text-secondary)'">Guards on duty</span>
+              <span class="text-sm font-bold" [style.color]="'var(--text-primary)'">{{ stats().active_guards }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b" [style.borderColor]="'var(--border-default)'">
+              <span class="text-xs" [style.color]="'var(--text-secondary)'">Attendance rate</span>
+              <span class="text-sm font-bold" [style.color]="'var(--text-primary)'">{{ stats().attendance_rate }}%</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b" [style.borderColor]="'var(--border-default)'">
+              <span class="text-xs" [style.color]="'var(--text-secondary)'">Active sites</span>
+              <span class="text-sm font-bold" [style.color]="'var(--text-primary)'">{{ stats().total_sites }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <span class="text-xs" [style.color]="'var(--text-secondary)'">Clients served</span>
+              <span class="text-sm font-bold" [style.color]="'var(--text-primary)'">{{ stats().total_clients }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      @if (todaySnapshot()) {
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="card p-4"><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Clock-ins Today</p>
+            <p class="text-xl font-bold" [style.color]="'var(--text-primary)'">{{ todaySnapshot().total_clock_ins || 0 }}</p></div>
+          <div class="card p-4"><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Incidents Today</p>
+            <p class="text-xl font-bold" [style.color]="'var(--color-danger)'">{{ todaySnapshot().total_incidents || 0 }}</p></div>
+          <div class="card p-4"><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Tours Completed</p>
+            <p class="text-xl font-bold" [style.color]="'var(--text-primary)'">{{ todaySnapshot().total_tours || 0 }}</p></div>
+          <div class="card p-4"><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Reports Submitted</p>
+            <p class="text-xl font-bold" [style.color]="'var(--text-primary)'">{{ todaySnapshot().total_reports || 0 }}</p></div>
+        </div>
+      }
+    }
   `,
 })
 export class DashboardComponent implements OnInit {
   private auth = inject(AuthStore);
+  private api = inject(ApiService);
   readonly ShieldIcon = Shield; readonly MapPinIcon = MapPin; readonly AlertTriangleIcon = AlertTriangle;
-  readonly ClockIcon = Clock; readonly PlusIcon = Plus;
+  readonly ClockIcon = Clock; readonly UsersIcon = Users; readonly PlusIcon = Plus; readonly RefreshIcon = RefreshCw;
 
-  greeting = signal('');
+  readonly greeting = signal('');
+  readonly loading = signal(true);
+  readonly stats = signal<any>({ total_guards: 0, active_guards: 0, total_sites: 0, total_clients: 0, attendance_rate: 0 });
+  readonly todaySnapshot = signal<any>(null);
+  readonly snapshotSeries = signal<LineChartSeries[]>([]);
+  readonly snapshotLabels = signal<string[]>([]);
 
   ngOnInit(): void {
     const name = this.auth.user()?.first_name || 'there';
     const hour = new Date().getHours();
     const prefix = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
     this.greeting.set(`${prefix}, ${name}`);
+    this.loadData();
   }
 
-  // Demo data
-  attendanceLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  attendanceSeries: LineChartSeries[] = [
-    { name: 'Present', data: [22, 24, 21, 23, 24, 18, 16], color: 'var(--color-brand-500)' },
-    { name: 'Expected', data: [24, 24, 24, 24, 24, 20, 18], color: 'var(--color-accent-500)' },
-  ];
+  refresh(): void { this.loadData(); }
 
-  incidentData: DonutChartData[] = [
-    { label: 'Unauthorized Access', value: 5, color: 'var(--color-danger)' },
-    { label: 'Equipment Issue', value: 4, color: 'var(--color-warning)' },
-    { label: 'Suspicious Activity', value: 3, color: 'var(--color-brand-500)' },
-    { label: 'Other', value: 2, color: 'var(--color-info)' },
-  ];
+  private loadData(): void {
+    this.loading.set(true);
 
-  guardHoursData: BarChartData[] = [
-    { label: 'Mon', value: 168 }, { label: 'Tue', value: 192 },
-    { label: 'Wed', value: 156 }, { label: 'Thu', value: 180 },
-    { label: 'Fri', value: 192 }, { label: 'Sat', value: 128 }, { label: 'Sun', value: 104 },
-  ];
+    this.api.get<any>('/dashboard/stats').subscribe({
+      next: res => { if (res.data) this.stats.set(res.data); this.loading.set(false); },
+      error: () => this.loading.set(false),
+    });
 
-  recentActivity = [
-    { id: 1, initials: 'MI', text: 'Musa Ibrahim clocked in at Lekki Phase 1', time: '5 minutes ago' },
-    { id: 2, initials: 'CN', text: 'Chika Nwosu submitted daily activity report', time: '18 minutes ago' },
-    { id: 3, initials: 'FA', text: 'Funmi Adeyemi dispatched patrol to Victoria Island', time: '34 minutes ago' },
-    { id: 4, initials: 'AO', text: 'Adebayo Okonkwo approved shift swap request', time: '1 hour ago' },
-    { id: 5, initials: 'KE', text: 'Kelechi Eze reported incident at Ikeja site', time: '2 hours ago' },
-  ];
+    this.api.get<any>('/dashboard/today').subscribe({
+      next: res => { if (res.data?.snapshot) this.todaySnapshot.set(res.data.snapshot); },
+    });
+
+    this.api.get<any>('/dashboard/snapshots?days=14').subscribe({
+      next: res => {
+        if (res.data?.snapshots?.length) {
+          const snaps = res.data.snapshots;
+          this.snapshotLabels.set(snaps.map((s: any) => new Date(s.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })));
+          this.snapshotSeries.set([
+            { name: 'Guards Active', data: snaps.map((s: any) => s.active_guards || 0), color: 'var(--color-brand-500)' },
+            { name: 'Clock-ins', data: snaps.map((s: any) => s.total_clock_ins || 0), color: 'var(--color-accent-500)' },
+          ]);
+        }
+      },
+    });
+  }
 }
