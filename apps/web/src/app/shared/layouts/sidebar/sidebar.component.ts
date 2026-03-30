@@ -76,7 +76,7 @@ interface NavSection {
       <nav class="flex-1 overflow-y-auto py-2 px-2">
         @for (section of visibleSections(); track section.label) {
           @if (!collapsed()) {
-            <div class="section-label">{{ section.translateKey | translate }}</div>
+            <div class="section-label">{{ (section.translateKey | translate) === section.translateKey ? section.label : (section.translateKey | translate) }}</div>
           } @else {
             <div class="my-2 mx-2 h-px" [style.background]="'var(--border-default)'"></div>
           }
@@ -92,7 +92,7 @@ interface NavSection {
             >
               <lucide-icon [img]="item.icon" [size]="18" class="shrink-0 transition-colors" [style.color]="'var(--sidebar-icon)'" />
               @if (!collapsed()) {
-                <span>{{ item.translateKey | translate }}</span>
+                <span>{{ (item.translateKey | translate) === item.translateKey ? item.label : (item.translateKey | translate) }}</span>
               }
             </a>
           }
