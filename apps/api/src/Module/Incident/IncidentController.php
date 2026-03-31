@@ -3,13 +3,20 @@ declare(strict_types=1);
 namespace Guard51\Module\Incident;
 
 use Guard51\Helper\JsonResponse;
+use Guard51\Helper\HandlesFileUploads;
+use Guard51\Service\FileStorageService;
 use Guard51\Service\IncidentService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class IncidentController
 {
-    public function __construct(private readonly IncidentService $incidentService) {}
+    use HandlesFileUploads;
+
+    public function __construct(
+        private readonly IncidentService $incidentService,
+        private readonly FileStorageService $storage,
+    ) {}
 
     public function list(Request $request, Response $response): Response
     {
@@ -24,7 +31,16 @@ final class IncidentController
     }
     public function create(Request $request, Response $response): Response
     {
-        $ir = $this->incidentService->createIncident($request->getAttribute('tenant_id'), (array) $request->getParsedBody());
+        $tenantId = $request->getAttribute('tenant_id');
+        $body = (array) $request->getParsedBody();
+
+        // Handle evidence file uploads
+        $attachments = $this->handleMultipleUploads($request, $this->storage, $tenantId, 'incidents');
+        if (!empty($attachments)) {
+            $body['attachments'] = $attachments;
+        }
+
+        $ir = $this->incidentService->createIncident($tenantId, $body);
         return JsonResponse::success($response, $ir->toArray(), 201);
     }
     public function updateStatus(Request $request, Response $response, array $args): Response

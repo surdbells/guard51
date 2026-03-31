@@ -10,6 +10,7 @@ use Guard51\Repository\SubscriptionInvoiceRepository;
 use Guard51\Repository\SubscriptionPlanRepository;
 use Guard51\Repository\SubscriptionRepository;
 use Guard51\Repository\TenantRepository;
+use Guard51\Service\PaystackService;
 use Guard51\Service\SubscriptionService;
 use Guard51\Service\ValidationService;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -20,6 +21,7 @@ final class SubscriptionController
 {
     public function __construct(
         private readonly SubscriptionService $subscriptionService,
+        private readonly PaystackService $paystackService,
         private readonly SubscriptionRepository $subscriptionRepo,
         private readonly SubscriptionPlanRepository $planRepo,
         private readonly SubscriptionInvoiceRepository $invoiceRepo,
@@ -102,13 +104,59 @@ final class SubscriptionController
         $payload = (string) $request->getBody();
         $signature = $request->getHeaderLine('x-paystack-signature');
 
-        // Webhook processing will be expanded in later phases
-        $this->logger->info('Paystack webhook received.', [
-            'signature_present' => !empty($signature),
-            'payload_length' => strlen($payload),
-        ]);
+        if (!$this->paystackService->validateWebhook($payload, $signature)) {
+            $this->logger->warning('Paystack webhook: invalid signature.');
+            return JsonResponse::error($response, 'Invalid signature.', 401);
+        }
 
-        return JsonResponse::success($response, ['message' => 'Webhook received.']);
+        $event = json_decode($payload, true);
+        $eventType = $event['event'] ?? '';
+        $data = $event['data'] ?? [];
+
+        $this->logger->info('Paystack webhook received.', ['event' => $eventType, 'reference' => $data['reference'] ?? '']);
+
+        try {
+            switch ($eventType) {
+                case 'charge.success':
+                    if (!empty($data['reference'])) {
+                        $this->subscriptionService->verifyPaystack($data['reference']);
+                        $this->logger->info('Paystack charge.success processed.', ['reference' => $data['reference']]);
+                    }
+                    break;
+
+                case 'subscription.not_renew':
+                case 'subscription.disable':
+                    $subCode = $data['subscription_code'] ?? '';
+                    if ($subCode) {
+                        $sub = $this->subscriptionRepo->findByPaystackCode($subCode);
+                        if ($sub) {
+                            $sub->setStatus(\Guard51\Entity\SubscriptionStatus::CANCELLED);
+                            $sub->setCancelledAt(new \DateTimeImmutable());
+                            $sub->setCancellationReason('Paystack: ' . $eventType);
+                            $this->subscriptionRepo->save($sub);
+                        }
+                    }
+                    break;
+
+                case 'invoice.payment_failed':
+                    $subCode = $data['subscription']['subscription_code'] ?? ($data['subscription_code'] ?? '');
+                    if ($subCode) {
+                        $sub = $this->subscriptionRepo->findByPaystackCode($subCode);
+                        if ($sub) {
+                            $sub->setStatus(\Guard51\Entity\SubscriptionStatus::PAST_DUE);
+                            $this->subscriptionRepo->save($sub);
+                        }
+                    }
+                    break;
+
+                default:
+                    $this->logger->info('Unhandled Paystack webhook.', ['event' => $eventType]);
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Paystack webhook error.', ['event' => $eventType, 'error' => $e->getMessage()]);
+        }
+
+        return JsonResponse::success($response, ['message' => 'Webhook processed.']);
     }
 
     /**

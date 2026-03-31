@@ -7,6 +7,8 @@ namespace Guard51\Module\Guard;
 use Guard51\Entity\GuardStatus;
 use Guard51\Exception\ApiException;
 use Guard51\Helper\JsonResponse;
+use Guard51\Helper\HandlesFileUploads;
+use Guard51\Service\FileStorageService;
 use Guard51\Service\GuardService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -14,8 +16,11 @@ use Psr\Log\LoggerInterface;
 
 final class GuardController
 {
+    use HandlesFileUploads;
+
     public function __construct(
         private readonly GuardService $guardService,
+        private readonly FileStorageService $storage,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -36,6 +41,11 @@ final class GuardController
     {
         $tenantId = $request->getAttribute('tenant_id');
         $body = (array) $request->getParsedBody();
+
+        // Handle photo upload
+        $photoUrl = $this->handleSingleUpload($request, $this->storage, 'photo', $tenantId, 'guards');
+        if ($photoUrl) $body['photo_url'] = $photoUrl;
+
         $guard = $this->guardService->createGuard($tenantId, $body);
         return JsonResponse::success($response, $guard->toArray(), 201);
     }
@@ -49,6 +59,12 @@ final class GuardController
     public function update(Request $request, Response $response, array $args): Response
     {
         $body = (array) $request->getParsedBody();
+
+        // Handle photo upload
+        $tenantId = $request->getAttribute('tenant_id');
+        $photoUrl = $this->handleSingleUpload($request, $this->storage, 'photo', $tenantId, 'guards');
+        if ($photoUrl) $body['photo_url'] = $photoUrl;
+
         $guard = $this->guardService->updateGuard($args['id'], $body);
         return JsonResponse::success($response, $guard->toArray());
     }

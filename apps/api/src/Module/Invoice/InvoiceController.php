@@ -9,7 +9,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class InvoiceController
 {
-    public function __construct(private readonly InvoiceService $invoiceService) {}
+    public function __construct(
+        private readonly InvoiceService $invoiceService,
+        private readonly \Guard51\Service\PdfService $pdfService,
+    ) {}
 
     public function list(Request $request, Response $response): Response
     {
@@ -45,6 +48,22 @@ final class InvoiceController
     {
         return JsonResponse::success($response, $this->invoiceService->exportInvoiceHtml($args['id']));
     }
+
+    /** GET /api/v1/invoices/{id}/pdf — Download invoice as PDF */
+    public function downloadPdf(Request $request, Response $response, array $args): Response
+    {
+        $data = $this->invoiceService->exportInvoiceHtml($args['id']);
+        $html = $data['html'] ?? '<p>Invoice not found</p>';
+
+        $pdfContent = $this->pdfService->generateFromHtml($html);
+
+        $response->getBody()->write($pdfContent);
+        return $response
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Disposition', 'attachment; filename="invoice-' . ($data['invoice_number'] ?? $args['id']) . '.pdf"')
+            ->withHeader('Cache-Control', 'no-cache');
+    }
+
     public function overdue(Request $request, Response $response): Response
     {
         $invoices = $this->invoiceService->findOverdue($request->getAttribute('tenant_id'));

@@ -62,4 +62,9 @@ class SubscriptionRepository extends BaseRepository
     {
         return $this->count(['status' => SubscriptionStatus::ACTIVE]);
     }
+
+    public function findByPaystackCode(string $code): ?Subscription
+    {
+        return $this->findOneBy(['paystackSubscriptionCode' => $code]);
+    }
 }

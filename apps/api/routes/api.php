@@ -15,6 +15,7 @@ use Guard51\Module\ClientPortal\ClientPortalController;
 use Guard51\Module\Chat\ChatController;
 use Guard51\Module\Dashboard\DashboardController;
 use Guard51\Module\Feature\FeatureController;
+use Guard51\Module\Upload\FileUploadController;
 use Guard51\Module\Dispatch\DispatchController;
 use Guard51\Module\Guard\GuardController;
 use Guard51\Module\Incident\IncidentController;
@@ -531,6 +532,7 @@ return function (App $app): void {
             $inv->post('/{id}/send', [InvoiceController::class, 'send']);
             $inv->post('/{id}/convert', [InvoiceController::class, 'convertEstimate']);
             $inv->get('/{id}/export', [InvoiceController::class, 'export']);
+            $inv->get('/{id}/pdf', [InvoiceController::class, 'downloadPdf']);
             $inv->post('/generate', [InvoiceController::class, 'generateFromTimeClock']);
         })
             ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN))
@@ -579,6 +581,14 @@ return function (App $app): void {
             $ch->post('/conversations/{id}/messages', [ChatController::class, 'sendMessage']);
             $ch->post('/conversations/{id}/read', [ChatController::class, 'markRead']);
             $ch->get('/unread-count', [ChatController::class, 'unreadCount']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── File Uploads ─────────────────────────────
+        $group->group("/uploads", function (RouteCollectorProxy $up) {
+            $up->post("", [FileUploadController::class, "upload"]);
+            $up->get("/{path:.*}", [FileUploadController::class, "serve"]);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
