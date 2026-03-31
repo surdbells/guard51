@@ -15,86 +15,101 @@ export const routes: Routes = [
     loadComponent: () => import('./shared/layouts/shell/shell.component').then(m => m.ShellComponent),
     canActivate: [authGuard],
     children: [
-      // Dashboard (role-aware: super admin vs company admin)
+      // Dashboard — all authenticated users
       {
         path: 'dashboard',
         loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor', 'dispatcher'] },
       },
 
-      // Phase 1: Core Operations
+      // Core Operations — admin + supervisor
       {
         path: 'sites',
         loadChildren: () => import('./features/sites/sites.routes').then(m => m.SITES_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor'] },
       },
       {
         path: 'guards',
         loadChildren: () => import('./features/guards/guards.routes').then(m => m.GUARDS_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor'] },
       },
       {
         path: 'clients',
         loadChildren: () => import('./features/clients/clients.routes').then(m => m.CLIENTS_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin'] },
       },
 
-      // Phase 2: Scheduling & Attendance
+      // Scheduling & Attendance — admin + supervisor
       {
         path: 'scheduling',
         loadChildren: () => import('./features/scheduling/scheduling.routes').then(m => m.SCHEDULING_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor'] },
       },
       {
         path: 'attendance',
         loadChildren: () => import('./features/attendance/attendance.routes').then(m => m.ATTENDANCE_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor'] },
       },
       {
         path: 'passdowns',
         loadChildren: () => import('./features/passdowns/passdowns.routes').then(m => m.PASSDOWNS_ROUTES),
       },
 
-      // Phase 3: Tracking, Tours & Panic
+      // Tracking, Tours & Panic
       {
         path: 'tracker',
         loadChildren: () => import('./features/tracker/tracker.routes').then(m => m.TRACKER_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor', 'dispatcher'] },
       },
       {
         path: 'tours',
         loadChildren: () => import('./features/tours/tours.routes').then(m => m.TOURS_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor'] },
       },
       {
         path: 'panic',
         loadChildren: () => import('./features/panic/panic.routes').then(m => m.PANIC_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor', 'dispatcher'] },
       },
 
-      // Phase 4: Reporting & Dispatch
+      // Reporting & Dispatch
       {
         path: 'reports',
         loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORTS_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor', 'guard'] },
       },
       {
         path: 'incidents',
         loadChildren: () => import('./features/incidents/incidents.routes').then(m => m.INCIDENTS_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'supervisor', 'guard'] },
       },
       {
         path: 'dispatch',
         loadChildren: () => import('./features/dispatch/dispatch.routes').then(m => m.DISPATCH_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin', 'dispatcher'] },
       },
       {
         path: 'tasks',
         loadChildren: () => import('./features/tasks/tasks.routes').then(m => m.TASKS_ROUTES),
       },
 
-      // Phase 5: Finance & Billing
+      // Finance & Billing — admin only
       {
         path: 'invoices',
         loadChildren: () => import('./features/invoices/invoices.routes').then(m => m.INVOICES_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin'] },
       },
       {
         path: 'payroll',
         loadChildren: () => import('./features/payroll/payroll.routes').then(m => m.PAYROLL_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin'] },
       },
 
-      // Phase 6: Client Experience & Communication
+      // Client Experience & Communication
       {
         path: 'client-portal',
         loadChildren: () => import('./features/client-portal/client-portal.routes').then(m => m.CLIENT_PORTAL_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['client'] },
       },
       {
         path: 'chat',

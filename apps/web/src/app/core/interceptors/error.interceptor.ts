@@ -26,7 +26,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (error.status >= 500) {
         toast.error('Server Error', 'Something went wrong. Please try again later.');
       } else if (error.status === 403) {
-        toast.warning('Access Denied', message);
+        // Silently suppress role-based 403s — the UI already filters by role
+        // Only show toast for explicit user actions (POST/PUT/DELETE), not background GETs
+        if (req.method !== 'GET') {
+          toast.warning('Access Denied', message);
+        }
       } else if (error.status !== 404) {
         toast.error('Error', message);
       }

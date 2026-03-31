@@ -99,14 +99,24 @@ export class LoginComponent {
       next: (res) => {
         this.loading.set(false);
         if (res.success && res.data) {
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-          if (returnUrl) {
-            this.router.navigateByUrl(returnUrl);
-          } else if (res.data.user.role === 'super_admin') {
-            this.router.navigateByUrl('/super-admin/dashboard');
-          } else {
-            this.router.navigateByUrl('/dashboard');
-          }
+          // Small delay to ensure auth store signals propagate before navigation
+          setTimeout(() => {
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+            if (returnUrl) {
+              this.router.navigateByUrl(returnUrl);
+            } else {
+              const role = res.data!.user.role;
+              if (role === 'super_admin') {
+                this.router.navigateByUrl('/admin/dashboard');
+              } else if (role === 'guard') {
+                this.router.navigateByUrl('/portal');
+              } else if (role === 'client') {
+                this.router.navigateByUrl('/client-portal');
+              } else {
+                this.router.navigateByUrl('/dashboard');
+              }
+            }
+          }, 50);
         }
       },
       error: (err) => { this.loading.set(false); this.error.set(err.error?.message || 'Login failed.'); },

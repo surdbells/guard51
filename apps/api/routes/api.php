@@ -146,7 +146,7 @@ return function (App $app): void {
             $feat->post('/enable/{moduleKey}', [FeatureController::class, 'enableModule']);
             $feat->post('/disable/{moduleKey}', [FeatureController::class, 'disableModule']);
         })
-            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD, UserRole::DISPATCHER))
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
@@ -304,7 +304,7 @@ return function (App $app): void {
             $dash->get('/snapshots', [DashboardController::class, 'snapshots']);
             $dash->get('/today', [DashboardController::class, 'today']);
         })
-            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER, UserRole::GUARD))
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
@@ -428,7 +428,7 @@ return function (App $app): void {
             $tours->get('/site/{siteId}/sessions', [TourController::class, 'sessionsBySite']);
             $tours->get('/guard/{guardId}/sessions', [TourController::class, 'sessionsByGuard']);
         })
-            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD))
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
@@ -471,7 +471,7 @@ return function (App $app): void {
             $rpt->get('/dar/{id}/export', [ReportController::class, 'exportDAR']);
             $rpt->get('/client/site/{siteId}', [ReportController::class, 'clientReports']);
         })
-            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD))
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
@@ -485,7 +485,7 @@ return function (App $app): void {
             $inc->post('/{id}/escalate', [IncidentController::class, 'escalate']);
             $inc->get('/{id}/escalations', [IncidentController::class, 'escalations']);
         })
-            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER))
+            ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::DISPATCHER, UserRole::GUARD))
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
