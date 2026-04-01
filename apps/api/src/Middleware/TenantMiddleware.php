@@ -60,7 +60,7 @@ final class TenantMiddleware implements MiddlewareInterface
 
         // Enable the Doctrine tenant filter with the resolved tenant_id
         $filter = $this->em->getFilters()->enable('tenant_filter');
-        $filter->setParameter('tenant_id', "'{$tenantId}'");
+        $filter->setParameter('tenant_id', $tenantId);
 
         // Pass tenant_id forward as request attribute for controllers
         $request = $request->withAttribute('tenant_id', $tenantId);

@@ -33,7 +33,7 @@ echo "findBy(['tenantId' => '{$tid}']): " . count($filtered) . " guards\n";
 echo "\n=== Enable TenantFilter ===\n";
 try {
     $filter = $em->getFilters()->enable('tenant_filter');
-    $filter->setParameter('tenant_id', "'{$tid}'");
+    $filter->setParameter('tenant_id', $tid);
     echo "Filter enabled for tenant: {$tid}\n";
     
     $withFilter = $repo->findAll();
