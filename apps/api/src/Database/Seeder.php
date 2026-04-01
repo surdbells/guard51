@@ -192,6 +192,66 @@ class Seeder
         $this->em->persist($bankAccount);
         echo "  ✅ Tenant bank account created: First Bank - ShieldForce\n";
 
+        // ── Demo Clients ──
+        $clientEntity = new \Guard51\Entity\Client();
+        $clientEntity->setTenantId($tenant->getId())->setCompanyName('Zenith Tower Properties')
+            ->setContactName('Tunde Bakare')->setContactEmail('tunde@zenithtower.ng')
+            ->setContactPhone('+2348033001122')->setCity('Lagos')->setState('Lagos')
+            ->setAddress('24 Marina Road, Lagos Island')->setBillingType(\Guard51\Entity\BillingType::MONTHLY)
+            ->setBillingRate(450000)->setContractStart(new \DateTimeImmutable('2026-01-01'))
+            ->setContractEnd(new \DateTimeImmutable('2026-12-31'));
+        $this->em->persist($clientEntity);
+
+        $client2 = new \Guard51\Entity\Client();
+        $client2->setTenantId($tenant->getId())->setCompanyName('ShopRite Ikeja Mall')
+            ->setContactName('Ngozi Okeke')->setContactEmail('ngozi@shoprite.ng')
+            ->setContactPhone('+2348044002233')->setCity('Lagos')->setState('Lagos')
+            ->setBillingType(\Guard51\Entity\BillingType::PER_GUARD)->setBillingRate(180000);
+        $this->em->persist($client2);
+        echo "  ✅ 2 demo clients created\n";
+
+        // ── Demo Sites ──
+        $site1 = new \Guard51\Entity\Site();
+        $site1->setTenantId($tenant->getId())->setName('Lekki Phase 1 HQ')->setAddress('15 Admiralty Way')
+            ->setCity('Lagos')->setState('Lagos')->setLatitude('6.4541')->setLongitude('3.4747')
+            ->setGeofenceRadius(150)->setContactName('Tunde Bakare')->setContactPhone('+2348033001122')
+            ->setClientId($clientEntity->getId());
+        $this->em->persist($site1);
+
+        $site2 = new \Guard51\Entity\Site();
+        $site2->setTenantId($tenant->getId())->setName('Victoria Island Branch')->setAddress('Plot 42, Adeola Odeku')
+            ->setCity('Lagos')->setState('Lagos')->setLatitude('6.4281')->setLongitude('3.4219')
+            ->setGeofenceRadius(100)->setClientId($clientEntity->getId());
+        $this->em->persist($site2);
+
+        $site3 = new \Guard51\Entity\Site();
+        $site3->setTenantId($tenant->getId())->setName('Ikeja Mall Post')->setAddress('Alausa, Ikeja')
+            ->setCity('Lagos')->setState('Lagos')->setLatitude('6.6018')->setLongitude('3.3515')
+            ->setGeofenceRadius(200)->setClientId($client2->getId());
+        $this->em->persist($site3);
+        echo "  ✅ 3 demo sites created\n";
+
+        // ── Demo Guards ──
+        $guardNames = [
+            ['Musa', 'Ibrahim', '+2349011001100', 'GRD-0001'],
+            ['Kelechi', 'Eze', '+2349011002200', 'GRD-0002'],
+            ['Adamu', 'Yusuf', '+2349011003300', 'GRD-0003'],
+            ['Blessing', 'Okafor', '+2349011004400', 'GRD-0004'],
+            ['Emeka', 'Nwankwo', '+2349011005500', 'GRD-0005'],
+        ];
+        foreach ($guardNames as $gn) {
+            $g = new \Guard51\Entity\Guard();
+            $g->setTenantId($tenant->getId())->setFirstName($gn[0])->setLastName($gn[1])
+                ->setPhone($gn[2])->setEmployeeNumber($gn[3])
+                ->setHireDate(new \DateTimeImmutable('2026-01-15'))
+                ->setPayType(\Guard51\Entity\PayType::MONTHLY)->setPayRate(65000)
+                ->setBankName('Access Bank')->setBankAccountNumber('001234567' . substr($gn[3], -1))
+                ->setBankAccountName($gn[0] . ' ' . $gn[1])
+                ->setState('Lagos');
+            $this->em->persist($g);
+        }
+        echo "  ✅ 5 demo guards created\n";
+
         // Audit log
         $this->em->persist((new AuditLog())
             ->setTenantId('system')

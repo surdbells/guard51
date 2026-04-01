@@ -178,6 +178,13 @@ export const routes: Routes = [
         loadChildren: () => import('./features/super-admin/super-admin.routes').then(m => m.SUPER_ADMIN_ROUTES),
       },
 
+      // Onboarding wizard
+      {
+        path: 'onboarding',
+        loadChildren: () => import('./features/onboarding/onboarding.routes').then(m => m.ONBOARDING_ROUTES),
+        canActivate: [roleGuard], data: { roles: ['company_admin'] },
+      },
+
       // Default redirect
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

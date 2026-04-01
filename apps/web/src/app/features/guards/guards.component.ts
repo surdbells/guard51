@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
+import { exportToCsv } from '@core/utils/csv-export';
 
 @Component({
   selector: 'g51-guards',
@@ -15,6 +16,7 @@ import { ToastService } from '@core/services/toast.service';
   imports: [RouterLink, FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, EmptyStateComponent, LoadingSpinnerComponent],
   template: `
     <g51-page-header title="Guards" subtitle="Manage your security personnel">
+      <button class="btn-secondary flex items-center gap-2" (click)="exportGuards()">Export CSV</button>
       <button class="btn-primary flex items-center gap-2" routerLink="new"><lucide-icon [img]="PlusIcon" [size]="16" /> Add Guard</button>
     </g51-page-header>
 
@@ -103,5 +105,13 @@ export class GuardsComponent implements OnInit {
     if (confirm(`Delete guard ${g.first_name} ${g.last_name}? This cannot be undone.`)) {
       this.api.delete(`/guards/${g.id}`).subscribe({ next: () => { this.toast.success('Guard deleted'); this.loadGuards(); } });
     }
+  }
+  exportGuards(): void {
+    exportToCsv('guards', this.guards(), [
+      { key: 'employee_number', label: 'Employee #' }, { key: 'first_name', label: 'First Name' },
+      { key: 'last_name', label: 'Last Name' }, { key: 'phone', label: 'Phone' },
+      { key: 'email', label: 'Email' }, { key: 'status', label: 'Status' },
+      { key: 'state', label: 'State' }, { key: 'hire_date', label: 'Hire Date' },
+    ]);
   }
 }
