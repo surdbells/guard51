@@ -50,13 +50,13 @@ final class GuardController
         return JsonResponse::success($response, $guard->toArray(), 201);
     }
 
-    public function show(Request $request, Response $response, array $args): Response
+    public function show(Request $request, Response $response): Response
     {
-        $profile = $this->guardService->getGuardProfile($args['id']);
+        $profile = $this->guardService->getGuardProfile($request->getAttribute('id'));
         return JsonResponse::success($response, $profile);
     }
 
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
 
@@ -65,26 +65,26 @@ final class GuardController
         $photoUrl = $this->handleSingleUpload($request, $this->storage, 'photo', $tenantId, 'guards');
         if ($photoUrl) $body['photo_url'] = $photoUrl;
 
-        $guard = $this->guardService->updateGuard($args['id'], $body);
+        $guard = $this->guardService->updateGuard($request->getAttribute('id'), $body);
         return JsonResponse::success($response, $guard->toArray());
     }
 
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $this->guardService->deleteGuard($args['id'], $tenantId);
+        $this->guardService->deleteGuard($request->getAttribute('id'), $tenantId);
         return JsonResponse::success($response, ['message' => 'Guard terminated.']);
     }
 
-    public function suspend(Request $request, Response $response, array $args): Response
+    public function suspend(Request $request, Response $response): Response
     {
-        $guard = $this->guardService->updateStatus($args['id'], GuardStatus::SUSPENDED);
+        $guard = $this->guardService->updateStatus($request->getAttribute('id'), GuardStatus::SUSPENDED);
         return JsonResponse::success($response, $guard->toArray());
     }
 
-    public function activate(Request $request, Response $response, array $args): Response
+    public function activate(Request $request, Response $response): Response
     {
-        $guard = $this->guardService->updateStatus($args['id'], GuardStatus::ACTIVE);
+        $guard = $this->guardService->updateStatus($request->getAttribute('id'), GuardStatus::ACTIVE);
         return JsonResponse::success($response, $guard->toArray());
     }
 
@@ -108,40 +108,40 @@ final class GuardController
         return JsonResponse::success($response, $skill->toArray(), 201);
     }
 
-    public function assignSkill(Request $request, Response $response, array $args): Response
+    public function assignSkill(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
         if (empty($body['skill_id'])) throw ApiException::validation('Skill ID is required.');
-        $sa = $this->guardService->assignSkill($args['id'], $body['skill_id'], $body['certified_at'] ?? null, $body['expires_at'] ?? null);
+        $sa = $this->guardService->assignSkill($request->getAttribute('id'), $body['skill_id'], $body['certified_at'] ?? null, $body['expires_at'] ?? null);
         return JsonResponse::success($response, $sa->toArray(), 201);
     }
 
-    public function removeSkill(Request $request, Response $response, array $args): Response
+    public function removeSkill(Request $request, Response $response): Response
     {
-        $this->guardService->removeSkill($args['guardId'], $args['skillId']);
+        $this->guardService->removeSkill($request->getAttribute('guardId'), $request->getAttribute('skillId'));
         return JsonResponse::success($response, ['message' => 'Skill removed.']);
     }
 
     // ── Documents ────────────────────────────────────
 
-    public function listDocuments(Request $request, Response $response, array $args): Response
+    public function listDocuments(Request $request, Response $response): Response
     {
-        $docs = $this->guardService->getDocuments($args['id']);
+        $docs = $this->guardService->getDocuments($request->getAttribute('id'));
         return JsonResponse::success($response, [
             'documents' => array_map(fn($d) => $d->toArray(), $docs),
         ]);
     }
 
-    public function addDocument(Request $request, Response $response, array $args): Response
+    public function addDocument(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $doc = $this->guardService->addDocument($args['id'], $body);
+        $doc = $this->guardService->addDocument($request->getAttribute('id'), $body);
         return JsonResponse::success($response, $doc->toArray(), 201);
     }
 
-    public function verifyDocument(Request $request, Response $response, array $args): Response
+    public function verifyDocument(Request $request, Response $response): Response
     {
-        $doc = $this->guardService->verifyDocument($args['docId']);
+        $doc = $this->guardService->verifyDocument($request->getAttribute('docId'));
         return JsonResponse::success($response, $doc->toArray());
     }
 

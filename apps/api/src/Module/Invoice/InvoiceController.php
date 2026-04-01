@@ -25,34 +25,34 @@ final class InvoiceController
         $inv = $this->invoiceService->createInvoice($request->getAttribute('tenant_id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $inv->toArray(), 201);
     }
-    public function detail(Request $request, Response $response, array $args): Response
+    public function detail(Request $request, Response $response): Response
     {
-        return JsonResponse::success($response, $this->invoiceService->getInvoiceDetail($args['id']));
+        return JsonResponse::success($response, $this->invoiceService->getInvoiceDetail($request->getAttribute('id')));
     }
-    public function recordPayment(Request $request, Response $response, array $args): Response
+    public function recordPayment(Request $request, Response $response): Response
     {
-        $p = $this->invoiceService->recordPayment($args['id'], (array) $request->getParsedBody(), $request->getAttribute('user_id'));
+        $p = $this->invoiceService->recordPayment($request->getAttribute('id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $p->toArray(), 201);
     }
-    public function send(Request $request, Response $response, array $args): Response
+    public function send(Request $request, Response $response): Response
     {
-        $inv = $this->invoiceService->sendInvoice($args['id']);
+        $inv = $this->invoiceService->sendInvoice($request->getAttribute('id'));
         return JsonResponse::success($response, $inv->toArray());
     }
-    public function convertEstimate(Request $request, Response $response, array $args): Response
+    public function convertEstimate(Request $request, Response $response): Response
     {
-        $inv = $this->invoiceService->convertEstimate($args['id']);
+        $inv = $this->invoiceService->convertEstimate($request->getAttribute('id'));
         return JsonResponse::success($response, $inv->toArray());
     }
-    public function export(Request $request, Response $response, array $args): Response
+    public function export(Request $request, Response $response): Response
     {
-        return JsonResponse::success($response, $this->invoiceService->exportInvoiceHtml($args['id']));
+        return JsonResponse::success($response, $this->invoiceService->exportInvoiceHtml($request->getAttribute('id')));
     }
 
     /** GET /api/v1/invoices/{id}/pdf — Download invoice as PDF */
-    public function downloadPdf(Request $request, Response $response, array $args): Response
+    public function downloadPdf(Request $request, Response $response): Response
     {
-        $data = $this->invoiceService->exportInvoiceHtml($args['id']);
+        $data = $this->invoiceService->exportInvoiceHtml($request->getAttribute('id'));
         $html = $data['html'] ?? '<p>Invoice not found</p>';
 
         $pdfContent = $this->pdfService->generateFromHtml($html);
@@ -60,7 +60,7 @@ final class InvoiceController
         $response->getBody()->write($pdfContent);
         return $response
             ->withHeader('Content-Type', 'application/pdf')
-            ->withHeader('Content-Disposition', 'attachment; filename="invoice-' . ($data['invoice_number'] ?? $args['id']) . '.pdf"')
+            ->withHeader('Content-Disposition', 'attachment; filename="invoice-' . ($data['invoice_number'] ?? $request->getAttribute('id')) . '.pdf"')
             ->withHeader('Cache-Control', 'no-cache');
     }
 

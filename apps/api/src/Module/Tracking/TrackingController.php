@@ -35,17 +35,17 @@ final class TrackingController
     }
 
     /** GET /api/v1/tracking/guard/{guardId}/latest — Latest location for a guard */
-    public function latestLocation(Request $request, Response $response, array $args): Response
+    public function latestLocation(Request $request, Response $response): Response
     {
-        $loc = $this->locationService->getLatestLocation($args['guardId']);
+        $loc = $this->locationService->getLatestLocation($request->getAttribute('guardId'));
         return JsonResponse::success($response, ['location' => $loc?->toArray()]);
     }
 
     /** GET /api/v1/tracking/guard/{guardId}/path — Path replay */
-    public function guardPath(Request $request, Response $response, array $args): Response
+    public function guardPath(Request $request, Response $response): Response
     {
         $p = $request->getQueryParams();
-        $path = $this->locationService->getPath($args['guardId'], $p['start'] ?? '-12 hours', $p['end'] ?? 'now');
+        $path = $this->locationService->getPath($request->getAttribute('guardId'), $p['start'] ?? '-12 hours', $p['end'] ?? 'now');
         return JsonResponse::success($response, ['path' => $path, 'points' => count($path)]);
     }
 
@@ -67,9 +67,9 @@ final class TrackingController
     }
 
     /** POST /api/v1/tracking/geofence-alerts/{id}/acknowledge */
-    public function acknowledgeGeofenceAlert(Request $request, Response $response, array $args): Response
+    public function acknowledgeGeofenceAlert(Request $request, Response $response): Response
     {
-        $alert = $this->locationService->acknowledgeGeofenceAlert($args['id'], $request->getAttribute('user_id'));
+        $alert = $this->locationService->acknowledgeGeofenceAlert($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $alert->toArray());
     }
 
@@ -83,9 +83,9 @@ final class TrackingController
     }
 
     /** POST /api/v1/tracking/idle-alerts/{id}/acknowledge */
-    public function acknowledgeIdleAlert(Request $request, Response $response, array $args): Response
+    public function acknowledgeIdleAlert(Request $request, Response $response): Response
     {
-        $alert = $this->locationService->acknowledgeIdleAlert($args['id'], $request->getAttribute('user_id'));
+        $alert = $this->locationService->acknowledgeIdleAlert($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $alert->toArray());
     }
 

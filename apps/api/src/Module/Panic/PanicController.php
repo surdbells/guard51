@@ -34,32 +34,32 @@ final class PanicController
     }
 
     /** POST /api/v1/panic/{id}/acknowledge */
-    public function acknowledge(Request $request, Response $response, array $args): Response
+    public function acknowledge(Request $request, Response $response): Response
     {
-        $alert = $this->panicService->acknowledge($args['id'], $request->getAttribute('user_id'));
+        $alert = $this->panicService->acknowledge($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $alert->toArray());
     }
 
     /** POST /api/v1/panic/{id}/responding */
-    public function responding(Request $request, Response $response, array $args): Response
+    public function responding(Request $request, Response $response): Response
     {
-        $alert = $this->panicService->markResponding($args['id']);
+        $alert = $this->panicService->markResponding($request->getAttribute('id'));
         return JsonResponse::success($response, $alert->toArray());
     }
 
     /** POST /api/v1/panic/{id}/resolve */
-    public function resolve(Request $request, Response $response, array $args): Response
+    public function resolve(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $alert = $this->panicService->resolve($args['id'], $request->getAttribute('user_id'), $body['notes'] ?? null);
+        $alert = $this->panicService->resolve($request->getAttribute('id'), $request->getAttribute('user_id'), $body['notes'] ?? null);
         return JsonResponse::success($response, $alert->toArray());
     }
 
     /** POST /api/v1/panic/{id}/false-alarm */
-    public function falseAlarm(Request $request, Response $response, array $args): Response
+    public function falseAlarm(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $alert = $this->panicService->markFalseAlarm($args['id'], $request->getAttribute('user_id'), $body['notes'] ?? null);
+        $alert = $this->panicService->markFalseAlarm($request->getAttribute('id'), $request->getAttribute('user_id'), $body['notes'] ?? null);
         return JsonResponse::success($response, $alert->toArray());
     }
 }

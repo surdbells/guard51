@@ -28,9 +28,9 @@ final class ShiftController
         return JsonResponse::success($response, $t->toArray(), 201);
     }
 
-    public function updateTemplate(Request $request, Response $response, array $args): Response
+    public function updateTemplate(Request $request, Response $response): Response
     {
-        $t = $this->shiftService->updateTemplate($args['id'], (array) $request->getParsedBody());
+        $t = $this->shiftService->updateTemplate($request->getAttribute('id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $t->toArray());
     }
 
@@ -53,15 +53,15 @@ final class ShiftController
         return JsonResponse::success($response, $shift->toArray(), 201);
     }
 
-    public function updateShift(Request $request, Response $response, array $args): Response
+    public function updateShift(Request $request, Response $response): Response
     {
-        $shift = $this->shiftService->updateShift($args['id'], (array) $request->getParsedBody());
+        $shift = $this->shiftService->updateShift($request->getAttribute('id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $shift->toArray());
     }
 
-    public function cancelShift(Request $request, Response $response, array $args): Response
+    public function cancelShift(Request $request, Response $response): Response
     {
-        $shift = $this->shiftService->cancelShift($args['id']);
+        $shift = $this->shiftService->cancelShift($request->getAttribute('id'));
         return JsonResponse::success($response, $shift->toArray());
     }
 
@@ -86,9 +86,9 @@ final class ShiftController
         return JsonResponse::success($response, ['published' => $count]);
     }
 
-    public function confirmShift(Request $request, Response $response, array $args): Response
+    public function confirmShift(Request $request, Response $response): Response
     {
-        $shift = $this->shiftService->confirmShift($args['id'], $request->getAttribute('user_id'));
+        $shift = $this->shiftService->confirmShift($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $shift->toArray());
     }
 
@@ -98,9 +98,9 @@ final class ShiftController
         return JsonResponse::success($response, ['shifts' => array_map(fn($s) => $s->toArray(), $shifts)]);
     }
 
-    public function claimShift(Request $request, Response $response, array $args): Response
+    public function claimShift(Request $request, Response $response): Response
     {
-        $shift = $this->shiftService->claimOpenShift($args['id'], $request->getAttribute('user_id'));
+        $shift = $this->shiftService->claimOpenShift($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $shift->toArray());
     }
 
@@ -119,16 +119,16 @@ final class ShiftController
         return JsonResponse::success($response, $req->toArray(), 201);
     }
 
-    public function approveSwap(Request $request, Response $response, array $args): Response
+    public function approveSwap(Request $request, Response $response): Response
     {
-        $req = $this->shiftService->approveSwap($args['id'], $request->getAttribute('user_id'));
+        $req = $this->shiftService->approveSwap($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $req->toArray());
     }
 
-    public function rejectSwap(Request $request, Response $response, array $args): Response
+    public function rejectSwap(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $req = $this->shiftService->rejectSwap($args['id'], $request->getAttribute('user_id'), $body['notes'] ?? null);
+        $req = $this->shiftService->rejectSwap($request->getAttribute('id'), $request->getAttribute('user_id'), $body['notes'] ?? null);
         return JsonResponse::success($response, $req->toArray());
     }
 

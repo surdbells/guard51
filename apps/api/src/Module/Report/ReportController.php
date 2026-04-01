@@ -23,15 +23,15 @@ final class ReportController
         $dar = $this->reportService->createDAR($request->getAttribute('tenant_id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $dar->toArray(), 201);
     }
-    public function submitDAR(Request $request, Response $response, array $args): Response
+    public function submitDAR(Request $request, Response $response): Response
     {
-        $dar = $this->reportService->submitDAR($args['id']);
+        $dar = $this->reportService->submitDAR($request->getAttribute('id'));
         return JsonResponse::success($response, $dar->toArray());
     }
-    public function reviewDAR(Request $request, Response $response, array $args): Response
+    public function reviewDAR(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $dar = $this->reportService->reviewDAR($args['id'], $request->getAttribute('user_id'), ($body['approve'] ?? false) === true);
+        $dar = $this->reportService->reviewDAR($request->getAttribute('id'), $request->getAttribute('user_id'), ($body['approve'] ?? false) === true);
         return JsonResponse::success($response, $dar->toArray());
     }
 
@@ -53,9 +53,9 @@ final class ReportController
         $sub = $this->reportService->submitCustomReport($request->getAttribute('tenant_id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $sub->toArray(), 201);
     }
-    public function listSubmissions(Request $request, Response $response, array $args): Response
+    public function listSubmissions(Request $request, Response $response): Response
     {
-        $subs = $this->reportService->listSubmissions($args['templateId']);
+        $subs = $this->reportService->listSubmissions($request->getAttribute('templateId'));
         return JsonResponse::success($response, ['submissions' => array_map(fn($s) => $s->toArray(), $subs)]);
     }
 
@@ -65,9 +65,9 @@ final class ReportController
         $log = $this->reportService->logWatchMedia($request->getAttribute('tenant_id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $log->toArray(), 201);
     }
-    public function watchFeed(Request $request, Response $response, array $args): Response
+    public function watchFeed(Request $request, Response $response): Response
     {
-        $logs = $this->reportService->getWatchFeed($args['siteId']);
+        $logs = $this->reportService->getWatchFeed($request->getAttribute('siteId'));
         return JsonResponse::success($response, ['feed' => array_map(fn($l) => $l->toArray(), $logs)]);
     }
     public function recentWatchFeed(Request $request, Response $response): Response
@@ -77,16 +77,16 @@ final class ReportController
     }
 
     /** GET /api/v1/reports/dar/{id}/export — Export DAR as HTML (for PDF rendering) */
-    public function exportDAR(Request $request, Response $response, array $args): Response
+    public function exportDAR(Request $request, Response $response): Response
     {
-        $data = $this->reportService->exportDARAsHtml($args['id']);
+        $data = $this->reportService->exportDARAsHtml($request->getAttribute('id'));
         return JsonResponse::success($response, $data);
     }
 
     /** GET /api/v1/reports/client/site/{siteId} — Get approved reports for client portal */
-    public function clientReports(Request $request, Response $response, array $args): Response
+    public function clientReports(Request $request, Response $response): Response
     {
-        $reports = $this->reportService->getClientShareableReports($args['siteId']);
+        $reports = $this->reportService->getClientShareableReports($request->getAttribute('siteId'));
         return JsonResponse::success($response, ['reports' => array_map(fn($r) => $r->toArray(), $reports)]);
     }
 }

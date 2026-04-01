@@ -26,8 +26,8 @@ final class VehiclePatrolController
     public function recordHit(Request $request, Response $response): Response
     { return JsonResponse::success($response, $this->patrolService->recordHit($request->getAttribute('tenant_id'), (array) $request->getParsedBody())->toArray(), 201); }
 
-    public function routeHits(Request $request, Response $response, array $args): Response
-    { return JsonResponse::success($response, ['hits' => array_map(fn($h) => $h->toArray(), $this->patrolService->getRouteHits($args['routeId'], $request->getQueryParams()['date'] ?? null))]); }
+    public function routeHits(Request $request, Response $response): Response
+    { return JsonResponse::success($response, ['hits' => array_map(fn($h) => $h->toArray(), $this->patrolService->getRouteHits($request->getAttribute('routeId'), $request->getQueryParams()['date'] ?? null))]); }
 
     public function missedPatrols(Request $request, Response $response): Response
     { return JsonResponse::success($response, ['missed' => $this->patrolService->detectMissedPatrols($request->getAttribute('tenant_id'))]); }

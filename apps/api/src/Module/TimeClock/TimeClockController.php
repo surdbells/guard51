@@ -50,9 +50,9 @@ final class TimeClockController
         return JsonResponse::success($response, ['clock' => $clock?->toArray(), 'is_clocked_in' => $clock !== null]);
     }
 
-    public function activeBySite(Request $request, Response $response, array $args): Response
+    public function activeBySite(Request $request, Response $response): Response
     {
-        $clocks = $this->clockService->getActiveBySite($args['siteId']);
+        $clocks = $this->clockService->getActiveBySite($request->getAttribute('siteId'));
         return JsonResponse::success($response, ['clocks' => array_map(fn($c) => $c->toArray(), $clocks)]);
     }
 
@@ -71,10 +71,10 @@ final class TimeClockController
         return JsonResponse::success($response, ['records' => array_map(fn($r) => $r->toArray(), $records), 'date' => $date]);
     }
 
-    public function attendanceByGuard(Request $request, Response $response, array $args): Response
+    public function attendanceByGuard(Request $request, Response $response): Response
     {
         $p = $request->getQueryParams();
-        $records = $this->clockService->getAttendanceByGuard($args['guardId'], $p['start_date'] ?? '-30 days', $p['end_date'] ?? 'now');
+        $records = $this->clockService->getAttendanceByGuard($request->getAttribute('guardId'), $p['start_date'] ?? '-30 days', $p['end_date'] ?? 'now');
         return JsonResponse::success($response, ['records' => array_map(fn($r) => $r->toArray(), $records)]);
     }
 
@@ -84,10 +84,10 @@ final class TimeClockController
         return JsonResponse::success($response, ['records' => array_map(fn($r) => $r->toArray(), $records)]);
     }
 
-    public function reconcile(Request $request, Response $response, array $args): Response
+    public function reconcile(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $record = $this->clockService->reconcile($args['id'], $request->getAttribute('user_id'), $body['status'] ?? 'present', $body['notes'] ?? null);
+        $record = $this->clockService->reconcile($request->getAttribute('id'), $request->getAttribute('user_id'), $body['status'] ?? 'present', $body['notes'] ?? null);
         return JsonResponse::success($response, $record->toArray());
     }
 
@@ -129,9 +129,9 @@ final class TimeClockController
         return JsonResponse::success($response, $log->toArray(), 201);
     }
 
-    public function endBreak(Request $request, Response $response, array $args): Response
+    public function endBreak(Request $request, Response $response): Response
     {
-        $log = $this->clockService->endBreak($args['id']);
+        $log = $this->clockService->endBreak($request->getAttribute('id'));
         return JsonResponse::success($response, $log->toArray());
     }
 }

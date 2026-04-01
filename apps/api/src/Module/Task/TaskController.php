@@ -22,20 +22,20 @@ final class TaskController
         $task = $this->taskService->createTask($request->getAttribute('tenant_id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $task->toArray(), 201);
     }
-    public function updateStatus(Request $request, Response $response, array $args): Response
+    public function updateStatus(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $task = $this->taskService->updateStatus($args['id'], $body['action'] ?? '', $body['notes'] ?? null);
+        $task = $this->taskService->updateStatus($request->getAttribute('id'), $body['action'] ?? '', $body['notes'] ?? null);
         return JsonResponse::success($response, $task->toArray());
     }
-    public function byGuard(Request $request, Response $response, array $args): Response
+    public function byGuard(Request $request, Response $response): Response
     {
-        $tasks = $this->taskService->listByGuard($args['guardId']);
+        $tasks = $this->taskService->listByGuard($request->getAttribute('guardId'));
         return JsonResponse::success($response, ['tasks' => array_map(fn($t) => $t->toArray(), $tasks)]);
     }
-    public function bySite(Request $request, Response $response, array $args): Response
+    public function bySite(Request $request, Response $response): Response
     {
-        $tasks = $this->taskService->listBySite($args['siteId']);
+        $tasks = $this->taskService->listBySite($request->getAttribute('siteId'));
         return JsonResponse::success($response, ['tasks' => array_map(fn($t) => $t->toArray(), $tasks)]);
     }
     public function overdue(Request $request, Response $response): Response

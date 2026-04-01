@@ -57,9 +57,9 @@ final class PlanController
     /**
      * PUT /api/v1/admin/plans/{id} — Update plan (super admin)
      */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $request, Response $response): Response
     {
-        $plan = $this->planRepo->findOrFail($args['id']);
+        $plan = $this->planRepo->findOrFail($request->getAttribute('id'));
         $body = (array) $request->getParsedBody();
         $this->validatePlanData($body);
 
@@ -74,9 +74,9 @@ final class PlanController
     /**
      * DELETE /api/v1/admin/plans/{id} — Deactivate plan (super admin)
      */
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Request $request, Response $response): Response
     {
-        $plan = $this->planRepo->findOrFail($args['id']);
+        $plan = $this->planRepo->findOrFail($request->getAttribute('id'));
         $plan->setIsActive(false);
         $this->planRepo->save($plan);
 
@@ -86,9 +86,9 @@ final class PlanController
     /**
      * POST /api/v1/admin/plans/{id}/duplicate — Clone plan (super admin)
      */
-    public function duplicate(Request $request, Response $response, array $args): Response
+    public function duplicate(Request $request, Response $response): Response
     {
-        $source = $this->planRepo->findOrFail($args['id']);
+        $source = $this->planRepo->findOrFail($request->getAttribute('id'));
 
         $clone = new SubscriptionPlan();
         $clone->setName($source->getName() . ' (Copy)')

@@ -14,6 +14,6 @@ final class AnalyticsController
     public function kpis(Request $request, Response $response): Response
     { return JsonResponse::success($response, $this->analytics->getTenantKPIs($request->getAttribute('tenant_id'))); }
 
-    public function guardPerformance(Request $request, Response $response, array $args): Response
-    { return JsonResponse::success($response, ['performance' => array_map(fn($p) => $p->toArray(), $this->analytics->getGuardPerformance($args['guardId']))]); }
+    public function guardPerformance(Request $request, Response $response): Response
+    { return JsonResponse::success($response, ['performance' => array_map(fn($p) => $p->toArray(), $this->analytics->getGuardPerformance($request->getAttribute('guardId')))]); }
 }

@@ -19,34 +19,34 @@ final class UserManagementController
     }
 
     /** PUT /users/{id}/role — Change user role */
-    public function changeRole(Request $request, Response $response, array $args): Response
+    public function changeRole(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $this->userMgmt->changeRole($args['id'], $body['role'] ?? '');
+        $this->userMgmt->changeRole($request->getAttribute('id'), $body['role'] ?? '');
         return JsonResponse::success($response, ['message' => 'Role updated']);
     }
 
     /** GET /users/{id}/permissions — Get user permissions */
-    public function permissions(Request $request, Response $response, array $args): Response
+    public function permissions(Request $request, Response $response): Response
     {
-        $perms = $this->userMgmt->getUserPermissions($args['id']);
+        $perms = $this->userMgmt->getUserPermissions($request->getAttribute('id'));
         return JsonResponse::success($response, ['permissions' => array_map(fn($p) => $p->toArray(), $perms)]);
     }
 
     /** POST /users/{id}/permissions — Set module permission */
-    public function setPermission(Request $request, Response $response, array $args): Response
+    public function setPermission(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
         $perm = $this->userMgmt->setModulePermission(
-            $request->getAttribute('tenant_id'), $args['id'], $body['module_key'] ?? '', $body
+            $request->getAttribute('tenant_id'), $request->getAttribute('id'), $body['module_key'] ?? '', $body
         );
         return JsonResponse::success($response, $perm->toArray());
     }
 
     /** DELETE /users/{id}/permissions/{moduleKey} — Revoke module permission */
-    public function revokePermission(Request $request, Response $response, array $args): Response
+    public function revokePermission(Request $request, Response $response): Response
     {
-        $this->userMgmt->revokeModulePermission($args['id'], $args['moduleKey']);
+        $this->userMgmt->revokeModulePermission($request->getAttribute('id'), $request->getAttribute('moduleKey'));
         return JsonResponse::success($response, ['revoked' => true]);
     }
 

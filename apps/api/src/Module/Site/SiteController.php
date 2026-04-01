@@ -75,10 +75,10 @@ final class SiteController
     /**
      * GET /api/v1/sites/{id} — Get site detail
      */
-    public function show(Request $request, Response $response, array $args): Response
+    public function show(Request $request, Response $response): Response
     {
-        $site = $this->siteService->getSite($args['id']);
-        $postOrders = $this->siteService->listPostOrders($args['id'], true);
+        $site = $this->siteService->getSite($request->getAttribute('id'));
+        $postOrders = $this->siteService->listPostOrders($request->getAttribute('id'), true);
 
         return JsonResponse::success($response, [
             'site' => $site->toArray(),
@@ -90,12 +90,12 @@ final class SiteController
     /**
      * PUT /api/v1/sites/{id} — Update site
      */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $request, Response $response): Response
     {
         $userId = $request->getAttribute('user_id');
         $body = (array) $request->getParsedBody();
 
-        $site = $this->siteService->updateSite($args['id'], $body, $userId);
+        $site = $this->siteService->updateSite($request->getAttribute('id'), $body, $userId);
 
         return JsonResponse::success($response, $site->toArray());
     }
@@ -103,10 +103,10 @@ final class SiteController
     /**
      * DELETE /api/v1/sites/{id} — Deactivate site
      */
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $this->siteService->deleteSite($args['id'], $tenantId);
+        $this->siteService->deleteSite($request->getAttribute('id'), $tenantId);
 
         return JsonResponse::success($response, ['message' => 'Site deactivated.']);
     }
@@ -114,18 +114,18 @@ final class SiteController
     /**
      * POST /api/v1/sites/{id}/suspend — Suspend site
      */
-    public function suspend(Request $request, Response $response, array $args): Response
+    public function suspend(Request $request, Response $response): Response
     {
-        $site = $this->siteService->updateStatus($args['id'], SiteStatus::SUSPENDED);
+        $site = $this->siteService->updateStatus($request->getAttribute('id'), SiteStatus::SUSPENDED);
         return JsonResponse::success($response, $site->toArray());
     }
 
     /**
      * POST /api/v1/sites/{id}/activate — Reactivate site
      */
-    public function activate(Request $request, Response $response, array $args): Response
+    public function activate(Request $request, Response $response): Response
     {
-        $site = $this->siteService->updateStatus($args['id'], SiteStatus::ACTIVE);
+        $site = $this->siteService->updateStatus($request->getAttribute('id'), SiteStatus::ACTIVE);
         return JsonResponse::success($response, $site->toArray());
     }
 
@@ -134,11 +134,11 @@ final class SiteController
     /**
      * GET /api/v1/sites/{siteId}/post-orders — List post orders for a site
      */
-    public function listPostOrders(Request $request, Response $response, array $args): Response
+    public function listPostOrders(Request $request, Response $response): Response
     {
         $params = $request->getQueryParams();
         $effectiveOnly = ($params['effective'] ?? 'false') === 'true';
-        $orders = $this->siteService->listPostOrders($args['siteId'], $effectiveOnly);
+        $orders = $this->siteService->listPostOrders($request->getAttribute('siteId'), $effectiveOnly);
 
         return JsonResponse::success($response, [
             'post_orders' => array_map(fn($po) => $po->toArray(), $orders),
@@ -149,7 +149,7 @@ final class SiteController
     /**
      * POST /api/v1/sites/{siteId}/post-orders — Create post order
      */
-    public function createPostOrder(Request $request, Response $response, array $args): Response
+    public function createPostOrder(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
         $userId = $request->getAttribute('user_id');
@@ -159,7 +159,7 @@ final class SiteController
             throw ApiException::validation('Post order title and instructions are required.');
         }
 
-        $order = $this->siteService->createPostOrder($tenantId, $args['siteId'], $body, $userId);
+        $order = $this->siteService->createPostOrder($tenantId, $request->getAttribute('siteId'), $body, $userId);
 
         return JsonResponse::success($response, $order->toArray(), 201);
     }
@@ -167,12 +167,12 @@ final class SiteController
     /**
      * PUT /api/v1/post-orders/{id} — Update post order
      */
-    public function updatePostOrder(Request $request, Response $response, array $args): Response
+    public function updatePostOrder(Request $request, Response $response): Response
     {
         $userId = $request->getAttribute('user_id');
         $body = (array) $request->getParsedBody();
 
-        $order = $this->siteService->updatePostOrder($args['id'], $body, $userId);
+        $order = $this->siteService->updatePostOrder($request->getAttribute('id'), $body, $userId);
 
         return JsonResponse::success($response, $order->toArray());
     }
@@ -180,9 +180,9 @@ final class SiteController
     /**
      * DELETE /api/v1/post-orders/{id} — Deactivate post order
      */
-    public function deletePostOrder(Request $request, Response $response, array $args): Response
+    public function deletePostOrder(Request $request, Response $response): Response
     {
-        $this->siteService->deletePostOrder($args['id']);
+        $this->siteService->deletePostOrder($request->getAttribute('id'));
         return JsonResponse::success($response, ['message' => 'Post order deactivated.']);
     }
 }

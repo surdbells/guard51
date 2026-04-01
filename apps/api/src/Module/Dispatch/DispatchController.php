@@ -27,22 +27,22 @@ final class DispatchController
         $call = $this->dispatchService->createCall($request->getAttribute('tenant_id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $call->toArray(), 201);
     }
-    public function assignGuard(Request $request, Response $response, array $args): Response
+    public function assignGuard(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $a = $this->dispatchService->assignGuard($args['id'], $body['guard_id'] ?? '');
+        $a = $this->dispatchService->assignGuard($request->getAttribute('id'), $body['guard_id'] ?? '');
         return JsonResponse::success($response, $a->toArray(), 201);
     }
-    public function updateAssignment(Request $request, Response $response, array $args): Response
+    public function updateAssignment(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $a = $this->dispatchService->updateAssignmentStatus($args['assignmentId'], $body['action'] ?? '');
+        $a = $this->dispatchService->updateAssignmentStatus($request->getAttribute('assignmentId'), $body['action'] ?? '');
         return JsonResponse::success($response, $a->toArray());
     }
-    public function resolveCall(Request $request, Response $response, array $args): Response
+    public function resolveCall(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $call = $this->dispatchService->resolveCall($args['id'], $body['resolution'] ?? '');
+        $call = $this->dispatchService->resolveCall($request->getAttribute('id'), $body['resolution'] ?? '');
         return JsonResponse::success($response, $call->toArray());
     }
     public function nearestGuards(Request $request, Response $response): Response
@@ -52,9 +52,9 @@ final class DispatchController
         $guards = $this->dispatchService->suggestNearestGuards($request->getAttribute('tenant_id'), (float) $p['lat'], (float) $p['lng']);
         return JsonResponse::success($response, ['guards' => $guards]);
     }
-    public function assignments(Request $request, Response $response, array $args): Response
+    public function assignments(Request $request, Response $response): Response
     {
-        $assignments = $this->dispatchService->getAssignments($args['id']);
+        $assignments = $this->dispatchService->getAssignments($request->getAttribute('id'));
         return JsonResponse::success($response, ['assignments' => array_map(fn($a) => $a->toArray(), $assignments)]);
     }
 }

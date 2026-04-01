@@ -17,9 +17,9 @@ final class NotificationController
         $unread = $this->notifService->getUnreadCount($request->getAttribute('user_id'));
         return JsonResponse::success($response, ['notifications' => array_map(fn($n) => $n->toArray(), $notifs), 'unread_count' => $unread]);
     }
-    public function markRead(Request $request, Response $response, array $args): Response
+    public function markRead(Request $request, Response $response): Response
     {
-        $n = $this->notifService->markRead($args['id']);
+        $n = $this->notifService->markRead($request->getAttribute('id'));
         return JsonResponse::success($response, $n->toArray());
     }
     public function markAllRead(Request $request, Response $response): Response

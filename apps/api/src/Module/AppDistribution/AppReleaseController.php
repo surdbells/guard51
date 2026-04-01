@@ -96,18 +96,18 @@ final class AppReleaseController
     /**
      * GET /api/v1/admin/apps/releases/{id} — Get release detail (super admin)
      */
-    public function show(Request $request, Response $response, array $args): Response
+    public function show(Request $request, Response $response): Response
     {
-        $release = $this->releaseRepo->findOrFail($args['id']);
+        $release = $this->releaseRepo->findOrFail($request->getAttribute('id'));
         return JsonResponse::success($response, $release->toArray());
     }
 
     /**
      * PUT /api/v1/admin/apps/releases/{id} — Update release (notes, mandatory, active)
      */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $request, Response $response): Response
     {
-        $release = $this->releaseRepo->findOrFail($args['id']);
+        $release = $this->releaseRepo->findOrFail($request->getAttribute('id'));
         $body = (array) $request->getParsedBody();
 
         if (isset($body['release_notes'])) $release->setReleaseNotes($body['release_notes']);
@@ -125,9 +125,9 @@ final class AppReleaseController
     /**
      * DELETE /api/v1/admin/apps/releases/{id} — Deactivate release (super admin)
      */
-    public function deactivate(Request $request, Response $response, array $args): Response
+    public function deactivate(Request $request, Response $response): Response
     {
-        $release = $this->appService->deactivateRelease($args['id']);
+        $release = $this->appService->deactivateRelease($request->getAttribute('id'));
         return JsonResponse::success($response, [
             'message' => 'Release deactivated.',
             'release' => $release->toArray(),

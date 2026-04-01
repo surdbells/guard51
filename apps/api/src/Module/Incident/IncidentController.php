@@ -43,27 +43,27 @@ final class IncidentController
         $ir = $this->incidentService->createIncident($tenantId, $body);
         return JsonResponse::success($response, $ir->toArray(), 201);
     }
-    public function updateStatus(Request $request, Response $response, array $args): Response
+    public function updateStatus(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $ir = $this->incidentService->updateStatus($args['id'], $body['status'] ?? '');
+        $ir = $this->incidentService->updateStatus($request->getAttribute('id'), $body['status'] ?? '');
         return JsonResponse::success($response, $ir->toArray());
     }
-    public function resolve(Request $request, Response $response, array $args): Response
+    public function resolve(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $ir = $this->incidentService->resolve($args['id'], $request->getAttribute('user_id'), $body['resolution'] ?? '');
+        $ir = $this->incidentService->resolve($request->getAttribute('id'), $request->getAttribute('user_id'), $body['resolution'] ?? '');
         return JsonResponse::success($response, $ir->toArray());
     }
-    public function escalate(Request $request, Response $response, array $args): Response
+    public function escalate(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $ir = $this->incidentService->escalate($args['id'], $body['escalated_to'] ?? '', $request->getAttribute('user_id'), $body['reason'] ?? '');
+        $ir = $this->incidentService->escalate($request->getAttribute('id'), $body['escalated_to'] ?? '', $request->getAttribute('user_id'), $body['reason'] ?? '');
         return JsonResponse::success($response, $ir->toArray());
     }
-    public function escalations(Request $request, Response $response, array $args): Response
+    public function escalations(Request $request, Response $response): Response
     {
-        $escs = $this->incidentService->getEscalations($args['id']);
+        $escs = $this->incidentService->getEscalations($request->getAttribute('id'));
         return JsonResponse::success($response, ['escalations' => array_map(fn($e) => $e->toArray(), $escs)]);
     }
 }

@@ -37,51 +37,51 @@ final class ClientController
         return JsonResponse::success($response, $client->toArray(), 201);
     }
 
-    public function show(Request $request, Response $response, array $args): Response
+    public function show(Request $request, Response $response): Response
     {
-        $data = $this->clientService->getClient($args['id']);
+        $data = $this->clientService->getClient($request->getAttribute('id'));
         return JsonResponse::success($response, $data);
     }
 
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $client = $this->clientService->updateClient($args['id'], $body);
+        $client = $this->clientService->updateClient($request->getAttribute('id'), $body);
         return JsonResponse::success($response, $client->toArray());
     }
 
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $this->clientService->deleteClient($args['id'], $tenantId);
+        $this->clientService->deleteClient($request->getAttribute('id'), $tenantId);
         return JsonResponse::success($response, ['message' => 'Client deactivated.']);
     }
 
     // ── Contacts ─────────────────────────────────────
 
-    public function listContacts(Request $request, Response $response, array $args): Response
+    public function listContacts(Request $request, Response $response): Response
     {
-        $data = $this->clientService->getClient($args['id']);
+        $data = $this->clientService->getClient($request->getAttribute('id'));
         return JsonResponse::success($response, ['contacts' => $data['contacts']]);
     }
 
-    public function addContact(Request $request, Response $response, array $args): Response
+    public function addContact(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $contact = $this->clientService->addContact($args['id'], $body);
+        $contact = $this->clientService->addContact($request->getAttribute('id'), $body);
         return JsonResponse::success($response, $contact->toArray(), 201);
     }
 
-    public function updateContact(Request $request, Response $response, array $args): Response
+    public function updateContact(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $contact = $this->clientService->updateContact($args['contactId'], $body);
+        $contact = $this->clientService->updateContact($request->getAttribute('contactId'), $body);
         return JsonResponse::success($response, $contact->toArray());
     }
 
-    public function deleteContact(Request $request, Response $response, array $args): Response
+    public function deleteContact(Request $request, Response $response): Response
     {
-        $this->clientService->deleteContact($args['contactId']);
+        $this->clientService->deleteContact($request->getAttribute('contactId'));
         return JsonResponse::success($response, ['message' => 'Contact deleted.']);
     }
 }

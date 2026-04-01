@@ -65,9 +65,9 @@ final class TenantController
     /**
      * GET /api/v1/admin/tenants/{id} — Tenant detail with stats (super admin)
      */
-    public function show(Request $request, Response $response, array $args): Response
+    public function show(Request $request, Response $response): Response
     {
-        $tenant = $this->tenantRepo->findOrFail($args['id']);
+        $tenant = $this->tenantRepo->findOrFail($request->getAttribute('id'));
         $usage = $this->usageRepo->findByTenant($tenant->getId());
         $subscription = $this->subscriptionRepo->findActiveByTenant($tenant->getId());
         $userCount = $this->userRepo->countByTenant($tenant->getId());
@@ -83,9 +83,9 @@ final class TenantController
     /**
      * POST /api/v1/admin/tenants/{id}/suspend — Suspend tenant (super admin)
      */
-    public function suspend(Request $request, Response $response, array $args): Response
+    public function suspend(Request $request, Response $response): Response
     {
-        $tenant = $this->tenantRepo->findOrFail($args['id']);
+        $tenant = $this->tenantRepo->findOrFail($request->getAttribute('id'));
         $body = (array) $request->getParsedBody();
         $reason = $body['reason'] ?? 'Suspended by administrator';
 
@@ -110,9 +110,9 @@ final class TenantController
     /**
      * POST /api/v1/admin/tenants/{id}/reactivate — Reactivate tenant (super admin)
      */
-    public function reactivate(Request $request, Response $response, array $args): Response
+    public function reactivate(Request $request, Response $response): Response
     {
-        $tenant = $this->tenantRepo->findOrFail($args['id']);
+        $tenant = $this->tenantRepo->findOrFail($request->getAttribute('id'));
 
         if ($tenant->getStatus() !== TenantStatus::SUSPENDED) {
             throw ApiException::conflict('Tenant is not currently suspended.');
@@ -132,9 +132,9 @@ final class TenantController
     /**
      * POST /api/v1/admin/tenants/{id}/impersonate — Get a JWT as this tenant's admin (super admin)
      */
-    public function impersonate(Request $request, Response $response, array $args): Response
+    public function impersonate(Request $request, Response $response): Response
     {
-        $tenant = $this->tenantRepo->findOrFail($args['id']);
+        $tenant = $this->tenantRepo->findOrFail($request->getAttribute('id'));
 
         // Find the first company_admin user for this tenant
         $admins = $this->userRepo->findActiveByTenantAndRole($tenant->getId(), \Guard51\Entity\UserRole::COMPANY_ADMIN);

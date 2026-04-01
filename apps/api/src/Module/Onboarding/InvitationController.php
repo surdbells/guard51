@@ -111,10 +111,10 @@ final class InvitationController
     /**
      * POST /api/v1/invitations/{id}/resend — Resend invitation
      */
-    public function resend(Request $request, Response $response, array $args): Response
+    public function resend(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $invitation = $this->invitationService->resend($args['id'], $tenantId);
+        $invitation = $this->invitationService->resend($request->getAttribute('id'), $tenantId);
 
         return JsonResponse::success($response, [
             'invitation' => $invitation->toArray(),
@@ -125,10 +125,10 @@ final class InvitationController
     /**
      * DELETE /api/v1/invitations/{id} — Revoke invitation
      */
-    public function revoke(Request $request, Response $response, array $args): Response
+    public function revoke(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $invitation = $this->invitationService->revoke($args['id'], $tenantId);
+        $invitation = $this->invitationService->revoke($request->getAttribute('id'), $tenantId);
 
         return JsonResponse::success($response, [
             'invitation' => $invitation->toArray(),

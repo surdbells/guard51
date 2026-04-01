@@ -186,9 +186,9 @@ final class SubscriptionController
     /**
      * POST /api/v1/admin/subscriptions/{id}/confirm-payment — Super admin confirms bank transfer
      */
-    public function confirmPayment(Request $request, Response $response, array $args): Response
+    public function confirmPayment(Request $request, Response $response): Response
     {
-        $subscriptionId = $args['id'] ?? '';
+        $subscriptionId = $request->getAttribute('id') ?? '';
         $userId = $request->getAttribute('user_id');
         $body = (array) $request->getParsedBody();
 

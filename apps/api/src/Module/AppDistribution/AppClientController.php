@@ -36,9 +36,9 @@ final class AppClientController
     /**
      * GET /api/v1/apps/download/{releaseId} — Download app binary (signed URL)
      */
-    public function download(Request $request, Response $response, array $args): Response
+    public function download(Request $request, Response $response): Response
     {
-        $releaseId = $args['releaseId'] ?? '';
+        $releaseId = $request->getAttribute('releaseId') ?? '';
         $params = $request->getQueryParams();
         $expires = (int) ($params['expires'] ?? 0);
         $signature = $params['sig'] ?? '';
@@ -112,10 +112,10 @@ final class AppClientController
     /**
      * PUT /api/v1/apps/config/{appKey} — Update tenant app config
      */
-    public function updateConfig(Request $request, Response $response, array $args): Response
+    public function updateConfig(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $appKey = $args['appKey'] ?? '';
+        $appKey = $request->getAttribute('appKey') ?? '';
         $body = (array) $request->getParsedBody();
 
         $config = $this->configRepo->findOrCreate($tenantId, $appKey);

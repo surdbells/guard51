@@ -19,10 +19,10 @@ final class PassdownController
         return JsonResponse::success($response, $log->toArray(), 201);
     }
 
-    public function listBySite(Request $request, Response $response, array $args): Response
+    public function listBySite(Request $request, Response $response): Response
     {
         $limit = (int) ($request->getQueryParams()['limit'] ?? 20);
-        $logs = $this->passdownService->listBySite($args['siteId'], $limit);
+        $logs = $this->passdownService->listBySite($request->getAttribute('siteId'), $limit);
         return JsonResponse::success($response, ['passdowns' => array_map(fn($p) => $p->toArray(), $logs)]);
     }
 
@@ -32,9 +32,9 @@ final class PassdownController
         return JsonResponse::success($response, ['passdowns' => array_map(fn($p) => $p->toArray(), $logs)]);
     }
 
-    public function acknowledge(Request $request, Response $response, array $args): Response
+    public function acknowledge(Request $request, Response $response): Response
     {
-        $log = $this->passdownService->acknowledge($args['id'], $request->getAttribute('user_id'));
+        $log = $this->passdownService->acknowledge($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $log->toArray());
     }
 }

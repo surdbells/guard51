@@ -53,10 +53,10 @@ final class FeatureController
     /**
      * POST /api/v1/features/tenant/enable/{moduleKey} — Enable a module for current tenant
      */
-    public function enableModule(Request $request, Response $response, array $args): Response
+    public function enableModule(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $moduleKey = $args['moduleKey'] ?? '';
+        $moduleKey = $request->getAttribute('moduleKey') ?? '';
         $userId = $request->getAttribute('user_id');
 
         $enabled = $this->featureService->enableModule($tenantId, $moduleKey, $userId ?? 'admin');
@@ -70,10 +70,10 @@ final class FeatureController
     /**
      * POST /api/v1/features/tenant/disable/{moduleKey} — Disable a module for current tenant
      */
-    public function disableModule(Request $request, Response $response, array $args): Response
+    public function disableModule(Request $request, Response $response): Response
     {
         $tenantId = $request->getAttribute('tenant_id');
-        $moduleKey = $args['moduleKey'] ?? '';
+        $moduleKey = $request->getAttribute('moduleKey') ?? '';
 
         $this->featureService->disableModule($tenantId, $moduleKey);
 

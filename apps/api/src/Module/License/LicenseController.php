@@ -14,8 +14,8 @@ final class LicenseController
     public function create(Request $request, Response $response): Response
     { return JsonResponse::success($response, $this->licenseService->create($request->getAttribute('tenant_id'), (array) $request->getParsedBody())->toArray(), 201); }
 
-    public function byGuard(Request $request, Response $response, array $args): Response
-    { return JsonResponse::success($response, ['licenses' => array_map(fn($l) => $l->toArray(), $this->licenseService->listByGuard($args['guardId']))]); }
+    public function byGuard(Request $request, Response $response): Response
+    { return JsonResponse::success($response, ['licenses' => array_map(fn($l) => $l->toArray(), $this->licenseService->listByGuard($request->getAttribute('guardId')))]); }
 
     public function expiringSoon(Request $request, Response $response): Response
     { return JsonResponse::success($response, ['licenses' => array_map(fn($l) => $l->toArray(), $this->licenseService->findExpiringSoon($request->getAttribute('tenant_id')))]); }

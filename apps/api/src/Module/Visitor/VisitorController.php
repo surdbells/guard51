@@ -17,14 +17,14 @@ final class VisitorController
     public function checkIn(Request $request, Response $response): Response
     { return JsonResponse::success($response, $this->visitorService->checkIn($request->getAttribute('tenant_id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'))->toArray(), 201); }
 
-    public function checkOut(Request $request, Response $response, array $args): Response
-    { return JsonResponse::success($response, $this->visitorService->checkOut($args['id'], $request->getAttribute('user_id'))->toArray()); }
+    public function checkOut(Request $request, Response $response): Response
+    { return JsonResponse::success($response, $this->visitorService->checkOut($request->getAttribute('id'), $request->getAttribute('user_id'))->toArray()); }
 
-    public function listBySite(Request $request, Response $response, array $args): Response
-    { $p = $request->getQueryParams(); return JsonResponse::success($response, ['visitors' => array_map(fn($v) => $v->toArray(), $this->visitorService->listBySite($args['siteId'], $p['date'] ?? null))]); }
+    public function listBySite(Request $request, Response $response): Response
+    { $p = $request->getQueryParams(); return JsonResponse::success($response, ['visitors' => array_map(fn($v) => $v->toArray(), $this->visitorService->listBySite($request->getAttribute('siteId'), $p['date'] ?? null))]); }
 
-    public function listCheckedIn(Request $request, Response $response, array $args): Response
-    { return JsonResponse::success($response, ['visitors' => array_map(fn($v) => $v->toArray(), $this->visitorService->listCheckedIn($args['siteId']))]); }
+    public function listCheckedIn(Request $request, Response $response): Response
+    { return JsonResponse::success($response, ['visitors' => array_map(fn($v) => $v->toArray(), $this->visitorService->listCheckedIn($request->getAttribute('siteId')))]); }
 
     public function search(Request $request, Response $response): Response
     { return JsonResponse::success($response, ['visitors' => array_map(fn($v) => $v->toArray(), $this->visitorService->search($request->getAttribute('tenant_id'), $request->getQueryParams()['q'] ?? ''))]); }
@@ -44,9 +44,9 @@ final class VisitorController
         return JsonResponse::success($response, ['appointments' => array_map(fn($a) => $a->toArray(), $appts)]);
     }
 
-    public function getAppointment(Request $request, Response $response, array $args): Response
+    public function getAppointment(Request $request, Response $response): Response
     {
-        $appt = $this->appointmentService->findById($args['id']);
+        $appt = $this->appointmentService->findById($request->getAttribute('id'));
         return JsonResponse::success($response, $appt->toArray());
     }
 
@@ -57,21 +57,21 @@ final class VisitorController
         return JsonResponse::success($response, $appt->toArray());
     }
 
-    public function appointmentCheckIn(Request $request, Response $response, array $args): Response
+    public function appointmentCheckIn(Request $request, Response $response): Response
     {
-        $appt = $this->appointmentService->checkIn($args['id'], $request->getAttribute('user_id'));
+        $appt = $this->appointmentService->checkIn($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $appt->toArray());
     }
 
-    public function appointmentCheckOut(Request $request, Response $response, array $args): Response
+    public function appointmentCheckOut(Request $request, Response $response): Response
     {
-        $appt = $this->appointmentService->checkOut($args['id']);
+        $appt = $this->appointmentService->checkOut($request->getAttribute('id'));
         return JsonResponse::success($response, $appt->toArray());
     }
 
-    public function cancelAppointment(Request $request, Response $response, array $args): Response
+    public function cancelAppointment(Request $request, Response $response): Response
     {
-        $appt = $this->appointmentService->cancel($args['id']);
+        $appt = $this->appointmentService->cancel($request->getAttribute('id'));
         return JsonResponse::success($response, $appt->toArray());
     }
 }

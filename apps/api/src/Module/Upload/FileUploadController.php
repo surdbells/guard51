@@ -82,9 +82,9 @@ final class FileUploadController
     }
 
     /** GET /api/v1/uploads/{path} — Serve a file */
-    public function serve(Request $request, Response $response, array $args): Response
+    public function serve(Request $request, Response $response): Response
     {
-        $path = $args['path'] ?? '';
+        $path = $request->getAttribute('path') ?? '';
         if (!$this->storage->exists($path)) {
             return JsonResponse::error($response, 'File not found.', 404);
         }

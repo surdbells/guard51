@@ -21,20 +21,20 @@ final class ChatController
         $conv = $this->chatService->createConversation($request->getAttribute('tenant_id'), (array) $request->getParsedBody(), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $conv->toArray(), 201);
     }
-    public function messages(Request $request, Response $response, array $args): Response
+    public function messages(Request $request, Response $response): Response
     {
         $p = $request->getQueryParams();
-        $msgs = $this->chatService->getMessages($args['id'], (int) ($p['limit'] ?? 50), (int) ($p['offset'] ?? 0));
+        $msgs = $this->chatService->getMessages($request->getAttribute('id'), (int) ($p['limit'] ?? 50), (int) ($p['offset'] ?? 0));
         return JsonResponse::success($response, ['messages' => array_map(fn($m) => $m->toArray(), $msgs)]);
     }
-    public function sendMessage(Request $request, Response $response, array $args): Response
+    public function sendMessage(Request $request, Response $response): Response
     {
-        $msg = $this->chatService->sendMessage($args['id'], $request->getAttribute('user_id'), (array) $request->getParsedBody());
+        $msg = $this->chatService->sendMessage($request->getAttribute('id'), $request->getAttribute('user_id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $msg->toArray(), 201);
     }
-    public function markRead(Request $request, Response $response, array $args): Response
+    public function markRead(Request $request, Response $response): Response
     {
-        $this->chatService->markRead($args['id'], $request->getAttribute('user_id'));
+        $this->chatService->markRead($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, ['ok' => true]);
     }
 

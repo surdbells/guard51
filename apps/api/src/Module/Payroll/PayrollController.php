@@ -22,29 +22,29 @@ final class PayrollController
         $period = $this->payrollService->createPeriod($request->getAttribute('tenant_id'), $body['period_start'] ?? '', $body['period_end'] ?? '');
         return JsonResponse::success($response, $period->toArray(), 201);
     }
-    public function periodDetail(Request $request, Response $response, array $args): Response
+    public function periodDetail(Request $request, Response $response): Response
     {
-        return JsonResponse::success($response, $this->payrollService->getPeriodDetail($args['id']));
+        return JsonResponse::success($response, $this->payrollService->getPeriodDetail($request->getAttribute('id')));
     }
-    public function addItem(Request $request, Response $response, array $args): Response
+    public function addItem(Request $request, Response $response): Response
     {
-        $item = $this->payrollService->addPayrollItem($args['id'], (array) $request->getParsedBody());
+        $item = $this->payrollService->addPayrollItem($request->getAttribute('id'), (array) $request->getParsedBody());
         return JsonResponse::success($response, $item->toArray(), 201);
     }
-    public function calculateFromTimeClock(Request $request, Response $response, array $args): Response
+    public function calculateFromTimeClock(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $items = $this->payrollService->calculateFromTimeClock($args['id'], (float) ($body['default_rate'] ?? 500));
+        $items = $this->payrollService->calculateFromTimeClock($request->getAttribute('id'), (float) ($body['default_rate'] ?? 500));
         return JsonResponse::success($response, ['calculated' => count($items), 'items' => array_map(fn($i) => $i->toArray(), $items)]);
     }
-    public function approve(Request $request, Response $response, array $args): Response
+    public function approve(Request $request, Response $response): Response
     {
-        $period = $this->payrollService->approvePeriod($args['id'], $request->getAttribute('user_id'));
+        $period = $this->payrollService->approvePeriod($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $period->toArray());
     }
-    public function guardPayslips(Request $request, Response $response, array $args): Response
+    public function guardPayslips(Request $request, Response $response): Response
     {
-        $slips = $this->payrollService->getGuardPayslips($args['guardId']);
+        $slips = $this->payrollService->getGuardPayslips($request->getAttribute('guardId'));
         return JsonResponse::success($response, ['payslips' => array_map(fn($s) => $s->toArray(), $slips)]);
     }
     public function listRates(Request $request, Response $response): Response
@@ -59,9 +59,9 @@ final class PayrollController
     }
 
     /** GET /api/v1/payroll/periods/{id}/export — Export payroll as CSV */
-    public function exportCsv(Request $request, Response $response, array $args): Response
+    public function exportCsv(Request $request, Response $response): Response
     {
-        $csv = $this->payrollService->exportPayrollCsv($args['id']);
-        return JsonResponse::success($response, ['csv' => $csv, 'filename' => "payroll-{$args['id']}.csv"]);
+        $csv = $this->payrollService->exportPayrollCsv($request->getAttribute('id'));
+        return JsonResponse::success($response, ['csv' => $csv, 'filename' => "payroll-{$request->getAttribute('id')}.csv"]);
     }
 }
