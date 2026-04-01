@@ -278,22 +278,22 @@ final class GuardService
 
     private function generateEmployeeNumber(string $tenantId): string
     {
-        // Find the highest existing GRD-XXXX number for this tenant
-        $guards = $this->guardRepo->findByTenant($tenantId);
-        $maxNum = 0;
-        foreach ($guards as $g) {
-            $emp = $g->getEmployeeNumber();
-            if (preg_match('/GRD-(\d+)/', $emp, $m)) {
-                $num = (int) $m[1];
-                if ($num > $maxNum) $maxNum = $num;
-            }
-        }
+        // Use raw SQL to bypass Doctrine tenant filter and find actual max
+        $conn = $this->em->getConnection();
+        $result = $conn->fetchOne(
+            "SELECT MAX(CAST(SUBSTRING(employee_number FROM 5) AS INTEGER)) FROM guards WHERE tenant_id = ? AND employee_number LIKE 'GRD-%'",
+            [$tenantId]
+        );
+        $maxNum = $result ? (int) $result : 0;
         $next = $maxNum + 1;
-        // Ensure uniqueness
+
         do {
             $number = 'GRD-' . str_pad((string) $next, 4, '0', STR_PAD_LEFT);
             $next++;
-        } while ($this->guardRepo->findByEmployeeNumber($tenantId, $number));
+            // Check uniqueness via raw SQL too
+            $exists = $conn->fetchOne("SELECT 1 FROM guards WHERE tenant_id = ? AND employee_number = ?", [$tenantId, $number]);
+        } while ($exists);
+
         return $number;
     }
 }

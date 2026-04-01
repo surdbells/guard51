@@ -139,8 +139,9 @@ abstract class BaseRepository
             $qb->addOrderBy("e.{$field}", $direction);
         }
 
-        // Count total
+        // Count total (remove ordering for count query — PostgreSQL requires it)
         $countQb = clone $qb;
+        $countQb->resetDQLPart('orderBy');
         $total = (int) $countQb->select('COUNT(e.id)')->getQuery()->getSingleScalarResult();
 
         // Fetch page
