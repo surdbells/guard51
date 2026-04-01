@@ -278,9 +278,18 @@ final class GuardService
 
     private function generateEmployeeNumber(string $tenantId): string
     {
-        $count = $this->guardRepo->countByTenant($tenantId);
-        $next = $count + 1;
-        // Format: GRD-XXXX (zero-padded to 4 digits)
+        // Find the highest existing GRD-XXXX number for this tenant
+        $guards = $this->guardRepo->findByTenant($tenantId);
+        $maxNum = 0;
+        foreach ($guards as $g) {
+            $emp = $g->getEmployeeNumber();
+            if (preg_match('/GRD-(\d+)/', $emp, $m)) {
+                $num = (int) $m[1];
+                if ($num > $maxNum) $maxNum = $num;
+            }
+        }
+        $next = $maxNum + 1;
+        // Ensure uniqueness
         do {
             $number = 'GRD-' . str_pad((string) $next, 4, '0', STR_PAD_LEFT);
             $next++;

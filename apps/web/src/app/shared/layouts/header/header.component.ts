@@ -2,7 +2,7 @@ import { Component, inject, signal, input, HostListener } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LucideAngularModule, Search, Bell, Sun, Moon, Globe, Menu, LogOut, User, Settings } from 'lucide-angular';
 import { AuthStore } from '@core/services/auth.store';
 import { AuthService } from '@core/services/auth.service';
@@ -62,10 +62,15 @@ import { BrandingService } from '@core/services/branding.service';
           <lucide-icon [img]="theme.theme() === 'light' ? MoonIcon : SunIcon" [size]="18" />
         </button>
 
+        <!-- Language switcher -->
+        <button (click)="toggleLang()" class="p-2 rounded-lg hover:bg-[var(--surface-hover)] transition-colors" [style.color]="'var(--text-secondary)'" title="Switch language">
+          <lucide-icon [img]="GlobeIcon" [size]="18" />
+        </button>
+
         <!-- Notifications -->
-        <button
+        <button (click)="navigateTo('/notifications')"
           class="p-2 rounded-lg hover:bg-[var(--surface-hover)] transition-colors relative"
-          [style.color]="'var(--text-secondary)'"
+          [style.color]="'var(--text-secondary)'" title="Notifications"
         >
           <lucide-icon [img]="BellIcon" [size]="18" />
           <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[var(--color-danger)]"></span>
@@ -139,6 +144,7 @@ export class HeaderComponent {
   readonly branding = inject(BrandingService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private translate = inject(TranslateService);
 
   userMenuOpen = false;
   mobileMenuOpen = false;
@@ -219,6 +225,13 @@ export class HeaderComponent {
     this.searchOpen.set(false);
     this.searchQuery = '';
     this.router.navigateByUrl(route);
+  }
+
+  toggleLang(): void {
+    const current = this.translate.currentLang || 'en';
+    const next = current === 'en' ? 'pcm' : 'en';
+    this.translate.use(next);
+    localStorage.setItem('g51_lang', next);
   }
 
   logout(): void {
