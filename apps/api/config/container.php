@@ -775,7 +775,7 @@ $containerBuilder->addDefinitions([
     ParkingService::class => fn(ContainerInterface $c) => new ParkingService($c->get(ParkingAreaRepository::class), $c->get(ParkingLotRepository::class), $c->get(ParkingVehicleRepository::class), $c->get(ParkingIncidentTypeRepository::class), $c->get(ParkingIncidentRepository::class), $c->get(LoggerInterface::class)),
 
     VehiclePatrolController::class => fn(ContainerInterface $c) => new VehiclePatrolController($c->get(VehiclePatrolService::class)),
-    VisitorController::class => fn(ContainerInterface $c) => new VisitorController($c->get(VisitorService::class)),
+    VisitorController::class => fn(ContainerInterface $c) => new VisitorController($c->get(VisitorService::class), $c->get(\Guard51\Service\VisitorAppointmentService::class)),
     ParkingController::class => fn(ContainerInterface $c) => new ParkingController($c->get(ParkingService::class)),
 
     // Phase 8: Advanced Features
@@ -796,6 +796,7 @@ $containerBuilder->addDefinitions([
     UserManagementService::class => fn(ContainerInterface $c) => new UserManagementService($c->get(UserRepository::class), $c->get(PermissionRepository::class), $c->get(LoggerInterface::class)),
     UserManagementController::class => fn(ContainerInterface $c) => new UserManagementController($c->get(UserManagementService::class)),
     \Guard51\Module\Upload\FileUploadController::class => fn(ContainerInterface $c) => new \Guard51\Module\Upload\FileUploadController($c->get(FileStorageService::class)),
+    \Guard51\Service\VisitorAppointmentService::class => fn(ContainerInterface $c) => new \Guard51\Service\VisitorAppointmentService($c->get(EntityManagerInterface::class), $c->get(\Guard51\Service\ZeptoMailService::class), $c->get(\Guard51\Service\TermiiService::class), $c->get(LoggerInterface::class)),
 ]);
 
 return $containerBuilder->build();

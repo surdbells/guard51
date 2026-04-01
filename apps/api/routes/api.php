@@ -716,6 +716,14 @@ return function (App $app): void {
             $vis->get('/site/{siteId}', [VisitorController::class, 'listBySite']);
             $vis->get('/site/{siteId}/checked-in', [VisitorController::class, 'listCheckedIn']);
             $vis->get('/search', [VisitorController::class, 'search']);
+            // Appointments
+            $vis->post('/appointments', [VisitorController::class, 'createAppointment']);
+            $vis->get('/appointments', [VisitorController::class, 'listAppointments']);
+            $vis->get('/appointments/{id}', [VisitorController::class, 'getAppointment']);
+            $vis->post('/appointments/verify', [VisitorController::class, 'verifyCode']);
+            $vis->post('/appointments/{id}/check-in', [VisitorController::class, 'appointmentCheckIn']);
+            $vis->post('/appointments/{id}/check-out', [VisitorController::class, 'appointmentCheckOut']);
+            $vis->post('/appointments/{id}/cancel', [VisitorController::class, 'cancelAppointment']);
         })
             ->add(new RoleMiddleware(UserRole::COMPANY_ADMIN, UserRole::SUPERVISOR, UserRole::GUARD))
             ->add($container->get(TenantMiddleware::class))
