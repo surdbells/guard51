@@ -19,7 +19,19 @@
     "messenger": "Messenger",
     "settings": "Settings",
     "help": "Help & Support",
-    "logout": "Logout"
+    "logout": "Logout",
+    "tours": "Site Tours",
+    "visitors": "Visitors",
+    "vehicle_patrol": "Vehicle Patrol",
+    "parking": "Parking",
+    "users": "Team Management",
+    "licenses": "Licenses",
+    "security": "Security",
+    "tasks": "Tasks",
+    "panic": "Panic Alerts",
+    "billing": "Billing",
+    "analytics": "Analytics",
+    "notifications": "Notifications"
   },
   "nav_sections": {
     "main": "Main",
@@ -27,7 +39,8 @@
     "finance": "Finance",
     "communication": "Communication",
     "admin": "Administration",
-    "support": "Help & Support"
+    "support": "Help & Support",
+    "platform": "Platform"
   },
   "auth": {
     "login": "Log In",
@@ -72,6 +85,68 @@
     "view_all": "View all",
     "export": "Export",
     "filter": "Filter",
-    "actions": "Actions"
+    "actions": "Actions",
+    "submit": "Submit",
+    "confirm_delete": "Are you sure you want to delete this?",
+    "export_csv": "Export CSV",
+    "download_pdf": "Download PDF",
+    "upload": "Upload",
+    "status": "Status",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "suspended": "Suspended"
+  },
+  "pages": {
+    "guards": {
+      "title": "Guards",
+      "add": "Add Guard",
+      "edit": "Edit Guard"
+    },
+    "sites": {
+      "title": "Sites",
+      "add": "Add Site",
+      "edit": "Edit Site"
+    },
+    "clients": {
+      "title": "Clients",
+      "add": "Add Client",
+      "edit": "Edit Client"
+    },
+    "scheduling": {
+      "title": "Scheduling",
+      "create_shift": "Create Shift"
+    },
+    "attendance": {
+      "title": "Attendance",
+      "clock_in": "Clock In",
+      "clock_out": "Clock Out"
+    },
+    "incidents": {
+      "title": "Incidents",
+      "report": "Report Incident"
+    },
+    "invoices": {
+      "title": "Invoices",
+      "create": "Create Invoice",
+      "overdue": "Overdue"
+    },
+    "reports": {
+      "title": "Reports",
+      "new_dar": "New Report"
+    },
+    "dispatch": {
+      "title": "Dispatch",
+      "new_call": "New Call"
+    },
+    "visitors": {
+      "title": "Visitors",
+      "check_in": "Check In",
+      "check_out": "Check Out"
+    },
+    "parking": {
+      "title": "Parking",
+      "log_vehicle": "Log Vehicle"
+    }
   }
 }

@@ -19,13 +19,20 @@
     "messenger": "Messenger",
     "settings": "Settings",
     "help": "Help & Support",
-    "logout": "Comot"
+    "logout": "Comot",
+    "tours": "Patrol Tours",
+    "visitors": "Visitors",
+    "vehicle_patrol": "Vehicle Patrol",
+    "parking": "Parking",
+    "users": "Team People",
+    "licenses": "Licenses",
+    "security": "Security"
   },
   "nav_sections": {
     "main": "Main",
     "operations": "Operations",
     "finance": "Money Matter",
-    "communication": "Communication",
+    "communication": "Messaging",
     "admin": "Admin",
     "support": "Help & Support"
   },
@@ -58,12 +65,12 @@
     "from_last_month": "from last month"
   },
   "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
+    "save": "Save am",
+    "cancel": "Cancel am",
+    "delete": "Remove am",
     "edit": "Edit",
     "create": "Create",
-    "search": "Search...",
+    "search": "Find something",
     "loading": "E dey load...",
     "no_data": "Nothing dey here",
     "confirm": "Confirm",
@@ -72,6 +79,7 @@
     "view_all": "See all",
     "export": "Export",
     "filter": "Filter",
-    "actions": "Actions"
+    "actions": "Actions",
+    "submit": "Submit am"
   }
 }

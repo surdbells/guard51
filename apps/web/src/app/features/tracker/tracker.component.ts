@@ -1,208 +1,178 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { NgClass, DatePipe } from '@angular/common';
+import { Component, inject, signal, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Navigation, MapPin, Battery, Clock, AlertTriangle, RefreshCw, Search, Filter } from 'lucide-angular';
+import { NgClass } from '@angular/common';
+import { LucideAngularModule, Navigation, MapPin, Battery, Clock, AlertTriangle, RefreshCw, Search } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
+import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+
+declare var L: any;
 
 @Component({
   selector: 'g51-tracker',
   standalone: true,
-  imports: [NgClass, DatePipe, FormsModule, LucideAngularModule, PageHeaderComponent, StatsCardComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, LoadingSpinnerComponent],
   template: `
-    <g51-page-header title="Live Tracker" subtitle="Real-time guard locations and geofence monitoring">
-      <button (click)="refreshLocations()" class="btn-secondary flex items-center gap-2">
-        <lucide-icon [img]="RefreshCwIcon" [size]="16" /> Refresh
-      </button>
+    <g51-page-header title="Live Tracker" subtitle="Real-time guard positions and geofence monitoring">
+      <button class="btn-secondary flex items-center gap-2 text-xs" (click)="refreshPositions()"><lucide-icon [img]="RefreshIcon" [size]="14" /> Refresh</button>
     </g51-page-header>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
-      <g51-stats-card label="Guards Online" [value]="stats().online" [icon]="NavigationIcon" />
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 stagger-children">
+      <g51-stats-card label="Online" [value]="stats().online" [icon]="NavigationIcon" />
       <g51-stats-card label="Moving" [value]="stats().moving" [icon]="MapPinIcon" />
-      <g51-stats-card label="Geofence Alerts" [value]="stats().geofenceAlerts" [icon]="AlertTriangleIcon" />
-      <g51-stats-card label="Idle Alerts" [value]="stats().idleAlerts" [icon]="ClockIcon" />
+      <g51-stats-card label="Idle" [value]="stats().idle" [icon]="ClockIcon" />
+      <g51-stats-card label="Alerts" [value]="stats().alerts" [icon]="AlertTriangleIcon" />
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- Map area -->
-      <div class="lg:col-span-2 card overflow-hidden" style="min-height: 500px">
-        <div class="h-full flex flex-col items-center justify-center" [style.background]="'var(--surface-muted)'">
-          <lucide-icon [img]="MapPinIcon" [size]="48" [style.color]="'var(--text-tertiary)'" />
-          <p class="text-sm mt-3 font-medium" [style.color]="'var(--text-secondary)'">Live Map</p>
-          <p class="text-xs mt-1 max-w-sm text-center" [style.color]="'var(--text-tertiary)'">
-            Google Maps integration renders here. Guard positions update via WebSocket with HTTP polling fallback.
-          </p>
-          <div class="mt-4 flex flex-wrap gap-2 justify-center">
-            @for (guard of guards(); track guard.guard_id) {
-              <div class="px-3 py-2 rounded-lg text-xs cursor-pointer transition-colors hover:ring-1 hover:ring-[var(--color-brand-500)]"
-                [style.background]="selectedGuardId() === guard.guard_id ? 'var(--color-brand-500)' : 'var(--surface-card)'"
-                [style.color]="selectedGuardId() === guard.guard_id ? 'white' : 'var(--text-primary)'"
-                (click)="selectGuard(guard.guard_id)">
-                <span class="font-medium">{{ guard.first_name }} {{ guard.last_name }}</span>
-                <span class="ml-2" [style.color]="selectedGuardId() === guard.guard_id ? 'rgba(255,255,255,.7)' : 'var(--text-tertiary)'">{{ guard.lat?.toFixed(4) }}, {{ guard.lng?.toFixed(4) }}</span>
-                @if (guard.battery_level) {
-                  <span class="ml-2 flex items-center gap-0.5 inline-flex" [style.color]="guard.battery_level < 20 ? 'var(--color-danger)' : selectedGuardId() === guard.guard_id ? 'rgba(255,255,255,.7)' : 'var(--text-tertiary)'">
-                    <lucide-icon [img]="BatteryIcon" [size]="10" /> {{ guard.battery_level }}%
-                  </span>
-                }
-              </div>
-            }
-          </div>
-
-          <!-- Path replay panel (when guard selected) -->
-          @if (selectedGuardId()) {
-            <div class="mt-4 p-3 rounded-lg" [style.background]="'var(--surface-card)'" [style.borderLeft]="'3px solid var(--color-brand-500)'">
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="text-sm font-semibold" [style.color]="'var(--text-primary)'">Path Replay</h4>
-                <button (click)="selectedGuardId.set(null)" class="text-xs" [style.color]="'var(--text-tertiary)'">Close</button>
-              </div>
-              @if (pathPoints().length > 0) {
-                <p class="text-xs" [style.color]="'var(--text-secondary)'">{{ pathPoints().length }} location points today</p>
-                <div class="mt-2 max-h-[120px] overflow-y-auto space-y-1">
-                  @for (point of pathPoints().slice(0, 20); track $index) {
-                    <div class="text-[10px] flex justify-between" [style.color]="'var(--text-tertiary)'">
-                      <span>{{ point.lat?.toFixed(5) }}, {{ point.lng?.toFixed(5) }}</span>
-                      <span>{{ point.recorded_at | date:'shortTime' }}</span>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <p class="text-xs" [style.color]="'var(--text-tertiary)'">Loading path data...</p>
-              }
-            </div>
-          }
-          </div>
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <!-- Map -->
+      <div class="lg:col-span-3 card overflow-hidden" style="height: 500px;">
+        <div #mapContainer id="guard51-map" style="height: 100%; width: 100%;"></div>
       </div>
 
-      <!-- Alert sidebar -->
-      <div class="space-y-4">
-        <!-- Filters -->
-        <div class="card p-4">
-          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Filters</h3>
-          <div class="space-y-2">
-            <select class="input-base w-full text-sm" [(ngModel)]="filterSite" (ngModelChange)="refreshLocations()">
-              <option value="">All Sites</option>
-            </select>
-            <select class="input-base w-full text-sm" [(ngModel)]="filterStatus">
-              <option value="">All Statuses</option>
-              <option value="moving">Moving</option>
-              <option value="stationary">Stationary</option>
-            </select>
+      <!-- Guard list -->
+      <div class="card p-3 overflow-y-auto" style="max-height: 500px;">
+        <div class="relative mb-3">
+          <lucide-icon [img]="SearchIcon" [size]="14" class="absolute left-2 top-1/2 -translate-y-1/2" [style.color]="'var(--text-tertiary)'" />
+          <input type="text" [(ngModel)]="searchGuard" placeholder="Search guard..." class="input-base w-full pl-8 text-xs" />
+        </div>
+        @for (g of filteredGuards(); track g.guard_id) {
+          <div class="flex items-center gap-2 py-2 px-2 rounded-lg cursor-pointer transition-colors mb-1"
+            [ngClass]="selectedGuardId() === g.guard_id ? 'bg-[var(--color-brand-500)]' : 'hover:bg-[var(--surface-hover)]'"
+            [style.color]="selectedGuardId() === g.guard_id ? 'white' : 'var(--text-primary)'"
+            (click)="selectGuard(g)">
+            <div class="h-2 w-2 rounded-full" [ngClass]="g.is_moving ? 'bg-emerald-400' : 'bg-amber-400'"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium truncate">{{ g.guard_name || 'Guard' }}</p>
+              <p class="text-[10px] opacity-70">{{ g.site_name || 'Unknown' }} · {{ g.battery_level || '?' }}%</p>
+            </div>
           </div>
-        </div>
-
-        <!-- Geofence Alerts -->
-        <div class="card p-4">
-          <h3 class="text-sm font-semibold mb-3 flex items-center gap-2" [style.color]="'var(--text-primary)'">
-            <lucide-icon [img]="AlertTriangleIcon" [size]="14" class="text-amber-500" /> Geofence Alerts
-          </h3>
-          @for (alert of geofenceAlerts(); track alert.id) {
-            <div class="py-2 border-b last:border-b-0" [style.borderColor]="'var(--border-default)'">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium" [style.color]="'var(--text-primary)'">{{ alert.alert_type_label }}</span>
-                <span class="badge text-[9px]" [ngClass]="alert.severity === 'critical' ? 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400' : 'bg-amber-50 text-amber-600'">{{ alert.severity }}</span>
-              </div>
-              <p class="text-[11px] mt-0.5" [style.color]="'var(--text-tertiary)'">{{ alert.message }}</p>
-              @if (!alert.is_acknowledged) {
-                <button class="text-[10px] mt-1 font-medium" [style.color]="'var(--color-brand-500)'" (click)="acknowledgeGeofence(alert.id)">Acknowledge</button>
-              }
-            </div>
-          } @empty {
-            <p class="text-xs py-2" [style.color]="'var(--text-tertiary)'">No active alerts</p>
-          }
-        </div>
-
-        <!-- Idle Alerts -->
-        <div class="card p-4">
-          <h3 class="text-sm font-semibold mb-3 flex items-center gap-2" [style.color]="'var(--text-primary)'">
-            <lucide-icon [img]="ClockIcon" [size]="14" class="text-blue-500" /> Idle Alerts
-          </h3>
-          @for (alert of idleAlerts(); track alert.id) {
-            <div class="py-2 border-b last:border-b-0" [style.borderColor]="'var(--border-default)'">
-              <p class="text-xs font-medium" [style.color]="'var(--text-primary)'">Idle {{ alert.idle_duration_minutes }} min</p>
-              <p class="text-[11px]" [style.color]="'var(--text-tertiary)'">Guard {{ alert.guard_id?.substring(0,8) }}</p>
-            </div>
-          } @empty {
-            <p class="text-xs py-2" [style.color]="'var(--text-tertiary)'">No idle alerts</p>
-          }
-        </div>
-
-        <!-- Alert History (recent 24h) -->
-        <div class="card p-4">
-          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Alert History (24h)</h3>
-          @for (alert of recentAlerts(); track alert.id) {
-            <div class="py-2 border-b last:border-b-0" [style.borderColor]="'var(--border-default)'">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium" [style.color]="'var(--text-primary)'">{{ alert.alert_type_label }}</span>
-                <span class="text-[10px]" [style.color]="'var(--text-tertiary)'">{{ alert.created_at | date:'shortTime' }}</span>
-              </div>
-              <p class="text-[10px]" [style.color]="alert.is_acknowledged ? 'var(--text-tertiary)' : 'var(--color-warning)'">
-                {{ alert.is_acknowledged ? 'Acknowledged' : 'Pending' }}
-              </p>
-            </div>
-          } @empty {
-            <p class="text-xs py-2" [style.color]="'var(--text-tertiary)'">No alerts in last 24 hours</p>
-          }
-        </div>
-      </div>
-  `,
-})
-export class TrackerComponent implements OnInit, OnDestroy {
-  private api = inject(ApiService);
-  readonly NavigationIcon = Navigation; readonly MapPinIcon = MapPin; readonly BatteryIcon = Battery;
-  readonly ClockIcon = Clock; readonly AlertTriangleIcon = AlertTriangle; readonly RefreshCwIcon = RefreshCw;
-  readonly SearchIcon = Search; readonly FilterIcon = Filter;
-
-  readonly guards = signal<any[]>([]);
-  readonly geofenceAlerts = signal<any[]>([]);
-  readonly idleAlerts = signal<any[]>([]);
-  readonly recentAlerts = signal<any[]>([]);
-  readonly selectedGuardId = signal<string | null>(null);
-  readonly pathPoints = signal<any[]>([]);
-  readonly stats = signal({ online: 0, moving: 0, geofenceAlerts: 0, idleAlerts: 0 });
-  filterSite = ''; filterStatus = '';
-  private refreshInterval: any;
-
-  ngOnInit(): void { this.refreshLocations(); this.refreshInterval = setInterval(() => this.refreshLocations(), 15000); }
-  ngOnDestroy(): void { if (this.refreshInterval) clearInterval(this.refreshInterval); }
-
-  refreshLocations(): void {
-    this.api.get<any>('/tracking/live').subscribe({
-      next: res => {
-        if (res.data) {
-          const guards = res.data.guards || [];
-          this.guards.set(guards);
-          this.stats.update(s => ({ ...s, online: guards.length, moving: guards.filter((g: any) => g.is_moving).length }));
         }
-      },
-    });
-    this.api.get<any>('/tracking/geofence-alerts').subscribe({
-      next: res => { if (res.data) { this.geofenceAlerts.set(res.data.alerts || []); this.stats.update(s => ({ ...s, geofenceAlerts: (res.data.alerts || []).length })); } },
-    });
-    this.api.get<any>('/tracking/idle-alerts').subscribe({
-      next: res => { if (res.data) { this.idleAlerts.set(res.data.alerts || []); this.stats.update(s => ({ ...s, idleAlerts: (res.data.alerts || []).length })); } },
-    });
-    this.api.get<any>('/tracking/geofence-alerts/recent').subscribe({
-      next: res => { if (res.data) this.recentAlerts.set(res.data.alerts || []); },
-    });
+      </div>
+    </div>
+  `,
+  styles: [`
+    :host { display: block; }
+  `],
+})
+export class TrackerComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('mapContainer') mapContainer!: ElementRef;
+  private api = inject(ApiService);
+  readonly NavigationIcon = Navigation; readonly MapPinIcon = MapPin; readonly ClockIcon = Clock;
+  readonly AlertTriangleIcon = AlertTriangle; readonly RefreshIcon = RefreshCw; readonly SearchIcon = Search;
+  readonly BatteryIcon = Battery;
+
+  readonly stats = signal({ online: 0, moving: 0, idle: 0, alerts: 0 });
+  readonly guards = signal<any[]>([]);
+  readonly selectedGuardId = signal('');
+  searchGuard = '';
+  private map: any = null;
+  private markers: any[] = [];
+  private pollInterval: any;
+
+  readonly filteredGuards = signal<any[]>([]);
+
+  ngOnInit(): void {
+    this.loadPositions();
+    this.pollInterval = setInterval(() => this.loadPositions(), 30000);
   }
 
-  selectGuard(guardId: string): void {
-    if (this.selectedGuardId() === guardId) {
-      this.selectedGuardId.set(null);
-      this.pathPoints.set([]);
-      return;
+  ngAfterViewInit(): void {
+    this.loadLeaflet();
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollInterval) clearInterval(this.pollInterval);
+  }
+
+  private loadLeaflet(): void {
+    if ((window as any).L) { this.initMap(); return; }
+    // Load Leaflet CSS
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+    document.head.appendChild(css);
+    // Load Leaflet JS
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    script.onload = () => this.initMap();
+    document.head.appendChild(script);
+  }
+
+  private initMap(): void {
+    if (!this.mapContainer?.nativeElement) return;
+    const L = (window as any).L;
+    if (!L) return;
+    // Default center: Lagos
+    this.map = L.map(this.mapContainer.nativeElement).setView([6.5244, 3.3792], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(this.map);
+    this.updateMarkers();
+  }
+
+  private updateMarkers(): void {
+    if (!this.map) return;
+    const L = (window as any).L;
+    if (!L) return;
+    // Clear old markers
+    this.markers.forEach(m => this.map.removeLayer(m));
+    this.markers = [];
+    // Add guard markers
+    for (const g of this.guards()) {
+      if (g.lat && g.lng) {
+        const icon = L.divIcon({
+          className: 'guard-marker',
+          html: `<div style="background:${g.is_moving ? '#10B981' : '#F59E0B'};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>`,
+          iconSize: [12, 12],
+        });
+        const marker = L.marker([g.lat, g.lng], { icon })
+          .addTo(this.map)
+          .bindPopup(`<b>${g.guard_name || 'Guard'}</b><br>${g.site_name || ''}<br>Battery: ${g.battery_level || '?'}%`);
+        this.markers.push(marker);
+      }
     }
-    this.selectedGuardId.set(guardId);
-    this.pathPoints.set([]);
-    this.api.get<any>(`/tracking/guard/${guardId}/path`).subscribe({
-      next: res => { if (res.data) this.pathPoints.set(res.data.path || []); },
+    // Fit bounds if we have markers
+    if (this.markers.length) {
+      const group = L.featureGroup(this.markers);
+      this.map.fitBounds(group.getBounds().pad(0.1));
+    }
+  }
+
+  loadPositions(): void {
+    this.api.get<any>('/tracking/positions').subscribe({
+      next: res => {
+        const positions = res.data?.positions || res.data || [];
+        this.guards.set(positions);
+        this.filterGuards();
+        this.stats.set({
+          online: positions.length,
+          moving: positions.filter((g: any) => g.is_moving).length,
+          idle: positions.filter((g: any) => !g.is_moving).length,
+          alerts: positions.filter((g: any) => g.alert).length,
+        });
+        this.updateMarkers();
+      },
+      error: () => {},
     });
   }
 
-  acknowledgeGeofence(id: string): void {
-    this.api.post(`/tracking/geofence-alerts/${id}/acknowledge`, {}).subscribe({ next: () => this.refreshLocations() });
+  refreshPositions(): void { this.loadPositions(); }
+
+  selectGuard(g: any): void {
+    this.selectedGuardId.set(g.guard_id);
+    if (this.map && g.lat && g.lng) {
+      this.map.setView([g.lat, g.lng], 16);
+    }
+  }
+
+  filterGuards(): void {
+    const q = this.searchGuard.toLowerCase();
+    if (!q) { this.filteredGuards.set(this.guards()); return; }
+    this.filteredGuards.set(this.guards().filter((g: any) =>
+      (g.guard_name || '').toLowerCase().includes(q) || (g.site_name || '').toLowerCase().includes(q)
+    ));
   }
 }
