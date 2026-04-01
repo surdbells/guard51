@@ -29,6 +29,6 @@ class SubscriptionInvoiceRepository extends BaseRepository
     /** @return SubscriptionInvoice[] */
     public function findByTenant(string $tenantId): array
     {
-        return $this->findBy([], ['createdAt' => 'DESC']);
+        return $this->findBy(['tenantId' => $tenantId, 'tenantId' => $tenantId], ['createdAt' => 'DESC']);
     }
 }

@@ -7,6 +7,6 @@ use Guard51\Entity\ChatConversation;
 class ChatConversationRepository extends BaseRepository
 {
     protected function getEntityClass(): string { return ChatConversation::class; }
-    public function findByTenant(string $tenantId): array { return $this->findBy([], ['lastMessageAt' => 'DESC']); }
+    public function findByTenant(string $tenantId): array { return $this->findBy(['tenantId' => $tenantId, 'tenantId' => $tenantId], ['lastMessageAt' => 'DESC']); }
     public function findSiteChannel(string $tenantId, string $siteId): ?ChatConversation { return $this->findOneBy(['siteId' => $siteId, 'type' => 'site_channel']); }
 }

@@ -24,7 +24,7 @@ class TenantAppConfigRepository extends BaseRepository
     /** @return TenantAppConfig[] */
     public function findByTenant(string $tenantId): array
     {
-        return $this->findBy([]);
+        return $this->findBy(['tenantId' => $tenantId, 'tenantId' => $tenantId]);
     }
 
     public function findOrCreate(string $tenantId, string $appKey): TenantAppConfig

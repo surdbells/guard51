@@ -8,7 +8,7 @@ use Guard51\Entity\SwapRequestStatus;
 class ShiftSwapRequestRepository extends BaseRepository
 {
     protected function getEntityClass(): string { return ShiftSwapRequest::class; }
-    public function findPendingByTenant(string $tenantId): array { return $this->findBy(['status' => SwapRequestStatus::PENDING], ['createdAt' => 'DESC']); }
+    public function findPendingByTenant(string $tenantId): array { return $this->findBy(['tenantId' => $tenantId, 'status' => SwapRequestStatus::PENDING], ['createdAt' => 'DESC']); }
     public function findByGuard(string $guardId): array
     {
         return $this->createQueryBuilder('r')

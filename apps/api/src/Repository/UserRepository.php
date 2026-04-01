@@ -27,7 +27,7 @@ class UserRepository extends BaseRepository
      */
     public function findByTenant(string $tenantId): array
     {
-        return $this->findBy([], ['firstName' => 'ASC']);
+        return $this->findBy(['tenantId' => $tenantId, 'tenantId' => $tenantId], ['firstName' => 'ASC']);
     }
 
     /**
@@ -57,7 +57,7 @@ class UserRepository extends BaseRepository
 
     public function countByTenant(string $tenantId): int
     {
-        return $this->count([]);
+        return $this->count(['tenantId' => $tenantId, 'tenantId' => $tenantId]);
     }
 
     public function emailExists(string $email): bool

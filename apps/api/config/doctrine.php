@@ -17,6 +17,9 @@ $config = ORMSetup::createAttributeMetadataConfiguration(
 // Map camelCase PHP properties to snake_case DB columns
 $config->setNamingStrategy(new UnderscoreNamingStrategy(CASE_LOWER));
 
+// Register the tenant filter for multi-tenancy
+$config->addFilter('tenant_filter', \Guard51\Filter\TenantFilter::class);
+
 $connection = DriverManager::getConnection($settings['database'], $config);
 $entityManager = new EntityManager($connection, $config);
 
