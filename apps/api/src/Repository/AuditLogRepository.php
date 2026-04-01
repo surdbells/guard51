@@ -9,12 +9,7 @@ class AuditLogRepository extends BaseRepository
     protected function getEntityClass(): string { return AuditLog::class; }
     public function findByTenant(string $tenantId, int $limit = 100): array
     {
-        return $this->createQueryBuilder('a')->where('a.tenantId = :tid')
-            ->orderBy('a.createdAt', 'DESC')->setMaxResults($limit)->getQuery()->getResult();
-    }
-    public function findByUser(string $userId, int $limit = 50): array
-    {
-        return $this->createQueryBuilder('a')->where('a.userId = :uid')->setParameter('uid', $userId)
+        return $this->createQueryBuilder('a')->where('a.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('a.createdAt', 'DESC')->setMaxResults($limit)->getQuery()->getResult();
     }
 }

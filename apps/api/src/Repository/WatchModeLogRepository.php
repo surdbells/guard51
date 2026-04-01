@@ -18,7 +18,7 @@ class WatchModeLogRepository extends BaseRepository
     public function findByTenantRecent(string $tenantId, int $hours = 24): array
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
-        return $this->createQueryBuilder('w')->where('w.tenantId = :tid')->andWhere('w.recordedAt > :since')->setParameter('since', $since)
+        return $this->createQueryBuilder('w')->where('w.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('w.recordedAt', 'DESC')->getQuery()->getResult();
     }
 }

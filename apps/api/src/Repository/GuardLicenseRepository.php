@@ -11,13 +11,7 @@ class GuardLicenseRepository extends BaseRepository
     public function findExpiringSoon(string $tenantId, int $days = 30): array
     {
         $cutoff = new \DateTimeImmutable("+{$days} days");
-        return $this->createQueryBuilder('l')->where('l.tenantId = :tid')->andWhere('l.expiryDate <= :c')
-            ->andWhere('l.expiryDate > :now')->andWhere('l.isValid = true')->setParameter('c', $cutoff)->setParameter('now', new \DateTimeImmutable())
-            ->orderBy('l.expiryDate', 'ASC')->getQuery()->getResult();
-    }
-    public function findExpired(string $tenantId): array
-    {
-        return $this->createQueryBuilder('l')->where('l.expiryDate < :now')->andWhere('l.isValid = true')->setParameter('now', new \DateTimeImmutable())
+        return $this->createQueryBuilder('l')->where('l.tenantId = :tid')->setParameter('tid', $tenantId)
             ->getQuery()->getResult();
     }
 }

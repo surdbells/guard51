@@ -22,7 +22,7 @@ class PanicAlertRepository extends BaseRepository
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
         return $this->createQueryBuilder('pa')
-            ->where('pa.tenantId = :tid')->andWhere('pa.createdAt > :since')->setParameter('since', $since)
+            ->where('pa.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('pa.createdAt', 'DESC')->getQuery()->getResult();
     }
 }

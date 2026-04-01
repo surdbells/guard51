@@ -11,18 +11,7 @@ class TaskRepository extends BaseRepository
 
     public function findByTenant(string $tenantId, ?string $status = null): array
     {
-        $qb = $this->createQueryBuilder('t')->where('t.tenantId = :tid');
-        if ($status) $qb->andWhere('t.status = :s')->setParameter('s', $status);
-        return $qb->orderBy('t.createdAt', 'DESC')->getQuery()->getResult();
-    }
-
-    public function findByGuard(string $guardId): array { return $this->findBy(['assignedTo' => $guardId], ['createdAt' => 'DESC']); }
-    public function findBySite(string $siteId): array { return $this->findBy(['siteId' => $siteId], ['createdAt' => 'DESC']); }
-
-    public function findOverdue(string $tenantId): array
-    {
-        return $this->createQueryBuilder('t')->where('t.dueDate < :now')->andWhere('t.status IN (:active)')->setParameter('now', new \DateTimeImmutable())
-            ->setParameter('active', ['pending', 'in_progress'])
+        $qb = $this->createQueryBuilder('t')->where('t.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('t.dueDate', 'ASC')->getQuery()->getResult();
     }
 }

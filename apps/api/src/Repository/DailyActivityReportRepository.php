@@ -23,7 +23,7 @@ class DailyActivityReportRepository extends BaseRepository
 
     public function findByTenantFiltered(string $tenantId, ?string $siteId = null, ?string $guardId = null, ?string $status = null, int $limit = 50): array
     {
-        $qb = $this->createQueryBuilder('d')->where('d.tenantId = :tid');
+        $qb = $this->createQueryBuilder('d')->where('d.tenantId = :tid')->setParameter('tid', $tenantId);
         if ($siteId) $qb->andWhere('d.siteId = :sid')->setParameter('sid', $siteId);
         if ($guardId) $qb->andWhere('d.guardId = :gid')->setParameter('gid', $guardId);
         if ($status) $qb->andWhere('d.status = :status')->setParameter('status', $status);

@@ -18,7 +18,7 @@ class GeofenceAlertRepository extends BaseRepository
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
         return $this->createQueryBuilder('ga')
-            ->where('ga.tenantId = :tid')->andWhere('ga.createdAt > :since')->setParameter('since', $since)
+            ->where('ga.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('ga.createdAt', 'DESC')->getQuery()->getResult();
     }
 }

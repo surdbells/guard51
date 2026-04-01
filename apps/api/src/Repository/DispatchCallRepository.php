@@ -18,7 +18,7 @@ class DispatchCallRepository extends BaseRepository
     public function findByTenantRecent(string $tenantId, int $hours = 24): array
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
-        return $this->createQueryBuilder('d')->where('d.tenantId = :tid')->andWhere('d.receivedAt > :since')->setParameter('since', $since)
+        return $this->createQueryBuilder('d')->where('d.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('d.receivedAt', 'DESC')->getQuery()->getResult();
     }
 }

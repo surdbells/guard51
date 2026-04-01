@@ -10,16 +10,7 @@ class InvoiceRepository extends BaseRepository
 
     public function findByTenant(string $tenantId, ?string $status = null, ?string $clientId = null): array
     {
-        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid');
-        if ($status) $qb->andWhere('i.status = :s')->setParameter('s', $status);
-        if ($clientId) $qb->andWhere('i.clientId = :cid')->setParameter('cid', $clientId);
-        return $qb->orderBy('i.issueDate', 'DESC')->getQuery()->getResult();
-    }
-
-    public function findOverdue(string $tenantId): array
-    {
-        return $this->createQueryBuilder('i')->where('i.dueDate < :now')->andWhere('i.status IN (:active)')->setParameter('now', new \DateTimeImmutable())
-            ->setParameter('active', ['sent', 'viewed', 'partially_paid'])
+        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('i.dueDate', 'ASC')->getQuery()->getResult();
     }
 
