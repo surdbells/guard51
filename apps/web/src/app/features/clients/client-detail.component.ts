@@ -14,7 +14,7 @@ import { ApiService } from '@core/services/api.service';
   template: `
     <g51-page-header [title]="client()?.company_name || 'Client'" subtitle="Client profile, sites, and billing">
       <button class="btn-secondary flex items-center gap-2" routerLink="/clients"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
-      <button class="btn-primary flex items-center gap-2" [routerLink]="['/clients', client()?.id, 'edit']"><lucide-icon [img]="EditIcon" [size]="14" /> Edit</button>
+      <button class="btn-primary flex items-center gap-2" [routerLink]="['/clients/edit', client()?.id]"><lucide-icon [img]="EditIcon" [size]="14" /> Edit</button>
     </g51-page-header>
 
     @if (loading()) { <g51-loading /> } @else if (client()) {

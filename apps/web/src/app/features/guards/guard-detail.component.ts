@@ -16,7 +16,7 @@ import { ToastService } from '@core/services/toast.service';
   template: `
     <g51-page-header [title]="guard()?.first_name + ' ' + guard()?.last_name" subtitle="Guard profile, performance, and documents">
       <button class="btn-secondary flex items-center gap-2" routerLink="/guards"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
-      <button class="btn-primary flex items-center gap-2" [routerLink]="['/guards', guard()?.id, 'edit']"><lucide-icon [img]="EditIcon" [size]="14" /> Edit</button>
+      <button class="btn-primary flex items-center gap-2" [routerLink]="['/guards/edit', guard()?.id]"><lucide-icon [img]="EditIcon" [size]="14" /> Edit</button>
     </g51-page-header>
 
     @if (loading()) { <g51-loading /> } @else if (guard()) {

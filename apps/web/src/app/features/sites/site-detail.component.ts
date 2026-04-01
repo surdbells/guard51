@@ -16,7 +16,7 @@ declare var L: any;
   template: `
     <g51-page-header [title]="site()?.name || 'Site'" subtitle="Site details, location, and assigned guards">
       <button class="btn-secondary flex items-center gap-2" routerLink="/sites"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
-      <button class="btn-primary flex items-center gap-2" [routerLink]="['/sites', site()?.id, 'edit']"><lucide-icon [img]="EditIcon" [size]="14" /> Edit</button>
+      <button class="btn-primary flex items-center gap-2" [routerLink]="['/sites/edit', site()?.id]"><lucide-icon [img]="EditIcon" [size]="14" /> Edit</button>
     </g51-page-header>
 
     @if (loading()) { <g51-loading /> } @else if (site()) {

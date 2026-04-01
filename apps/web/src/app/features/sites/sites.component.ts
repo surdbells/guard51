@@ -43,7 +43,7 @@ import { ToastService } from '@core/services/toast.service';
               <div class="flex items-center gap-2">
                 <span class="badge text-[10px]" [ngClass]="s.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'">{{ s.status }}</span>
                 <a [routerLink]="[s.id]" class="btn-secondary text-xs py-1 px-2"><lucide-icon [img]="EyeIcon" [size]="12" /></a>
-                <a [routerLink]="[s.id, 'edit']" class="btn-secondary text-xs py-1 px-2">Edit</a>
+                <a [routerLink]="['edit', s.id]" class="btn-secondary text-xs py-1 px-2">Edit</a>
                 @if (s.status === 'active') {
                   <button (click)="suspend(s)" class="btn-secondary text-xs py-1 px-2 text-amber-600"><lucide-icon [img]="PowerOffIcon" [size]="12" /></button>
                 } @else {

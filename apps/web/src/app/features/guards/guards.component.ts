@@ -47,7 +47,7 @@ import { exportToCsv } from '@core/utils/csv-export';
               <div class="flex items-center gap-2">
                 <span class="badge text-[10px]" [ngClass]="g.status === 'active' ? 'bg-emerald-50 text-emerald-600' : g.status === 'suspended' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'">{{ g.status }}</span>
                 <a [routerLink]="[g.id]" class="btn-secondary text-xs py-1 px-2"><lucide-icon [img]="EyeIcon" [size]="12" /></a>
-                <a [routerLink]="[g.id, 'edit']" class="btn-secondary text-xs py-1 px-2">Edit</a>
+                <a [routerLink]="['edit', g.id]" class="btn-secondary text-xs py-1 px-2">Edit</a>
                 @if (g.status === 'active') {
                   <button (click)="suspend(g)" class="btn-secondary text-xs py-1 px-2 text-amber-600"><lucide-icon [img]="UserXIcon" [size]="12" /></button>
                 } @else if (g.status === 'suspended' || g.status === 'inactive') {
