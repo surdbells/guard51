@@ -562,6 +562,7 @@ $containerBuilder->addDefinitions([
     GuardController::class => function (ContainerInterface $c): GuardController {
         return new GuardController(
             $c->get(GuardService::class),
+            $c->get(FileStorageService::class),
             $c->get(LoggerInterface::class),
         );
     },
@@ -702,7 +703,7 @@ $containerBuilder->addDefinitions([
     },
 
     ReportController::class => fn(ContainerInterface $c) => new ReportController($c->get(ReportService::class)),
-    IncidentController::class => fn(ContainerInterface $c) => new IncidentController($c->get(IncidentService::class)),
+    IncidentController::class => fn(ContainerInterface $c) => new IncidentController($c->get(IncidentService::class), $c->get(FileStorageService::class)),
     DispatchController::class => fn(ContainerInterface $c) => new DispatchController($c->get(DispatchService::class)),
     TaskController::class => fn(ContainerInterface $c) => new TaskController($c->get(TaskService::class)),
 
@@ -794,6 +795,7 @@ $containerBuilder->addDefinitions([
     PermissionRepository::class => fn(ContainerInterface $c) => new PermissionRepository($c->get(EntityManagerInterface::class)),
     UserManagementService::class => fn(ContainerInterface $c) => new UserManagementService($c->get(UserRepository::class), $c->get(PermissionRepository::class), $c->get(LoggerInterface::class)),
     UserManagementController::class => fn(ContainerInterface $c) => new UserManagementController($c->get(UserManagementService::class)),
+    \Guard51\Module\Upload\FileUploadController::class => fn(ContainerInterface $c) => new \Guard51\Module\Upload\FileUploadController($c->get(FileStorageService::class)),
 ]);
 
 return $containerBuilder->build();
