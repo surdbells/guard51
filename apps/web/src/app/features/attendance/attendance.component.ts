@@ -7,13 +7,16 @@ import { StatsCardComponent } from '@shared/components/stats-card/stats-card.com
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { exportToCsv } from '@core/utils/csv-export';
 
 @Component({
   selector: 'g51-attendance',
   standalone: true,
   imports: [FormsModule, NgClass, DatePipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, EmptyStateComponent, LoadingSpinnerComponent],
   template: `
-    <g51-page-header title="Attendance" subtitle="Guard clock-in/out records and attendance tracking" />
+    <g51-page-header title="Attendance" subtitle="Guard clock-in/out records and attendance tracking">
+      <button (click)="exportAttendance()" class="btn-secondary text-xs">Export CSV</button>
+    </g51-page-header>
     <div class="flex items-center gap-3 mb-4">
       <input type="date" [(ngModel)]="selectedDate" (ngModelChange)="loadAttendance()" class="input-base text-xs" />
       <div class="relative flex-1 max-w-xs">
@@ -76,5 +79,12 @@ export class AttendanceComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+  exportAttendance(): void {
+    exportToCsv('attendance-' + this.selectedDate, this.records(), [
+      { key: 'guard_name', label: 'Guard' }, { key: 'site_name', label: 'Site' },
+      { key: 'clock_in_time', label: 'Clock In' }, { key: 'clock_out_time', label: 'Clock Out' },
+      { key: 'total_hours', label: 'Hours' }, { key: 'status', label: 'Status' },
+    ]);
   }
 }

@@ -11,6 +11,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
+import { exportToCsv } from '@core/utils/csv-export';
 
 @Component({
   selector: 'g51-invoices',
@@ -18,6 +19,7 @@ import { ToastService } from '@core/services/toast.service';
   imports: [FormsModule, NgClass, DatePipe, DecimalPipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, BarChartComponent, LineChartComponent, ModalComponent, EmptyStateComponent],
   template: `
     <g51-page-header title="Invoices" subtitle="Client billing, payments, and revenue tracking">
+      <button (click)="exportInvoices()" class="btn-secondary flex items-center gap-2">Export CSV</button>
       <button (click)="showGenerate.set(true)" class="btn-secondary flex items-center gap-2">
         <lucide-icon [img]="CreditCardIcon" [size]="16" /> Generate from Timesheet
       </button>
@@ -208,5 +210,14 @@ export class InvoicesComponent implements OnInit {
     this.api.post('/invoices/generate', this.genForm).subscribe({
       next: () => { this.showGenerate.set(false); this.toast.success('Invoice generated from timesheet'); this.ngOnInit(); },
     });
+  }
+
+  exportInvoices(): void {
+    exportToCsv('invoices', this.invoices(), [
+      { key: 'invoice_number', label: 'Invoice #' }, { key: 'client_name', label: 'Client' },
+      { key: 'issue_date', label: 'Issue Date' }, { key: 'due_date', label: 'Due Date' },
+      { key: 'total_amount', label: 'Total (₦)' }, { key: 'amount_paid', label: 'Paid (₦)' },
+      { key: 'balance_due', label: 'Balance (₦)' }, { key: 'status', label: 'Status' },
+    ]);
   }
 }
