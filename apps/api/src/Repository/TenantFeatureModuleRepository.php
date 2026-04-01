@@ -19,12 +19,12 @@ class TenantFeatureModuleRepository extends BaseRepository
     /** @return TenantFeatureModule[] */
     public function findEnabledByTenant(string $tenantId): array
     {
-        return $this->findBy(['tenantId' => $tenantId, 'isEnabled' => true]);
+        return $this->findBy(['isEnabled' => true]);
     }
 
     public function findByTenantAndKey(string $tenantId, string $moduleKey): ?TenantFeatureModule
     {
-        return $this->findOneBy(['tenantId' => $tenantId, 'moduleKey' => $moduleKey]);
+        return $this->findOneBy(['moduleKey' => $moduleKey]);
     }
 
     /** @return string[] */

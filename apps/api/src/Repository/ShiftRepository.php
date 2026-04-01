@@ -12,8 +12,7 @@ class ShiftRepository extends BaseRepository
     public function findByTenantAndDateRange(string $tenantId, \DateTimeImmutable $start, \DateTimeImmutable $end, ?string $siteId = null, ?string $guardId = null): array
     {
         $qb = $this->createQueryBuilder('s')
-            ->where('s.tenantId = :tid')->andWhere('s.shiftDate >= :start')->andWhere('s.shiftDate <= :end')
-            ->setParameter('tid', $tenantId)->setParameter('start', $start)->setParameter('end', $end);
+            ->where('s.tenantId = :tid')->andWhere('s.shiftDate >= :start')->andWhere('s.shiftDate <= :end')->setParameter('start', $start)->setParameter('end', $end);
         if ($siteId) $qb->andWhere('s.siteId = :sid')->setParameter('sid', $siteId);
         if ($guardId) $qb->andWhere('s.guardId = :gid')->setParameter('gid', $guardId);
         return $qb->orderBy('s.shiftDate', 'ASC')->addOrderBy('s.startTime', 'ASC')->getQuery()->getResult();
@@ -23,8 +22,7 @@ class ShiftRepository extends BaseRepository
     {
         return $this->createQueryBuilder('s')
             ->where('s.tenantId = :tid')->andWhere('s.isOpen = true')->andWhere('s.status = :status')
-            ->andWhere('s.shiftDate >= :today')
-            ->setParameter('tid', $tenantId)->setParameter('status', ShiftStatus::PUBLISHED)
+            ->andWhere('s.shiftDate >= :today')->setParameter('status', ShiftStatus::PUBLISHED)
             ->setParameter('today', new \DateTimeImmutable('today'))
             ->orderBy('s.shiftDate', 'ASC')->getQuery()->getResult();
     }

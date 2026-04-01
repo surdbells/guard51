@@ -18,7 +18,6 @@ class PassdownLogRepository extends BaseRepository
     public function findUnacknowledged(string $tenantId): array
     {
         return $this->createQueryBuilder('p')
-            ->where('p.tenantId = :tid')->andWhere('p.acknowledgedAt IS NULL')
-            ->setParameter('tid', $tenantId)->orderBy('p.createdAt', 'DESC')->getQuery()->getResult();
+            ->where('p.tenantId = :tid')->andWhere('p.acknowledgedAt IS NULL')->orderBy('p.createdAt', 'DESC')->getQuery()->getResult();
     }
 }

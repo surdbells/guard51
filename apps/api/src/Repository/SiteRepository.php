@@ -20,7 +20,7 @@ class SiteRepository extends BaseRepository
     /** @return Site[] */
     public function findByTenant(string $tenantId, ?string $status = null): array
     {
-        $criteria = ['tenantId' => $tenantId];
+        $criteria = [];
         if ($status) $criteria['status'] = SiteStatus::from($status);
         return $this->findBy($criteria, ['name' => 'ASC']);
     }
@@ -28,7 +28,7 @@ class SiteRepository extends BaseRepository
     /** @return Site[] */
     public function findActiveByTenant(string $tenantId): array
     {
-        return $this->findBy(['tenantId' => $tenantId, 'status' => SiteStatus::ACTIVE], ['name' => 'ASC']);
+        return $this->findBy(['status' => SiteStatus::ACTIVE], ['name' => 'ASC']);
     }
 
     /** @return Site[] */
@@ -39,18 +39,16 @@ class SiteRepository extends BaseRepository
 
     public function countByTenant(string $tenantId): int
     {
-        return $this->count(['tenantId' => $tenantId]);
+        return $this->count([]);
     }
 
     /** @return Site[] Sites with coordinates for map display */
     public function findWithCoordinates(string $tenantId): array
     {
         $qb = $this->createQueryBuilder('s')
-            ->where('s.tenantId = :tid')
-            ->andWhere('s.latitude IS NOT NULL')
+            ->where('s.latitude IS NOT NULL')
             ->andWhere('s.longitude IS NOT NULL')
             ->andWhere('s.status = :status')
-            ->setParameter('tid', $tenantId)
             ->setParameter('status', SiteStatus::ACTIVE)
             ->orderBy('s.name', 'ASC');
         return $qb->getQuery()->getResult();
@@ -59,9 +57,7 @@ class SiteRepository extends BaseRepository
     public function searchByName(string $tenantId, string $query): array
     {
         $qb = $this->createQueryBuilder('s')
-            ->where('s.tenantId = :tid')
-            ->andWhere('LOWER(s.name) LIKE :q')
-            ->setParameter('tid', $tenantId)
+            ->where('LOWER(s.name) LIKE :q')
             ->setParameter('q', '%' . strtolower($query) . '%')
             ->orderBy('s.name', 'ASC');
         return $qb->getQuery()->getResult();

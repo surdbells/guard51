@@ -13,7 +13,7 @@ class DailySnapshotRepository extends BaseRepository
 
     public function findByTenantAndDate(string $tenantId, \DateTimeImmutable $date): ?DailySnapshot
     {
-        return $this->findOneBy(['tenantId' => $tenantId, 'snapshotDate' => $date]);
+        return $this->findOneBy(['snapshotDate' => $date]);
     }
 
     /** @return DailySnapshot[] */
@@ -21,9 +21,7 @@ class DailySnapshotRepository extends BaseRepository
     {
         $since = new \DateTimeImmutable("-{$days} days");
         $qb = $this->createQueryBuilder('s')
-            ->where('s.tenantId = :tid')
-            ->andWhere('s.snapshotDate >= :since')
-            ->setParameter('tid', $tenantId)
+            ->where('s.snapshotDate >= :since')
             ->setParameter('since', $since)
             ->orderBy('s.snapshotDate', 'ASC');
         return $qb->getQuery()->getResult();

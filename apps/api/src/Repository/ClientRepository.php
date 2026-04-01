@@ -14,19 +14,17 @@ class ClientRepository extends BaseRepository
 
     public function findByTenant(string $tenantId, ?string $status = null): array
     {
-        $c = ['tenantId' => $tenantId];
+        $c = [];
         if ($status) $c['status'] = ClientStatus::from($status);
         return $this->findBy($c, ['companyName' => 'ASC']);
     }
 
-    public function countByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId]); }
+    public function countByTenant(string $tenantId): int { return $this->count([]); }
 
     public function searchByName(string $tenantId, string $query): array
     {
         $qb = $this->createQueryBuilder('c')
-            ->where('c.tenantId = :tid')
-            ->andWhere('LOWER(c.companyName) LIKE :q')
-            ->setParameter('tid', $tenantId)
+            ->where('LOWER(c.companyName) LIKE :q')
             ->setParameter('q', '%' . strtolower($query) . '%')
             ->orderBy('c.companyName', 'ASC');
         return $qb->getQuery()->getResult();

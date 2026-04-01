@@ -11,17 +11,14 @@ class DispatchCallRepository extends BaseRepository
 
     public function findActiveByTenant(string $tenantId): array
     {
-        return $this->createQueryBuilder('d')->where('d.tenantId = :tid')
-            ->andWhere('d.status IN (:active)')
-            ->setParameter('tid', $tenantId)->setParameter('active', ['received', 'dispatched', 'in_progress'])
+        return $this->createQueryBuilder('d')->where('d.status IN (:active)')->setParameter('active', ['received', 'dispatched', 'in_progress'])
             ->orderBy('d.receivedAt', 'DESC')->getQuery()->getResult();
     }
 
     public function findByTenantRecent(string $tenantId, int $hours = 24): array
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
-        return $this->createQueryBuilder('d')->where('d.tenantId = :tid')->andWhere('d.receivedAt > :since')
-            ->setParameter('tid', $tenantId)->setParameter('since', $since)
+        return $this->createQueryBuilder('d')->where('d.tenantId = :tid')->andWhere('d.receivedAt > :since')->setParameter('since', $since)
             ->orderBy('d.receivedAt', 'DESC')->getQuery()->getResult();
     }
 }

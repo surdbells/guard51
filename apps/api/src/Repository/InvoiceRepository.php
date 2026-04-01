@@ -10,7 +10,7 @@ class InvoiceRepository extends BaseRepository
 
     public function findByTenant(string $tenantId, ?string $status = null, ?string $clientId = null): array
     {
-        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid')->setParameter('tid', $tenantId);
+        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid');
         if ($status) $qb->andWhere('i.status = :s')->setParameter('s', $status);
         if ($clientId) $qb->andWhere('i.clientId = :cid')->setParameter('cid', $clientId);
         return $qb->orderBy('i.issueDate', 'DESC')->getQuery()->getResult();
@@ -18,16 +18,14 @@ class InvoiceRepository extends BaseRepository
 
     public function findOverdue(string $tenantId): array
     {
-        return $this->createQueryBuilder('i')->where('i.tenantId = :tid')
-            ->andWhere('i.dueDate < :now')->andWhere('i.status IN (:active)')
-            ->setParameter('tid', $tenantId)->setParameter('now', new \DateTimeImmutable())
+        return $this->createQueryBuilder('i')->where('i.dueDate < :now')->andWhere('i.status IN (:active)')->setParameter('now', new \DateTimeImmutable())
             ->setParameter('active', ['sent', 'viewed', 'partially_paid'])
             ->orderBy('i.dueDate', 'ASC')->getQuery()->getResult();
     }
 
     public function getNextInvoiceNumber(string $tenantId): string
     {
-        $count = $this->count(['tenantId' => $tenantId]);
+        $count = $this->count([]);
         return 'INV-' . str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT);
     }
 }

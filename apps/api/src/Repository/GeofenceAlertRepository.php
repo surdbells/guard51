@@ -11,15 +11,14 @@ class GeofenceAlertRepository extends BaseRepository
 
     public function findActiveByTenant(string $tenantId): array
     {
-        return $this->findBy(['tenantId' => $tenantId, 'isAcknowledged' => false], ['createdAt' => 'DESC']);
+        return $this->findBy(['isAcknowledged' => false], ['createdAt' => 'DESC']);
     }
 
     public function findByTenantRecent(string $tenantId, int $hours = 24): array
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
         return $this->createQueryBuilder('ga')
-            ->where('ga.tenantId = :tid')->andWhere('ga.createdAt > :since')
-            ->setParameter('tid', $tenantId)->setParameter('since', $since)
+            ->where('ga.tenantId = :tid')->andWhere('ga.createdAt > :since')->setParameter('since', $since)
             ->orderBy('ga.createdAt', 'DESC')->getQuery()->getResult();
     }
 }

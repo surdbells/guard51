@@ -23,7 +23,7 @@ class AppDownloadLogRepository extends BaseRepository
 
     public function countByTenant(string $tenantId): int
     {
-        return $this->count(['tenantId' => $tenantId]);
+        return $this->count([]);
     }
 
     /**

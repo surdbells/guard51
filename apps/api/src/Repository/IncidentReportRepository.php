@@ -11,15 +11,13 @@ class IncidentReportRepository extends BaseRepository
 
     public function findActiveByTenant(string $tenantId): array
     {
-        return $this->createQueryBuilder('i')->where('i.tenantId = :tid')
-            ->andWhere('i.status NOT IN (:terminal)')
-            ->setParameter('tid', $tenantId)->setParameter('terminal', ['resolved', 'closed'])
+        return $this->createQueryBuilder('i')->where('i.status NOT IN (:terminal)')->setParameter('terminal', ['resolved', 'closed'])
             ->orderBy('i.reportedAt', 'DESC')->getQuery()->getResult();
     }
 
     public function findByTenantFiltered(string $tenantId, ?string $siteId = null, ?string $severity = null, ?string $status = null, int $limit = 50): array
     {
-        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid')->setParameter('tid', $tenantId);
+        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid');
         if ($siteId) $qb->andWhere('i.siteId = :sid')->setParameter('sid', $siteId);
         if ($severity) $qb->andWhere('i.severity = :sev')->setParameter('sev', $severity);
         if ($status) $qb->andWhere('i.status = :status')->setParameter('status', $status);

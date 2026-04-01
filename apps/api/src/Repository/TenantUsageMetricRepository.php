@@ -18,7 +18,7 @@ class TenantUsageMetricRepository extends BaseRepository
 
     public function findByTenant(string $tenantId): ?TenantUsageMetric
     {
-        return $this->findOneBy(['tenantId' => $tenantId]);
+        return $this->findOneBy([]);
     }
 
     public function findOrCreateForTenant(string $tenantId): TenantUsageMetric

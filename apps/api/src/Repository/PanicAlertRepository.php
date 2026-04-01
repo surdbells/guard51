@@ -13,9 +13,7 @@ class PanicAlertRepository extends BaseRepository
     public function findActiveByTenant(string $tenantId): array
     {
         return $this->createQueryBuilder('pa')
-            ->where('pa.tenantId = :tid')
-            ->andWhere('pa.status IN (:statuses)')
-            ->setParameter('tid', $tenantId)
+            ->where('pa.status IN (:statuses)')
             ->setParameter('statuses', [PanicAlertStatus::TRIGGERED->value, PanicAlertStatus::ACKNOWLEDGED->value, PanicAlertStatus::RESPONDING->value])
             ->orderBy('pa.createdAt', 'DESC')->getQuery()->getResult();
     }
@@ -24,8 +22,7 @@ class PanicAlertRepository extends BaseRepository
     {
         $since = new \DateTimeImmutable("-{$hours} hours");
         return $this->createQueryBuilder('pa')
-            ->where('pa.tenantId = :tid')->andWhere('pa.createdAt > :since')
-            ->setParameter('tid', $tenantId)->setParameter('since', $since)
+            ->where('pa.tenantId = :tid')->andWhere('pa.createdAt > :since')->setParameter('since', $since)
             ->orderBy('pa.createdAt', 'DESC')->getQuery()->getResult();
     }
 }
