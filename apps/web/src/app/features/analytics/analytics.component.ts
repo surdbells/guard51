@@ -1,84 +1,139 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { LucideAngularModule, BarChart3, Clock, Shield, FileText, TrendingUp, Users } from 'lucide-angular';
+import { NgClass, DecimalPipe } from '@angular/common';
+import { LucideAngularModule, BarChart3, Users, Clock, AlertTriangle, TrendingUp, Shield, MapPin } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
+import { BarChartComponent, BarChartData } from '@shared/components/charts/bar-chart.component';
+import { LineChartComponent, LineChartSeries } from '@shared/components/charts/line-chart.component';
+import { DonutChartComponent, DonutChartData } from '@shared/components/charts/donut-chart.component';
+import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { exportToCsv } from '@core/utils/csv-export';
 
 @Component({
   selector: 'g51-analytics',
   standalone: true,
-  imports: [NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent],
+  imports: [NgClass, DecimalPipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, BarChartComponent, LineChartComponent, DonutChartComponent, LoadingSpinnerComponent],
   template: `
-    <g51-page-header title="Analytics & Performance" subtitle="KPIs, guard performance index, and operational insights" />
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
-      <g51-stats-card label="Avg Response Time" [value]="kpis().avg_response_time_min + ' min'" [icon]="ClockIcon" />
-      <g51-stats-card label="Tour Compliance" [value]="kpis().tour_compliance_rate + '%'" [icon]="ShieldIcon" />
-      <g51-stats-card label="Guard Punctuality" [value]="kpis().guard_punctuality_rate + '%'" [icon]="UsersIcon" />
-      <g51-stats-card label="Incident Resolution" [value]="kpis().incident_resolution_hours + 'h'" [icon]="TrendingUpIcon" />
-    </div>
-    <div class="flex gap-1 mb-6">
-      @for (tab of ['Overview', 'Guard Performance', 'Site Analytics']; track tab) {
-        <button (click)="activeTab.set(tab)" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
-          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
-      }
-    </div>
-    @if (activeTab() === 'Overview') {
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="card p-5"><h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Operational Trends (30d)</h3>
-          <div class="h-48 flex items-center justify-center" [style.color]="'var(--text-tertiary)'"><lucide-icon [img]="BarChart3Icon" [size]="32" /><span class="ml-2 text-sm">Chart renders with live data</span></div></div>
-        <div class="card p-5"><h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Compliance Summary</h3>
-          @for (m of complianceMetrics; track m.label) {
-            <div class="flex items-center justify-between py-2 border-b last:border-b-0" [style.borderColor]="'var(--border-default)'">
-              <span class="text-xs" [style.color]="'var(--text-secondary)'">{{ m.label }}</span>
-              <div class="flex items-center gap-2"><div class="w-24 h-1.5 rounded-full bg-[var(--surface-muted)] overflow-hidden"><div class="h-full rounded-full" [style.width]="m.value + '%'" [style.background]="m.value >= 90 ? '#10b981' : m.value >= 70 ? '#f59e0b' : '#ef4444'"></div></div>
-                <span class="text-xs font-mono tabular-nums w-10 text-right" [style.color]="'var(--text-primary)'">{{ m.value }}%</span></div>
-            </div>
-          }
+    <g51-page-header title="Analytics & Reporting" subtitle="Operational insights and performance metrics">
+      <button (click)="exportKpis()" class="btn-secondary text-xs">Export Report</button>
+    </g51-page-header>
+
+    @if (loading()) { <g51-loading /> } @else {
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
+        <g51-stats-card label="Total Guards" [value]="kpis().total_guards" [icon]="ShieldIcon" />
+        <g51-stats-card label="Active Sites" [value]="kpis().total_sites" [icon]="MapPinIcon" />
+        <g51-stats-card label="Attendance Rate" [value]="kpis().attendance_rate + '%'" [icon]="ClockIcon" [trend]="kpis().attendance_trend" />
+        <g51-stats-card label="Incidents This Month" [value]="kpis().incidents_this_month" [icon]="AlertTriangleIcon" />
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="lg:col-span-2 card p-5">
+          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Attendance Trend (Last 14 Days)</h3>
+          @if (attendanceSeries().length) { <g51-line-chart [seriesData]="attendanceSeries()" [labels]="attendanceLabels()" [height]="220" /> }
+          @else { <p class="text-xs py-12 text-center" [style.color]="'var(--text-tertiary)'">No attendance data yet</p> }
+        </div>
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Incidents by Type</h3>
+          @if (incidentDonut().length) { <g51-donut-chart [data]="incidentDonut()" [size]="120" [strokeWidth]="18" [centerValue]="String(kpis().incidents_this_month)" centerLabel="Total" /> }
+          @else { <p class="text-xs py-12 text-center" [style.color]="'var(--text-tertiary)'">No incidents</p> }
         </div>
       </div>
-    }
-    @if (activeTab() === 'Guard Performance') {
-      <div class="card p-5"><h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Guard Performance Index — Current Month</h3>
-        <div class="space-y-2">
-          @for (g of guardPerformance; track g.name) {
-            <div class="card p-3 card-hover"><div class="flex items-center justify-between">
-              <div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ g.name }}</span>
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded" [ngClass]="g.grade.startsWith('A') ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400' : g.grade.startsWith('B') ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'">{{ g.grade }}</span></div>
-                <div class="grid grid-cols-4 gap-2">
-                  @for (s of [['Punctuality', g.punctuality], ['Tours', g.tours], ['Reports', g.reports], ['Response', g.response]]; track s[0]) {
-                    <div><p class="text-[9px]" [style.color]="'var(--text-tertiary)'">{{ s[0] }}</p><p class="text-xs font-mono" [style.color]="'var(--text-primary)'">{{ s[1] }}%</p></div>
-                  }
-                </div></div>
-              <div class="text-right ml-4"><span class="text-2xl font-bold" [style.color]="'var(--text-primary)'">{{ g.overall }}</span><p class="text-[9px]" [style.color]="'var(--text-tertiary)'">Overall</p></div>
-            </div></div>
-          }
+
+      <!-- Charts Row 2 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Guard Hours This Week</h3>
+          @if (hoursData().length) { <g51-bar-chart [data]="hoursData()" [height]="200" /> }
+          @else { <p class="text-xs py-12 text-center" [style.color]="'var(--text-tertiary)'">No hours data</p> }
+        </div>
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Revenue by Client</h3>
+          @if (revenueData().length) { <g51-bar-chart [data]="revenueData()" [height]="200" /> }
+          @else { <p class="text-xs py-12 text-center" [style.color]="'var(--text-tertiary)'">No revenue data</p> }
         </div>
       </div>
-    }
-    @if (activeTab() === 'Site Analytics') {
-      <div class="card p-5"><h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Site Performance</h3>
-        <p class="text-xs" [style.color]="'var(--text-tertiary)'">Site-level analytics with incident frequency, tour completion, and coverage metrics.</p></div>
+
+      <!-- Top Guards Performance -->
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Guard Performance Index (GPI)</h3>
+        @if (!topGuards().length) { <p class="text-xs" [style.color]="'var(--text-tertiary)'">No performance data calculated yet.</p> }
+        @else {
+          <div class="space-y-2">
+            @for (g of topGuards(); track g.guard_id; let i = $index) {
+              <div class="flex items-center gap-3 py-2 border-b" [style.borderColor]="'var(--border-default)'">
+                <span class="text-xs font-bold w-6 text-center" [style.color]="i < 3 ? 'var(--color-brand-500)' : 'var(--text-tertiary)'">#{{ i + 1 }}</span>
+                <div class="flex-1">
+                  <p class="text-sm font-medium" [style.color]="'var(--text-primary)'">{{ g.guard_name || 'Guard' }}</p>
+                  <div class="flex gap-3 mt-0.5">
+                    <span class="text-[10px]" [style.color]="'var(--text-tertiary)'">Punctuality: {{ g.punctuality_score }}%</span>
+                    <span class="text-[10px]" [style.color]="'var(--text-tertiary)'">Reports: {{ g.report_completion_score }}%</span>
+                    <span class="text-[10px]" [style.color]="'var(--text-tertiary)'">Tours: {{ g.tour_compliance_score }}%</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold" [style.color]="'var(--color-brand-500)'">{{ g.overall_score }}%</p>
+                  <p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Overall GPI</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
     }
   `,
 })
 export class AnalyticsComponent implements OnInit {
   private api = inject(ApiService);
-  readonly BarChart3Icon = BarChart3; readonly ClockIcon = Clock; readonly ShieldIcon = Shield;
-  readonly FileTextIcon = FileText; readonly TrendingUpIcon = TrendingUp; readonly UsersIcon = Users;
-  readonly activeTab = signal('Overview');
-  readonly kpis = signal({ avg_response_time_min: 8.5, tour_compliance_rate: 92.3, incident_resolution_hours: 4.2, guard_punctuality_rate: 88.7 });
-  complianceMetrics = [
-    { label: 'Tour checkpoint completion', value: 92 }, { label: 'Report submission rate', value: 96 },
-    { label: 'Geofence compliance', value: 89 }, { label: 'Clock-in punctuality', value: 88 },
-    { label: 'License validity', value: 100 },
-  ];
-  guardPerformance = [
-    { name: 'Musa Ibrahim', grade: 'A+', overall: 96, punctuality: 98, tours: 96, reports: 100, response: 90 },
-    { name: 'Chika Nwosu', grade: 'A', overall: 90, punctuality: 92, tours: 90, reports: 95, response: 82 },
-    { name: 'Adebayo O.', grade: 'B+', overall: 82, punctuality: 85, tours: 80, reports: 88, response: 75 },
-    { name: 'Emeka J.', grade: 'C', overall: 63, punctuality: 70, tours: 55, reports: 72, response: 58 },
-  ];
-  ngOnInit(): void { this.api.get<any>('/analytics/kpis').subscribe({ next: r => { if (r.data) this.kpis.set(r.data); } }); }
+  readonly BarChartIcon = BarChart3; readonly ShieldIcon = Shield; readonly MapPinIcon = MapPin;
+  readonly ClockIcon = Clock; readonly AlertTriangleIcon = AlertTriangle; readonly TrendingUpIcon = TrendingUp;
+  readonly UsersIcon = Users;
+  readonly String = String;
+
+  readonly loading = signal(true);
+  readonly kpis = signal<any>({ total_guards: 0, total_sites: 0, attendance_rate: 0, attendance_trend: 0, incidents_this_month: 0 });
+  readonly attendanceSeries = signal<LineChartSeries[]>([]);
+  readonly attendanceLabels = signal<string[]>([]);
+  readonly incidentDonut = signal<DonutChartData[]>([]);
+  readonly hoursData = signal<BarChartData[]>([]);
+  readonly revenueData = signal<BarChartData[]>([]);
+  readonly topGuards = signal<any[]>([]);
+
+  ngOnInit(): void {
+    this.api.get<any>('/analytics/kpis').subscribe({
+      next: res => {
+        if (res.data) {
+          this.kpis.set(res.data);
+          // Build charts from KPI data
+          if (res.data.attendance_by_day) {
+            this.attendanceLabels.set(res.data.attendance_by_day.map((d: any) => d.label || d.date));
+            this.attendanceSeries.set([{ name: 'Present', data: res.data.attendance_by_day.map((d: any) => d.present || d.value || 0), color: 'var(--color-brand-500)' }]);
+          }
+          if (res.data.incidents_by_type) {
+            const colors = ['var(--color-danger)', 'var(--color-warning)', 'var(--color-brand-500)', 'var(--color-info)', 'var(--color-success)'];
+            this.incidentDonut.set(res.data.incidents_by_type.map((d: any, i: number) => ({ label: d.type || d.label, value: d.count || d.value, color: colors[i % colors.length] })));
+          }
+          if (res.data.hours_by_day) {
+            this.hoursData.set(res.data.hours_by_day.map((d: any) => ({ label: d.label || d.day, value: d.hours || d.value || 0 })));
+          }
+          if (res.data.revenue_by_client) {
+            this.revenueData.set(res.data.revenue_by_client.map((d: any) => ({ label: d.client || d.label, value: d.amount || d.value || 0 })));
+          }
+          if (res.data.top_guards) { this.topGuards.set(res.data.top_guards); }
+        }
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  exportKpis(): void {
+    const k = this.kpis();
+    exportToCsv('analytics-report', [k], [
+      { key: 'total_guards', label: 'Total Guards' }, { key: 'total_sites', label: 'Total Sites' },
+      { key: 'attendance_rate', label: 'Attendance Rate %' }, { key: 'incidents_this_month', label: 'Incidents This Month' },
+    ]);
+  }
 }
