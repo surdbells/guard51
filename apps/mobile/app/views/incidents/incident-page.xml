@@ -1,0 +1,29 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="onLoaded" class="bg-white">
+  <ActionBar title="Report Incident" class="action-bar">
+    <NavigationButton text="Back" tap="{{ onBack }}" />
+  </ActionBar>
+  <ScrollView>
+    <StackLayout class="p-4">
+      <Label text="Incident Type" class="label m-b-1" />
+      <ListPicker items="{{ incidentTypes }}" selectedIndex="{{ selectedTypeIndex }}" class="m-b-3" />
+
+      <Label text="Severity" class="label m-b-1" />
+      <ListPicker items="{{ severities }}" selectedIndex="{{ selectedSeverityIndex }}" class="m-b-3" />
+
+      <Label text="Title *" class="label m-b-1" />
+      <TextField text="{{ title }}" hint="Brief description" class="input m-b-3" />
+
+      <Label text="Description *" class="label m-b-1" />
+      <TextView text="{{ description }}" hint="Detailed account of the incident..." class="input m-b-3" height="120" />
+
+      <Button text="📷 Take Photo" tap="{{ onTakePhoto }}" class="btn-secondary m-b-2" />
+      <Image src="{{ photoPath }}" height="150" class="m-b-3" stretch="aspectFill"
+        visibility="{{ photoPath ? 'visible' : 'collapsed' }}" />
+
+      <Label text="📍 GPS: {{ gpsStatus }}" class="text-muted text-sm m-b-3" />
+
+      <Button text="Submit Report" tap="{{ onSubmit }}" class="btn-primary" isEnabled="{{ !submitting }}" />
+      <ActivityIndicator busy="{{ submitting }}" class="m-t-2" />
+    </StackLayout>
+  </ScrollView>
+</Page>

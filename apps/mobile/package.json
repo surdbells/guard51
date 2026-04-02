@@ -1,0 +1,25 @@
+{
+  "name": "guard51-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "app/app.ts",
+  "nativescript": {
+    "id": "com.dosthq.guard51",
+    "tns-android": { "version": "8.7.0" },
+    "tns-ios": { "version": "8.7.0" }
+  },
+  "dependencies": {
+    "@nativescript/core": "~8.7.0",
+    "@nativescript/geolocation": "~8.0.0",
+    "@nativescript/camera": "~5.0.0",
+    "@nativescript/barcodescanner": "~4.0.0",
+    "@nativescript/local-notifications": "~6.0.0",
+    "nativescript-sqlite": "~2.0.0"
+  },
+  "devDependencies": {
+    "@nativescript/android": "~8.7.0",
+    "@nativescript/ios": "~8.7.0",
+    "@nativescript/webpack": "~5.0.0",
+    "typescript": "~5.4.0"
+  }
+}

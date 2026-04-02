@@ -1,0 +1,48 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="onLoaded" class="bg-white">
+  <ActionBar title="Guard51" class="action-bar">
+    <ActionItem text="Logout" ios.position="right" tap="{{ onLogout }}" />
+  </ActionBar>
+  <ScrollView>
+    <StackLayout class="p-4">
+      <!-- Clock Status -->
+      <GridLayout columns="*,*" rows="auto" class="m-b-4">
+        <StackLayout col="0" class="card p-3 m-r-2 text-center">
+          <Label text="{{ clockedIn ? '✅ Clocked In' : '⏸ Not Clocked In' }}" class="font-bold" />
+          <Label text="{{ clockInTime }}" class="text-muted text-sm" />
+          <Button text="{{ clockedIn ? 'Clock Out' : 'Clock In' }}" tap="{{ onToggleClock }}"
+            class="{{ clockedIn ? 'btn-danger' : 'btn-success' }} m-t-2" />
+        </StackLayout>
+        <StackLayout col="1" class="card p-3 m-l-2 text-center">
+          <Label text="{{ siteName || 'No Post' }}" class="font-bold" />
+          <Label text="Current Site" class="text-muted text-sm" />
+        </StackLayout>
+      </GridLayout>
+
+      <!-- Quick Actions -->
+      <Label text="Quick Actions" class="h3 m-b-2 font-bold" />
+      <GridLayout columns="*,*" rows="auto,auto" class="m-b-4">
+        <Button col="0" row="0" text="🚨 PANIC" tap="{{ onPanic }}" class="btn-panic m-2" />
+        <Button col="1" row="0" text="📋 Report Incident" tap="{{ onIncident }}" class="btn-action m-2" />
+        <Button col="0" row="1" text="📷 Scan Checkpoint" tap="{{ onScanCheckpoint }}" class="btn-action m-2" />
+        <Button col="1" row="1" text="📝 Passdowns" tap="{{ onPassdowns }}" class="btn-action m-2" />
+      </GridLayout>
+
+      <!-- Today's Info -->
+      <Label text="Today" class="h3 m-b-2 font-bold" />
+      <GridLayout columns="*,*,*" class="m-b-4">
+        <StackLayout col="0" class="card p-3 m-r-1 text-center">
+          <Label text="{{ todayReports }}" class="h2 font-bold text-primary" />
+          <Label text="Reports" class="text-muted text-sm" />
+        </StackLayout>
+        <StackLayout col="1" class="card p-3 m-l-1 m-r-1 text-center">
+          <Label text="{{ todayIncidents }}" class="h2 font-bold text-danger" />
+          <Label text="Incidents" class="text-muted text-sm" />
+        </StackLayout>
+        <StackLayout col="2" class="card p-3 m-l-1 text-center">
+          <Label text="{{ offlineQueue }}" class="h2 font-bold text-warning" />
+          <Label text="Queued" class="text-muted text-sm" />
+        </StackLayout>
+      </GridLayout>
+    </StackLayout>
+  </ScrollView>
+</Page>

@@ -1,0 +1,20 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" actionBarHidden="true" class="bg-primary">
+  <FlexboxLayout flexDirection="column" justifyContent="center" alignItems="center" class="p-4">
+    <Image src="res://logo" width="80" height="80" class="m-b-4" />
+    <Label text="Guard51" class="h1 text-white m-b-8 font-bold" />
+
+    <StackLayout class="input-field m-b-3" width="280">
+      <TextField hint="Email address" keyboardType="email" autocorrect="false"
+        autocapitalizationType="none" text="{{ email }}" class="input" />
+    </StackLayout>
+
+    <StackLayout class="input-field m-b-4" width="280">
+      <TextField hint="Password" secure="true" text="{{ password }}" class="input" />
+    </StackLayout>
+
+    <Button text="Sign In" tap="{{ onLogin }}" class="btn-primary" width="280" isEnabled="{{ !loading }}" />
+
+    <ActivityIndicator busy="{{ loading }}" class="m-t-4" color="white" />
+    <Label text="{{ errorMessage }}" class="text-danger m-t-2" visibility="{{ errorMessage ? 'visible' : 'collapsed' }}" />
+  </FlexboxLayout>
+</Page>
