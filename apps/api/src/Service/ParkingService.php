@@ -77,6 +77,7 @@ final class ParkingService
     }
 
     public function listParked(string $siteId): array { return $this->vehicleRepo->findParkedBySite($siteId); }
+    public function listParkedByTenant(string $tenantId): array { return $this->vehicleRepo->findBy(['tenantId' => $tenantId, 'exitTime' => null], ['entryTime' => 'DESC']); }
     public function countParked(string $siteId): int { return $this->vehicleRepo->countParked($siteId); }
 
     // Incidents

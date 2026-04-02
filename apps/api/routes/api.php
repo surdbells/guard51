@@ -467,6 +467,7 @@ return function (App $app): void {
             // Watch mode
             $rpt->post('/watch', [ReportController::class, 'logWatch']);
             $rpt->get('/watch/site/{siteId}', [ReportController::class, 'watchFeed']);
+            $rpt->get('/watch-feed', [ReportController::class, 'recentWatchFeed']);
             $rpt->get('/watch/recent', [ReportController::class, 'recentWatchFeed']);
             // Export & sharing
             $rpt->get('/dar/{id}/export', [ReportController::class, 'exportDAR']);
@@ -656,6 +657,20 @@ return function (App $app): void {
 
             ->add($container->get(AuthMiddleware::class));
 
+        // ── Top-level aliases for frontend convenience ──
+        $group->get('/audit-log', [SecurityController::class, 'auditLog'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+        $group->get('/auth/2fa/status', [SecurityController::class, 'status2FA'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+        $group->post('/auth/2fa/enable', [SecurityController::class, 'setup2FA'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+        $group->post('/auth/2fa/disable', [SecurityController::class, 'disable2FA'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
 
 
         // ── Guard Licenses ─────────────────────────────
@@ -734,6 +749,7 @@ return function (App $app): void {
             $pk->get('/areas', [ParkingController::class, 'listAreas']);
             $pk->post('/areas', [ParkingController::class, 'createArea']);
             $pk->post('/areas/{areaId}/lots', [ParkingController::class, 'createLot']);
+            $pk->get('/vehicles', [ParkingController::class, 'listParkedAll']);
             $pk->post('/vehicles', [ParkingController::class, 'logEntry']);
             $pk->post('/vehicles/{id}/exit', [ParkingController::class, 'logExit']);
             $pk->get('/site/{siteId}/parked', [ParkingController::class, 'listParked']);

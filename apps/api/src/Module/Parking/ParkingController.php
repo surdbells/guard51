@@ -26,6 +26,13 @@ final class ParkingController
     public function logExit(Request $request, Response $response): Response
     { return JsonResponse::success($response, $this->parkingService->logExit($request->getAttribute('id'))->toArray()); }
 
+    public function listParkedAll(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $vehicles = $this->parkingService->listParkedByTenant($tenantId);
+        return JsonResponse::success($response, ['vehicles' => array_map(fn($v) => $v->toArray(), $vehicles), 'count' => count($vehicles)]);
+    }
+
     public function listParked(Request $request, Response $response): Response
     { return JsonResponse::success($response, ['vehicles' => array_map(fn($v) => $v->toArray(), $this->parkingService->listParked($request->getAttribute('siteId'))), 'count' => $this->parkingService->countParked($request->getAttribute('siteId'))]); }
 
