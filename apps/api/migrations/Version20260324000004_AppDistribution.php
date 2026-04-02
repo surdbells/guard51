@@ -44,7 +44,7 @@ final class Version20260324000004_AppDistribution extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_ar_version ON app_releases (app_key, platform, version)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_ar_version ON app_releases (app_key, platform, version)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_app_platform ON app_releases (app_key, platform)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_release_type ON app_releases (release_type)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_active ON app_releases (is_active)');
@@ -81,7 +81,7 @@ final class Version20260324000004_AppDistribution extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_tac_tenant_app ON tenant_app_configs (tenant_id, app_key)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_tac_tenant_app ON tenant_app_configs (tenant_id, app_key)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_tac_tenant ON tenant_app_configs (tenant_id)');
         $this->addSql('ALTER TABLE tenant_app_configs ADD CONSTRAINT fk_tac_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
     }

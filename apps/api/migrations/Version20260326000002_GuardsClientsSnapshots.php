@@ -40,7 +40,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_guard_tenant ON guards (tenant_id)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_guard_user ON guards (user_id)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_guard_status ON guards (status)');
-        $this->addSql('CREATE UNIQUE INDEX uq_guard_employee ON guards (tenant_id, employee_number)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_guard_employee ON guards (tenant_id, employee_number)');
         $this->addSql('ALTER TABLE guards ADD CONSTRAINT fk_guard_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Guard Skills ─────────────────────────────
@@ -53,7 +53,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
             )
         ");
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_gs_tenant ON guard_skills (tenant_id)');
-        $this->addSql('CREATE UNIQUE INDEX uq_gs_name ON guard_skills (tenant_id, name)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_gs_name ON guard_skills (tenant_id, name)');
         $this->addSql('ALTER TABLE guard_skills ADD CONSTRAINT fk_gs_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Guard Skill Assignments ──────────────────
@@ -64,7 +64,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_gsa ON guard_skill_assignments (guard_id, skill_id)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_gsa ON guard_skill_assignments (guard_id, skill_id)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_gsa_guard ON guard_skill_assignments (guard_id)');
         $this->addSql('ALTER TABLE guard_skill_assignments ADD CONSTRAINT fk_gsa_guard FOREIGN KEY (guard_id) REFERENCES guards (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE guard_skill_assignments ADD CONSTRAINT fk_gsa_skill FOREIGN KEY (skill_id) REFERENCES guard_skills (id) ON DELETE CASCADE');
@@ -133,7 +133,7 @@ final class Version20260326000002_GuardsClientsSnapshots extends AbstractMigrati
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_ds_tenant_date ON daily_snapshots (tenant_id, snapshot_date)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_ds_tenant_date ON daily_snapshots (tenant_id, snapshot_date)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ds_tenant ON daily_snapshots (tenant_id)');
         $this->addSql('ALTER TABLE daily_snapshots ADD CONSTRAINT fk_ds_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
     }

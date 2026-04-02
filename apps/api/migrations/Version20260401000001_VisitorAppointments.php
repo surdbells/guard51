@@ -39,10 +39,10 @@ final class Version20260401000001_VisitorAppointments extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_va_code ON visitor_appointments (access_code)');
-        $this->addSql('CREATE INDEX idx_va_tenant ON visitor_appointments (tenant_id)');
-        $this->addSql('CREATE INDEX idx_va_site ON visitor_appointments (site_id)');
-        $this->addSql('CREATE INDEX idx_va_date ON visitor_appointments (scheduled_date)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_va_code ON visitor_appointments (access_code)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_va_tenant ON visitor_appointments (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_va_site ON visitor_appointments (site_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_va_date ON visitor_appointments (scheduled_date)');
     }
     public function down(Schema $schema): void
     {

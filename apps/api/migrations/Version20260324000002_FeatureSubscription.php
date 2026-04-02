@@ -40,7 +40,7 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_fm_key ON feature_modules (module_key)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_fm_key ON feature_modules (module_key)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_fm_category ON feature_modules (category)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_fm_tier ON feature_modules (minimum_tier)');
 
@@ -59,7 +59,7 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_tfm_tenant_module ON tenant_feature_modules (tenant_id, module_key)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_tfm_tenant_module ON tenant_feature_modules (tenant_id, module_key)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_tfm_tenant ON tenant_feature_modules (tenant_id)');
         $this->addSql('ALTER TABLE tenant_feature_modules ADD CONSTRAINT fk_tfm_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
@@ -177,7 +177,7 @@ final class Version20260324000002_FeatureSubscription extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_tum_tenant ON tenant_usage_metrics (tenant_id)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_tum_tenant ON tenant_usage_metrics (tenant_id)');
         $this->addSql('ALTER TABLE tenant_usage_metrics ADD CONSTRAINT fk_tum_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
     }
 

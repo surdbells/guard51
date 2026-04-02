@@ -83,7 +83,7 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
         ");
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_tenants_status ON tenants (status)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_tenants_type ON tenants (tenant_type)');
-        $this->addSql('CREATE UNIQUE INDEX uq_tenants_custom_domain ON tenants (custom_domain) WHERE custom_domain IS NOT NULL');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_tenants_custom_domain ON tenants (custom_domain) WHERE custom_domain IS NOT NULL');
 
         // ── Users ────────────────────────────────────
         $this->addSql("
@@ -111,7 +111,7 @@ final class Version20260324000001_TenantFoundation extends AbstractMigration
                 PRIMARY KEY (id)
             )
         ");
-        $this->addSql('CREATE UNIQUE INDEX uq_users_email ON users (email)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_users_email ON users (email)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_tenant ON users (tenant_id)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_role ON users (role)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_users_status ON users (is_active)');

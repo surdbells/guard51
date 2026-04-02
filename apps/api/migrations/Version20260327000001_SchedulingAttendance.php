@@ -146,7 +146,7 @@ final class Version20260327000001_SchedulingAttendance extends AbstractMigration
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_guard ON attendance_records (guard_id)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_date ON attendance_records (attendance_date)');
         $this->addSql('CREATE INDEX IF NOT EXISTS idx_ar_status ON attendance_records (status)');
-        $this->addSql('CREATE UNIQUE INDEX uq_ar_guard_shift ON attendance_records (guard_id, shift_id)');
+        $this->addSql('CREATE UNIQUE INDEX IF NOT EXISTS uq_ar_guard_shift ON attendance_records (guard_id, shift_id)');
         $this->addSql('ALTER TABLE attendance_records ADD CONSTRAINT fk_ar_tenant FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE');
 
         // ── Break Configs ────────────────────────────

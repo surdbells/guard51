@@ -18,8 +18,8 @@ final class Version20260402000002_SupportHelpCenter extends AbstractMigration
             created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
             updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL,
             PRIMARY KEY (id))");
-        $this->addSql('CREATE INDEX idx_st_tenant ON support_tickets (tenant_id)');
-        $this->addSql('CREATE INDEX idx_st_status ON support_tickets (status)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_st_tenant ON support_tickets (tenant_id)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_st_status ON support_tickets (status)');
 
         $this->addSql("CREATE TABLE IF NOT EXISTS help_articles (
             id VARCHAR(36) NOT NULL, title VARCHAR(200) NOT NULL, category VARCHAR(100) NOT NULL,
@@ -27,7 +27,7 @@ final class Version20260402000002_SupportHelpCenter extends AbstractMigration
             is_published BOOLEAN NOT NULL DEFAULT TRUE,
             created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
             PRIMARY KEY (id))");
-        $this->addSql('CREATE INDEX idx_ha_category ON help_articles (category)');
+        $this->addSql('CREATE INDEX IF NOT EXISTS idx_ha_category ON help_articles (category)');
 
         // Seed initial help articles
         $this->addSql("INSERT INTO help_articles (id, title, category, content, sort_order, is_published, created_at) VALUES
