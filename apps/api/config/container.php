@@ -803,6 +803,12 @@ $containerBuilder->addDefinitions([
     \Guard51\Service\EncryptionService::class => fn() => new \Guard51\Service\EncryptionService(),
     \Guard51\Service\RedisQueueService::class => fn() => new \Guard51\Service\RedisQueueService(),
     \Guard51\Service\FcmService::class => fn(ContainerInterface $c) => new \Guard51\Service\FcmService($c->get(LoggerInterface::class)),
+
+    // Phase 4: Commercial Readiness
+    \Guard51\Repository\SupportTicketRepository::class => fn(ContainerInterface $c) => new \Guard51\Repository\SupportTicketRepository($c->get(EntityManagerInterface::class)),
+    \Guard51\Repository\HelpArticleRepository::class => fn(ContainerInterface $c) => new \Guard51\Repository\HelpArticleRepository($c->get(EntityManagerInterface::class)),
+    \Guard51\Service\SupportTicketService::class => fn(ContainerInterface $c) => new \Guard51\Service\SupportTicketService($c->get(\Guard51\Repository\SupportTicketRepository::class)),
+    \Guard51\Module\Support\SupportController::class => fn(ContainerInterface $c) => new \Guard51\Module\Support\SupportController($c->get(\Guard51\Service\SupportTicketService::class), $c->get(\Guard51\Repository\HelpArticleRepository::class)),
 ]);
 
 return $containerBuilder->build();

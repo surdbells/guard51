@@ -178,6 +178,16 @@ export const routes: Routes = [
         loadChildren: () => import('./features/super-admin/super-admin.routes').then(m => m.SUPER_ADMIN_ROUTES),
       },
 
+      // Support & Help
+      {
+        path: 'support',
+        loadChildren: () => import('./features/support/support.routes').then(m => m.SUPPORT_ROUTES),
+      },
+      {
+        path: 'help',
+        loadChildren: () => import('./features/help-center/help-center.routes').then(m => m.HELP_CENTER_ROUTES),
+      },
+
       // Onboarding wizard
       {
         path: 'onboarding',

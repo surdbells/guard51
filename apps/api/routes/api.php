@@ -657,6 +657,30 @@ return function (App $app): void {
 
             ->add($container->get(AuthMiddleware::class));
 
+        // ── Support Tickets ────────────────────────────
+        $group->group('/support', function (RouteCollectorProxy $sup): void {
+            $sup->post('/tickets', [\Guard51\Module\Support\SupportController::class, 'createTicket']);
+            $sup->get('/tickets', [\Guard51\Module\Support\SupportController::class, 'listTickets']);
+            $sup->post('/tickets/{id}/resolve', [\Guard51\Module\Support\SupportController::class, 'resolveTicket']);
+            $sup->post('/tickets/{id}/close', [\Guard51\Module\Support\SupportController::class, 'closeTicket']);
+        })
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Help Center (public for authenticated users) ──
+        $group->get('/help/articles', [\Guard51\Module\Support\SupportController::class, 'listArticles'])
+            ->add($container->get(AuthMiddleware::class));
+        $group->get('/help/articles/{id}', [\Guard51\Module\Support\SupportController::class, 'getArticle'])
+            ->add($container->get(AuthMiddleware::class));
+
+        // ── Admin: Support tickets across all tenants ──
+        $group->get('/admin/support/tickets', [\Guard51\Module\Support\SupportController::class, 'adminListTickets'])
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(AuthMiddleware::class));
+        $group->post('/admin/support/tickets/{id}/assign', [\Guard51\Module\Support\SupportController::class, 'assignTicket'])
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(AuthMiddleware::class));
+
         // ── Top-level aliases for frontend convenience ──
         $group->get('/audit-log', [SecurityController::class, 'auditLog'])
             ->add($container->get(TenantMiddleware::class))
