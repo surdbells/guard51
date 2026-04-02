@@ -212,16 +212,17 @@ export class SidebarComponent {
 
   private readonly superAdminSections: NavSection[] = [
     {
-      label: 'Platform', translateKey: 'nav_sections.admin',
+      label: 'Platform Administration', translateKey: 'nav_sections.platform',
       items: [
-        { label: 'Dashboard', translateKey: 'nav.dashboard', icon: LayoutDashboard, route: '/admin/dashboard' },
-        { label: 'Tenants', translateKey: 'nav.clients', icon: Building2, route: '/admin/tenants' },
-        { label: 'Subscriptions', translateKey: 'nav.invoices', icon: Receipt, route: '/admin/subscriptions' },
-        { label: 'Payments', translateKey: 'nav.invoices', icon: Bell, route: '/admin/payments' },
-        { label: 'Features', translateKey: 'nav.settings', icon: Boxes, route: '/admin/features' },
-        { label: 'Apps', translateKey: 'nav.settings', icon: AppWindow, route: '/admin/apps' },
-        { label: 'Analytics', translateKey: 'nav.reports', icon: BarChart3, route: '/admin/analytics' },
-        { label: 'Settings', translateKey: 'nav.settings', icon: Settings, route: '/admin/settings' },
+        { label: 'Platform Dashboard', translateKey: 'nav.dashboard', icon: LayoutDashboard, route: '/admin/dashboard' },
+        { label: 'Companies', translateKey: 'nav.companies', icon: Building2, route: '/admin/tenants' },
+        { label: 'Subscriptions', translateKey: 'nav.subscriptions', icon: Receipt, route: '/admin/subscriptions' },
+        { label: 'Plan Management', translateKey: 'nav.plans', icon: Boxes, route: '/admin/plans' },
+        { label: 'Feature Flags', translateKey: 'nav.features', icon: AppWindow, route: '/admin/features' },
+        { label: 'Support Tickets', translateKey: 'nav.support', icon: Bell, route: '/admin/support' },
+        { label: 'App Distribution', translateKey: 'nav.apps', icon: AppWindow, route: '/admin/apps' },
+        { label: 'Platform Analytics', translateKey: 'nav.analytics', icon: BarChart3, route: '/admin/analytics' },
+        { label: 'Platform Settings', translateKey: 'nav.settings', icon: Settings, route: '/admin/settings' },
       ],
     },
   ];
