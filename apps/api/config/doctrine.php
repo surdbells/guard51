@@ -23,4 +23,12 @@ $config->addFilter('tenant_filter', \Guard51\Filter\TenantFilter::class);
 $connection = DriverManager::getConnection($settings['database'], $config);
 $entityManager = new EntityManager($connection, $config);
 
+// Register encryption lifecycle listener
+$encryptionService = new \Guard51\Service\EncryptionService();
+$encryptionListener = new \Guard51\EventListener\EncryptionListener($encryptionService);
+$entityManager->getEventManager()->addEventListener(
+    [\Doctrine\ORM\Events::prePersist, \Doctrine\ORM\Events::preUpdate, \Doctrine\ORM\Events::postLoad],
+    $encryptionListener
+);
+
 return $entityManager;

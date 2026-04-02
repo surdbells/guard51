@@ -17,6 +17,8 @@ final class NotificationService
     public function __construct(
         private readonly NotificationRepository $notifRepo,
         private readonly DeviceTokenRepository $tokenRepo,
+        private readonly RedisQueueService $queue,
+        private readonly FcmService $fcm,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -26,15 +28,19 @@ final class NotificationService
         $n->setTenantId($tenantId)->setUserId($userId)->setType($type)->setTitle($title)->setBody($body)->setData($data)->setChannel($channel);
         $this->notifRepo->save($n);
 
-        if ($channel === NotificationChannel::PUSH) {
-            // TODO: Firebase Cloud Messaging
-            $this->logger->info('Push notification queued', ['user' => $userId, 'title' => $title]);
-        } elseif ($channel === NotificationChannel::SMS) {
-            // TODO: Termii SMS
-            $this->logger->info('SMS notification queued', ['user' => $userId]);
-        } elseif ($channel === NotificationChannel::EMAIL) {
-            // TODO: ZeptoMail
-            $this->logger->info('Email notification queued', ['user' => $userId]);
+        // Dispatch to async queue based on channel
+        if ($channel === NotificationChannel::PUSH || $channel === NotificationChannel::IN_APP) {
+            $devices = $this->tokenRepo->findActiveByUser($userId);
+            $tokens = array_map(fn($d) => $d->getToken(), $devices);
+            if ($tokens) {
+                $this->queue->push('push', ['tokens' => $tokens, 'title' => $title, 'body' => $body, 'data' => $data]);
+            }
+        }
+        if ($channel === NotificationChannel::SMS) {
+            $this->queue->push('sms', ['user_id' => $userId, 'message' => "{$title}: {$body}"]);
+        }
+        if ($channel === NotificationChannel::EMAIL) {
+            $this->queue->push('email', ['user_id' => $userId, 'subject' => $title, 'body' => $body]);
         }
 
         $n->markSent();

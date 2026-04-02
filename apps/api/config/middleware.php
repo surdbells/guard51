@@ -1,8 +1,8 @@
 <?php
-
 declare(strict_types=1);
 
 use Guard51\Middleware\CorsMiddleware;
+use Guard51\Middleware\CsrfMiddleware;
 use Guard51\Middleware\JsonBodyParserMiddleware;
 use Guard51\Middleware\RequestIdMiddleware;
 use Slim\App;
@@ -18,6 +18,9 @@ return function (App $app): void {
         logErrorDetails: true,
     );
 
+    // CSRF protection (validates Origin/Referer on POST/PUT/DELETE)
+    $app->add(CsrfMiddleware::class);
+
     // Parse JSON request bodies
     $app->add(JsonBodyParserMiddleware::class);
 
@@ -25,6 +28,5 @@ return function (App $app): void {
     $app->add(RequestIdMiddleware::class);
 
     // CORS headers (outermost — runs first, added last in Slim's LIFO order)
-    // Must be outermost so OPTIONS preflight is handled before routing
     $app->add(CorsMiddleware::class);
 };

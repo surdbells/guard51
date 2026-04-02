@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Guard51\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Guard51\Attribute\Encrypted;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -40,6 +41,7 @@ class Guard implements TenantAwareInterface
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 50)]
+    #[Encrypted]
     private string $phone;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
@@ -67,6 +69,7 @@ class Guard implements TenantAwareInterface
     private ?string $emergencyContactName = null;
 
     #[ORM\Column(name: 'emergency_contact_phone', type: 'string', length: 50, nullable: true)]
+    #[Encrypted]
     private ?string $emergencyContactPhone = null;
 
     #[ORM\Column(name: 'hire_date', type: 'date_immutable')]
@@ -85,9 +88,11 @@ class Guard implements TenantAwareInterface
     private ?string $bankName = null;
 
     #[ORM\Column(name: 'bank_account_number', type: 'string', length: 20, nullable: true)]
+    #[Encrypted]
     private ?string $bankAccountNumber = null;
 
     #[ORM\Column(name: 'bank_account_name', type: 'string', length: 200, nullable: true)]
+    #[Encrypted]
     private ?string $bankAccountName = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

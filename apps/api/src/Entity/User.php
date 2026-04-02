@@ -6,6 +6,7 @@ namespace Guard51\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
+use Guard51\Attribute\Encrypted;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
@@ -36,6 +37,7 @@ class User implements TenantAwareInterface
     private string $lastName;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[Encrypted]
     private ?string $phone = null;
 
     #[ORM\Column(name: 'photo_url', type: 'string', length: 500, nullable: true)]

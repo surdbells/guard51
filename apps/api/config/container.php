@@ -750,6 +750,7 @@ $containerBuilder->addDefinitions([
     NotificationService::class => function (ContainerInterface $c): NotificationService {
         return new NotificationService(
             $c->get(NotificationRepository::class), $c->get(DeviceTokenRepository::class),
+            $c->get(\Guard51\Service\RedisQueueService::class), $c->get(\Guard51\Service\FcmService::class),
             $c->get(LoggerInterface::class),
         );
     },
@@ -797,6 +798,11 @@ $containerBuilder->addDefinitions([
     UserManagementController::class => fn(ContainerInterface $c) => new UserManagementController($c->get(UserManagementService::class)),
     \Guard51\Module\Upload\FileUploadController::class => fn(ContainerInterface $c) => new \Guard51\Module\Upload\FileUploadController($c->get(FileStorageService::class)),
     \Guard51\Service\VisitorAppointmentService::class => fn(ContainerInterface $c) => new \Guard51\Service\VisitorAppointmentService($c->get(EntityManagerInterface::class), $c->get(\Guard51\Service\ZeptoMailService::class), $c->get(\Guard51\Service\TermiiService::class), $c->get(LoggerInterface::class)),
+
+    // Phase 1: Security & Infrastructure
+    \Guard51\Service\EncryptionService::class => fn() => new \Guard51\Service\EncryptionService(),
+    \Guard51\Service\RedisQueueService::class => fn() => new \Guard51\Service\RedisQueueService(),
+    \Guard51\Service\FcmService::class => fn(ContainerInterface $c) => new \Guard51\Service\FcmService($c->get(LoggerInterface::class)),
 ]);
 
 return $containerBuilder->build();

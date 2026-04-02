@@ -40,4 +40,14 @@ final class ValidationService
 
         throw ApiException::validation('Validation failed.', $errors);
     }
+
+    public function validatePassword(string $password): array
+    {
+        $errors = [];
+        if (strlen($password) < 10) $errors[] = 'Password must be at least 10 characters.';
+        if (!preg_match('/[A-Z]/', $password)) $errors[] = 'Password must contain an uppercase letter.';
+        if (!preg_match('/[0-9]/', $password)) $errors[] = 'Password must contain a number.';
+        if (!preg_match('/[^A-Za-z0-9]/', $password)) $errors[] = 'Password must contain a special character.';
+        return $errors;
+    }
 }
