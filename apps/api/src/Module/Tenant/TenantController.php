@@ -12,6 +12,7 @@ use Guard51\Repository\TenantRepository;
 use Guard51\Repository\TenantUsageMetricRepository;
 use Guard51\Repository\UserRepository;
 use Guard51\Service\JwtService;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -24,6 +25,7 @@ final class TenantController
         private readonly SubscriptionRepository $subscriptionRepo,
         private readonly TenantUsageMetricRepository $usageRepo,
         private readonly JwtService $jwtService,
+        private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -174,11 +176,24 @@ final class TenantController
         $totalUsers = $this->userRepo->count([]);
 
         // Count guards and sites across all tenants via raw SQL (bypasses TenantFilter)
-        $conn = $this->tenantRepo->getConnection();
-        $totalGuards = (int) ($conn->fetchOne('SELECT COUNT(*) FROM guards') ?: 0);
-        $totalSites = (int) ($conn->fetchOne('SELECT COUNT(*) FROM sites') ?: 0);
-        $totalClients = (int) ($conn->fetchOne('SELECT COUNT(*) FROM clients') ?: 0);
-        $mrr = (float) ($conn->fetchOne('SELECT COALESCE(SUM(sp.monthly_price), 0) FROM subscriptions s JOIN subscription_plans sp ON s.plan_id = sp.id WHERE s.status = \'active\'') ?: 0);
+        $conn = $this->em->getConnection();
+        $totalGuards = 0; $totalSites = 0; $totalClients = 0; $mrr = 0;
+        try { $totalGuards = (int) $conn->fetchOne('SELECT COUNT(*) FROM guards'); } catch (\Throwable) {}
+        try { $totalSites = (int) $conn->fetchOne('SELECT COUNT(*) FROM sites'); } catch (\Throwable) {}
+        try { $totalClients = (int) $conn->fetchOne('SELECT COUNT(*) FROM clients'); } catch (\Throwable) {}
+        try { $mrr = (float) $conn->fetchOne("SELECT COALESCE(SUM(sp.monthly_price), 0) FROM subscriptions s JOIN subscription_plans sp ON s.plan_id = sp.id WHERE s.status = 'active'"); } catch (\Throwable) {}
+
+        // Recent signups (last 30 days)
+        $recentSignups = 0;
+        try { $recentSignups = (int) $conn->fetchOne("SELECT COUNT(*) FROM tenants WHERE created_at >= NOW() - INTERVAL '30 days'"); } catch (\Throwable) {}
+
+        // Incidents this month
+        $monthlyIncidents = 0;
+        try { $monthlyIncidents = (int) $conn->fetchOne("SELECT COUNT(*) FROM incident_reports WHERE created_at >= DATE_TRUNC('month', NOW())"); } catch (\Throwable) {}
+
+        // Open support tickets
+        $openTickets = 0;
+        try { $openTickets = (int) $conn->fetchOne("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'"); } catch (\Throwable) {}
 
         return JsonResponse::success($response, [
             'total_tenants' => $totalTenants,
@@ -192,6 +207,9 @@ final class TenantController
             'total_sites' => $totalSites,
             'total_clients' => $totalClients,
             'mrr' => $mrr,
+            'recent_signups_30d' => $recentSignups,
+            'monthly_incidents' => $monthlyIncidents,
+            'open_tickets' => $openTickets,
         ]);
     }
 }

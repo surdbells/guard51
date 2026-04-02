@@ -449,6 +449,7 @@ $containerBuilder->addDefinitions([
             $c->get(SubscriptionRepository::class),
             $c->get(TenantUsageMetricRepository::class),
             $c->get(JwtService::class),
+            $c->get(EntityManagerInterface::class),
             $c->get(LoggerInterface::class),
         );
     },
