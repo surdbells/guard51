@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { LucideAngularModule, BookOpen, Plus, Check, Search } from 'lucide-angular';
+import { LucideAngularModule, BookOpen, Plus, Send, CheckCircle, Clock } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
@@ -14,68 +14,82 @@ import { ToastService } from '@core/services/toast.service';
   standalone: true,
   imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
   template: `
-    <g51-page-header title="Passdown Logs" subtitle="Shift handover notes between guards">
-      <button class="btn-primary flex items-center gap-2" (click)="showCreate.set(true)"><lucide-icon [img]="PlusIcon" [size]="16" /> New Passdown</button>
+    <g51-page-header title="Passdown Logs" subtitle="Shift handover notes and acknowledgements">
+      <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> New Passdown</button>
     </g51-page-header>
+
     <div class="flex gap-1 mb-4">
-      @for (tab of ['All', 'Unacknowledged']; track tab) {
-        <button (click)="activeTab.set(tab); load()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'" [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
+      @for (tab of ['Pending', 'Acknowledged', 'All']; track tab) {
+        <button (click)="activeTab.set(tab); loadPassdowns()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
+          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
       }
     </div>
+
     @if (loading()) { <g51-loading /> }
-    @else if (!passdowns().length) { <g51-empty-state title="No Passdowns" message="Create the first passdown log." [icon]="BookIcon" /> }
+    @else if (!passdowns().length) { <g51-empty-state title="No Passdowns" message="No passdown logs in this category." [icon]="BookOpenIcon" /> }
     @else {
       <div class="space-y-2">
         @for (p of passdowns(); track p.id) {
           <div class="card p-4">
-            <div class="flex items-center justify-between mb-2">
-              <div><p class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ p.title || 'Passdown' }}</p>
-                <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ p.from_guard_name || 'Guard' }} → {{ p.to_guard_name || 'Next shift' }} · {{ p.site_name || '' }} · {{ p.created_at }}</p></div>
+            <div class="flex items-center justify-between mb-1">
               <div class="flex items-center gap-2">
-                <span class="badge text-[10px]" [ngClass]="p.priority === 'high' || p.priority === 'urgent' ? 'bg-red-50 text-red-600' : p.priority === 'medium' || p.priority === 'important' ? 'bg-amber-50 text-amber-600' : 'bg-gray-100 text-gray-500'">{{ p.priority }}</span>
-                @if (!p.is_acknowledged) { <button (click)="acknowledge(p)" class="btn-secondary text-xs py-1 px-2 flex items-center gap-1"><lucide-icon [img]="CheckIcon" [size]="12" /> Ack</button> }
-                @else { <span class="text-[10px] text-emerald-500 font-medium">Acknowledged</span> }
+                <span class="h-2 w-2 rounded-full" [ngClass]="p.priority === 'high' ? 'bg-red-500' : p.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+                <p class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ p.title || 'Passdown' }}</p>
+                <span class="badge text-[10px]" [ngClass]="p.priority === 'high' ? 'bg-red-50 text-red-600' : p.priority === 'medium' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'">{{ p.priority }}</span>
               </div>
+              <span class="badge text-[10px]" [ngClass]="p.is_acknowledged || p.acknowledged_at ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'">{{ p.is_acknowledged || p.acknowledged_at ? 'Ack' : 'Pending' }}</span>
             </div>
             <p class="text-xs" [style.color]="'var(--text-secondary)'">{{ p.content }}</p>
+            <div class="flex items-center justify-between mt-2">
+              <p class="text-[10px]" [style.color]="'var(--text-tertiary)'">{{ p.site_name || '' }} · By {{ p.created_by_name || '' }} · {{ p.created_at }}</p>
+              @if (!p.is_acknowledged && !p.acknowledged_at) {
+                <button (click)="acknowledge(p)" class="btn-secondary text-[10px] py-1 px-2">Acknowledge</button>
+              }
+            </div>
           </div>
         }
       </div>
     }
-    <g51-modal [open]="showCreate()" title="New Passdown" maxWidth="520px" (closed)="showCreate.set(false)">
+
+    <g51-modal [open]="showCreate()" title="New Passdown" maxWidth="500px" (closed)="showCreate.set(false)">
       <div class="space-y-3">
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-          <select [(ngModel)]="form.site_id" class="input-base w-full">
-            <option value="">Select site</option>
-            @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-          </select></div>
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Priority</label>
-          <select [(ngModel)]="form.priority" class="input-base w-full"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Title</label>
-          <input type="text" [(ngModel)]="form.title" class="input-base w-full" placeholder="Brief summary" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Title *</label><input type="text" [(ngModel)]="form.title" class="input-base w-full" /></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Priority</label>
+            <select [(ngModel)]="form.priority" class="input-base w-full"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site</label>
+            <select [(ngModel)]="form.site_id" class="input-base w-full"><option value="">All Sites</option>
+              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+            </select></div>
+        </div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Content *</label>
-          <textarea [(ngModel)]="form.content" rows="4" class="input-base w-full resize-none" placeholder="Detailed handover notes..."></textarea></div>
+          <textarea [(ngModel)]="form.content" rows="4" class="input-base w-full resize-none" placeholder="Handover notes for the incoming shift..."></textarea></div>
       </div>
-      <div modal-footer><button (click)="showCreate.set(false)" class="btn-secondary">Cancel</button><button (click)="onCreate()" class="btn-primary">Submit</button></div>
+      <div modal-footer><button (click)="showCreate.set(false)" class="btn-secondary">Cancel</button>
+        <button (click)="create()" class="btn-primary flex items-center gap-1"><lucide-icon [img]="SendIcon" [size]="12" /> Submit</button></div>
     </g51-modal>
   `,
 })
 export class PassdownsComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService);
-  readonly BookIcon = BookOpen; readonly PlusIcon = Plus; readonly CheckIcon = Check; readonly SearchIcon = Search;
-  readonly passdowns = signal<any[]>([]); readonly sites = signal<any[]>([]); readonly loading = signal(true);
-  readonly showCreate = signal(false); readonly activeTab = signal('All');
-  form: any = { site_id: '', priority: 'low', title: '', content: '' };
-  ngOnInit(): void { this.load(); this.api.get<any>('/sites').subscribe({ next: res => this.sites.set(res.data?.sites || res.data || []) }); }
-  load(): void {
+  readonly BookOpenIcon = BookOpen; readonly PlusIcon = Plus; readonly SendIcon = Send;
+  readonly activeTab = signal('Pending'); readonly loading = signal(true); readonly showCreate = signal(false);
+  readonly passdowns = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  form: any = { title: '', priority: 'low', site_id: '', content: '' };
+
+  ngOnInit(): void { this.loadPassdowns(); this.api.get<any>('/sites').subscribe({ next: r => this.sites.set(r.data?.sites || r.data || []) }); }
+  loadPassdowns(): void {
     this.loading.set(true);
-    const endpoint = this.activeTab() === 'Unacknowledged' ? '/passdowns/unacknowledged' : '/passdowns/site/all';
-    this.api.get<any>(endpoint).subscribe({
-      next: res => { this.passdowns.set(res.data?.passdowns || res.data?.items || res.data || []); this.loading.set(false); },
-      error: () => { this.passdowns.set([]); this.loading.set(false); },
+    const status = this.activeTab() === 'Pending' ? '?status=pending' : this.activeTab() === 'Acknowledged' ? '?status=acknowledged' : '';
+    this.api.get<any>(`/passdowns${status}`).subscribe({
+      next: r => { this.passdowns.set(r.data?.passdowns || r.data || []); this.loading.set(false); },
+      error: () => this.loading.set(false),
     });
   }
-  onCreate(): void { this.api.post('/passdowns', this.form).subscribe({ next: () => { this.showCreate.set(false); this.toast.success('Passdown created'); this.load(); } }); }
-  acknowledge(p: any): void { this.api.post(`/passdowns/${p.id}/acknowledge`, {}).subscribe({ next: () => { this.toast.success('Acknowledged'); this.load(); } }); }
+  acknowledge(p: any): void { this.api.post(`/passdowns/${p.id}/acknowledge`, {}).subscribe({ next: () => { this.toast.success('Acknowledged'); this.loadPassdowns(); } }); }
+  create(): void {
+    if (!this.form.content) { this.toast.warning('Content required'); return; }
+    this.api.post('/passdowns', this.form).subscribe({ next: () => { this.showCreate.set(false); this.toast.success('Passdown created'); this.form = { title: '', priority: 'low', site_id: '', content: '' }; this.loadPassdowns(); } });
+  }
 }
