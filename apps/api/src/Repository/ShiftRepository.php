@@ -25,7 +25,7 @@ class ShiftRepository extends BaseRepository
         return $this->createQueryBuilder('s')
             ->where('s.tenantId = :tid')->setParameter('tid', $tenantId)
             ->andWhere('s.isOpen = true')
-            ->andWhere('s.status = :status')->setParameter('status', ShiftStatus::SCHEDULED)
+            ->andWhere('s.status = :status')->setParameter('status', ShiftStatus::PUBLISHED)
             ->orderBy('s.shiftDate', 'ASC')->getQuery()->getResult();
     }
 

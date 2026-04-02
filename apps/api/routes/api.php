@@ -674,6 +674,9 @@ return function (App $app): void {
             ->add($container->get(AuthMiddleware::class));
 
         // ── Admin: Support tickets across all tenants ──
+        $group->get('/admin/stats', [TenantController::class, 'stats'])
+            ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
+            ->add($container->get(AuthMiddleware::class));
         $group->get('/admin/support/tickets', [\Guard51\Module\Support\SupportController::class, 'adminListTickets'])
             ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))
             ->add($container->get(AuthMiddleware::class));

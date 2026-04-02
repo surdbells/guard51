@@ -165,13 +165,33 @@ final class TenantController
      */
     public function stats(Request $request, Response $response): Response
     {
+        $totalTenants = $this->tenantRepo->count([]);
+        $active = $this->tenantRepo->countByStatus(TenantStatus::ACTIVE);
+        $trial = $this->tenantRepo->countByStatus(TenantStatus::TRIAL);
+        $suspended = $this->tenantRepo->countByStatus(TenantStatus::SUSPENDED);
+        $cancelled = $this->tenantRepo->countByStatus(TenantStatus::CANCELLED);
+        $activeSubs = $this->subscriptionRepo->countActive();
+        $totalUsers = $this->userRepo->count([]);
+
+        // Count guards and sites across all tenants via raw SQL (bypasses TenantFilter)
+        $conn = $this->tenantRepo->getConnection();
+        $totalGuards = (int) ($conn->fetchOne('SELECT COUNT(*) FROM guards') ?: 0);
+        $totalSites = (int) ($conn->fetchOne('SELECT COUNT(*) FROM sites') ?: 0);
+        $totalClients = (int) ($conn->fetchOne('SELECT COUNT(*) FROM clients') ?: 0);
+        $mrr = (float) ($conn->fetchOne('SELECT COALESCE(SUM(sp.monthly_price), 0) FROM subscriptions s JOIN subscription_plans sp ON s.plan_id = sp.id WHERE s.status = \'active\'') ?: 0);
+
         return JsonResponse::success($response, [
-            'total_tenants' => $this->tenantRepo->count([]),
-            'active' => $this->tenantRepo->countByStatus(TenantStatus::ACTIVE),
-            'trial' => $this->tenantRepo->countByStatus(TenantStatus::TRIAL),
-            'suspended' => $this->tenantRepo->countByStatus(TenantStatus::SUSPENDED),
-            'cancelled' => $this->tenantRepo->countByStatus(TenantStatus::CANCELLED),
-            'active_subscriptions' => $this->subscriptionRepo->countActive(),
+            'total_tenants' => $totalTenants,
+            'active' => $active,
+            'trial' => $trial,
+            'suspended' => $suspended,
+            'cancelled' => $cancelled,
+            'active_subscriptions' => $activeSubs,
+            'total_users' => $totalUsers,
+            'total_guards' => $totalGuards,
+            'total_sites' => $totalSites,
+            'total_clients' => $totalClients,
+            'mrr' => $mrr,
         ]);
     }
 }

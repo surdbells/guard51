@@ -94,6 +94,13 @@ abstract class BaseRepository
      * Persist and flush an entity.
      * @param T $entity
      */
+    /** Get DBAL connection for raw SQL queries */
+    public function getConnection(): \Doctrine\DBAL\Connection
+    {
+        return $this->em->getConnection();
+    }
+
+
     public function save(object $entity): void
     {
         $this->em->persist($entity);
