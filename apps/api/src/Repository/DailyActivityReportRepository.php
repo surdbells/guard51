@@ -11,7 +11,7 @@ class DailyActivityReportRepository extends BaseRepository
 
     public function findByTenantAndDate(string $tenantId, \DateTimeImmutable $date): array
     {
-        return $this->findBy(['reportDate' => $date], ['createdAt' => 'DESC']);
+        return $this->findBy(['tenantId' => $tenantId, 'reportDate' => $date], ['createdAt' => 'DESC']);
     }
 
     public function findByGuard(string $guardId, int $limit = 20): array

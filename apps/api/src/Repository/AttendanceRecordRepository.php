@@ -10,7 +10,7 @@ class AttendanceRecordRepository extends BaseRepository
 
     public function findByTenantAndDate(string $tenantId, \DateTimeImmutable $date): array
     {
-        return $this->findBy(['attendanceDate' => $date]);
+        return $this->findBy(['tenantId' => $tenantId, 'attendanceDate' => $date]);
     }
 
     public function findByGuardAndDateRange(string $guardId, \DateTimeImmutable $start, \DateTimeImmutable $end): array
@@ -23,6 +23,6 @@ class AttendanceRecordRepository extends BaseRepository
 
     public function findUnreconciled(string $tenantId): array
     {
-        return $this->findBy(['reconciled' => false]);
+        return $this->findBy(['tenantId' => $tenantId, 'reconciled' => false]);
     }
 }
