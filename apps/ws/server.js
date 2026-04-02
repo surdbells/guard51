@@ -3,6 +3,7 @@
  * Handles: guard-location, panic-alerts, dispatch, chat
  * Auth: JWT token in connection URL query param
  */
+require('./load-env');
 const { WebSocketServer, WebSocket } = require('ws');
 const jwt = require('jsonwebtoken');
 const http = require('http');
