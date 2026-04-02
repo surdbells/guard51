@@ -30,13 +30,14 @@ class GuardRepository extends BaseRepository
         return $this->findOneBy(['tenantId' => $tenantId, 'employeeNumber' => $empNum]);
     }
 
-    public function countByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId, 'tenantId' => $tenantId]); }
-    public function countActiveByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId, 'tenantId' => $tenantId, 'status' => GuardStatus::ACTIVE]); }
+    public function countByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId]); }
+    public function countActiveByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId, 'status' => GuardStatus::ACTIVE]); }
 
     public function searchByName(string $tenantId, string $query): array
     {
         $qb = $this->createQueryBuilder('g')
-            ->where('LOWER(CONCAT(g.firstName, \' \', g.lastName)) LIKE :q')
+            ->where('g.tenantId = :tid')->setParameter('tid', $tenantId)
+            ->andWhere('LOWER(CONCAT(g.firstName, \' \', g.lastName)) LIKE :q')
             ->setParameter('q', '%' . strtolower($query) . '%')
             ->orderBy('g.lastName', 'ASC');
         return $qb->getQuery()->getResult();

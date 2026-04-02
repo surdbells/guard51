@@ -16,7 +16,7 @@ class InvoiceRepository extends BaseRepository
 
     public function getNextInvoiceNumber(string $tenantId): string
     {
-        $count = $this->count([]);
+        $count = $this->count(['tenantId' => $tenantId]);
         return 'INV-' . str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT);
     }
 }

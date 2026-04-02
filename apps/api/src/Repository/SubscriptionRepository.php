@@ -55,7 +55,7 @@ class SubscriptionRepository extends BaseRepository
     /** @return Subscription[] */
     public function findByTenant(string $tenantId): array
     {
-        return $this->findBy(['tenantId' => $tenantId, 'tenantId' => $tenantId], ['createdAt' => 'DESC']);
+        return $this->findBy(['tenantId' => $tenantId], ['createdAt' => 'DESC']);
     }
 
     public function countActive(): int

@@ -19,7 +19,7 @@ class ClientRepository extends BaseRepository
         return $this->findBy($c, ['companyName' => 'ASC']);
     }
 
-    public function countByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId, 'tenantId' => $tenantId]); }
+    public function countByTenant(string $tenantId): int { return $this->count(['tenantId' => $tenantId]); }
 
     public function searchByName(string $tenantId, string $query): array
     {

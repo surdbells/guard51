@@ -24,7 +24,7 @@ class TenantFeatureModuleRepository extends BaseRepository
 
     public function findByTenantAndKey(string $tenantId, string $moduleKey): ?TenantFeatureModule
     {
-        return $this->findOneBy(['moduleKey' => $moduleKey]);
+        return $this->findOneBy(['tenantId' => $tenantId, 'moduleKey' => $moduleKey]);
     }
 
     /** @return string[] */

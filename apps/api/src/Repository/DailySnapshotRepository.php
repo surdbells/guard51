@@ -13,7 +13,7 @@ class DailySnapshotRepository extends BaseRepository
 
     public function findByTenantAndDate(string $tenantId, \DateTimeImmutable $date): ?DailySnapshot
     {
-        return $this->findOneBy(['snapshotDate' => $date]);
+        return $this->findOneBy(['tenantId' => $tenantId, 'snapshotDate' => $date]);
     }
 
     /** @return DailySnapshot[] */

@@ -17,7 +17,9 @@ class VisitorRepository extends BaseRepository
 
     public function searchByName(string $tenantId, string $name): array
     {
-        return $this->createQueryBuilder('v')->where('LOWER(v.firstName) LIKE :n OR LOWER(v.lastName) LIKE :n')->setParameter('n', '%' . strtolower($name) . '%')
+        return $this->createQueryBuilder('v')
+            ->where('v.tenantId = :tid')->setParameter('tid', $tenantId)
+            ->andWhere('LOWER(v.firstName) LIKE :n OR LOWER(v.lastName) LIKE :n')->setParameter('n', '%' . strtolower($name) . '%')
             ->setMaxResults(10)->getQuery()->getResult();
     }
 

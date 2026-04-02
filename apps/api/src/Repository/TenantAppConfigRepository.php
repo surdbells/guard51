@@ -18,13 +18,13 @@ class TenantAppConfigRepository extends BaseRepository
 
     public function findByTenantAndApp(string $tenantId, string $appKey): ?TenantAppConfig
     {
-        return $this->findOneBy(['appKey' => $appKey]);
+        return $this->findOneBy(['tenantId' => $tenantId, 'appKey' => $appKey]);
     }
 
     /** @return TenantAppConfig[] */
     public function findByTenant(string $tenantId): array
     {
-        return $this->findBy(['tenantId' => $tenantId, 'tenantId' => $tenantId]);
+        return $this->findBy(['tenantId' => $tenantId]);
     }
 
     public function findOrCreate(string $tenantId, string $appKey): TenantAppConfig
