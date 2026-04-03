@@ -3,13 +3,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, ArrowLeft, Save, Loader2 } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'g51-shift-form',
   standalone: true,
-  imports: [RouterLink, FormsModule, LucideAngularModule, PageHeaderComponent],
+  imports: [RouterLink, FormsModule, LucideAngularModule, PageHeaderComponent, SearchableSelectComponent],
   template: `
     <g51-page-header [title]="isEdit() ? 'Edit Shift' : 'Create Shift'" subtitle="Assign a guard to a site for a specific date and time">
       <a routerLink="/scheduling" class="btn-secondary flex items-center gap-1.5"><lucide-icon [img]="ArrowLeftIcon" [size]="16" /> Back</a>
@@ -20,10 +21,7 @@ import { ToastService } from '@core/services/toast.service';
         <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--text-primary)'">Shift Details</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-            <select [(ngModel)]="form.site_id" name="site_id" class="input-base w-full" required>
-              <option value="">Select site...</option>
-              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-            </select></div>
+            <g51-searchable-select [(ngModel)]="form.site_id" [options]="siteOptions()" placeholder="Select site..." /></div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Date *</label>
             <input type="date" [(ngModel)]="form.shift_date" name="shift_date" class="input-base w-full" required /></div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Start Time *</label>
@@ -37,10 +35,7 @@ import { ToastService } from '@core/services/toast.service';
         <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--text-primary)'">Assignment</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Guard (optional)</label>
-            <select [(ngModel)]="form.guard_id" name="guard_id" class="input-base w-full">
-              <option value="">Unassigned / Open shift</option>
-              @for (g of guards(); track g.id) { <option [value]="g.id">{{ g.full_name }} ({{ g.employee_number }})</option> }
-            </select></div>
+            <g51-searchable-select [(ngModel)]="form.guard_id" [options]="guardOptions()" placeholder="Unassigned / Open shift" [allowEmpty]="true" emptyLabel="Unassigned" /></div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Template (optional)</label>
             <select [(ngModel)]="form.template_id" name="template_id" class="input-base w-full">
               <option value="">None</option>
@@ -73,12 +68,13 @@ export class ShiftFormComponent implements OnInit {
   readonly ArrowLeftIcon = ArrowLeft; readonly SaveIcon = Save; readonly Loader2Icon = Loader2;
   readonly isEdit = signal(false); readonly saving = signal(false);
   readonly sites = signal<any[]>([]); readonly guards = signal<any[]>([]); readonly templates = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]); readonly guardOptions = signal<SelectOption[]>([]);
 
   form: Record<string, any> = { site_id: '', shift_date: '', start_time: '', end_time: '', guard_id: '', template_id: '', is_open: false, notes: '' };
 
   ngOnInit(): void {
-    this.api.get<any>('/sites').subscribe({ next: res => { if (res.data) this.sites.set(res.data.sites || []); } });
-    this.api.get<any>('/guards').subscribe({ next: res => { if (res.data) this.guards.set(res.data.guards || []); } });
+    this.api.get<any>('/sites').subscribe({ next: (res: any) => { const s = res.data?.sites || []; this.sites.set(s); this.siteOptions.set(s.map((x: any) => ({ value: x.id, label: x.name, sublabel: x.address || '' }))); } });
+    this.api.get<any>('/guards').subscribe({ next: (res: any) => { const g = res.data?.guards || []; this.guards.set(g); this.guardOptions.set(g.map((x: any) => ({ value: x.id, label: (x.first_name || '') + ' ' + (x.last_name || ''), sublabel: x.employee_number || '' }))); } });
     this.api.get<any>('/shift-templates?active=true').subscribe({ next: res => { if (res.data) this.templates.set(res.data.templates || []); } });
 
     const id = this.route.snapshot.params['id'];

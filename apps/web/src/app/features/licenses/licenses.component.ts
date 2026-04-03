@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, FileCheck, AlertTriangle, Clock, Plus, Upload } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
@@ -13,7 +14,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-licenses',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Licenses & Certifications" subtitle="Guard license tracking and expiry alerts">
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> Add License</button>
@@ -54,9 +55,7 @@ import { ToastService } from '@core/services/toast.service';
     <g51-modal [open]="showCreate()" title="Add License" maxWidth="480px" (closed)="showCreate.set(false)">
       <div class="space-y-3">
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Guard *</label>
-          <select [(ngModel)]="form.guard_id" class="input-base w-full"><option value="">Select guard</option>
-            @for (g of guards(); track g.id) { <option [value]="g.id">{{ g.first_name }} {{ g.last_name }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.guard_id" [options]="guardOptions()" placeholder="Select guard" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">License Type *</label>
           <select [(ngModel)]="form.license_type" class="input-base w-full">
             <option value="security_license">Security License</option><option value="first_aid">First Aid</option>
@@ -77,10 +76,11 @@ export class LicensesComponent implements OnInit {
   readonly FileCheckIcon = FileCheck; readonly AlertTriangleIcon = AlertTriangle; readonly ClockIcon = Clock; readonly PlusIcon = Plus;
   readonly activeTab = signal('All'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly licenses = signal<any[]>([]); readonly guards = signal<any[]>([]);
+  readonly guardOptions = signal<SelectOption[]>([]);
   readonly stats = signal<any>({ active: 0, expiring_soon: 0, expired: 0 });
   form: any = { guard_id: '', license_type: 'security_license', license_number: '', expiry_date: '' };
 
-  ngOnInit(): void { this.loadLicenses(); this.api.get<any>('/guards').subscribe({ next: r => this.guards.set(r.data?.guards || r.data || []) }); }
+  ngOnInit(): void { this.loadLicenses(); this.api.get<any>('/guards').subscribe({ next: r => { const g = r.data?.guards || r.data || []; this.guards.set(g); this.guardOptions.set(g.map((x: any) => ({ value: x.id, label: (x.first_name || '') + ' ' + (x.last_name || ''), sublabel: x.employee_number || '' }))); } }); }
   loadLicenses(): void {
     this.loading.set(true);
     const endpoint = this.activeTab() === 'Expiring Soon' ? '/licenses/expiring' : this.activeTab() === 'Expired' ? '/licenses/expired' : '/licenses/guard/all';

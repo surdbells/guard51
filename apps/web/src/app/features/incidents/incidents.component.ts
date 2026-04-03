@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, AlertTriangle, Plus, Search, Upload, X, Eye, FileText } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
@@ -16,7 +17,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-incidents',
   standalone: true,
-  imports: [RouterLink, FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, PieChartComponent, LineChartComponent],
+  imports: [RouterLink, FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, PieChartComponent, LineChartComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Incident Reports" subtitle="Report, track, and resolve security incidents">
       <button class="btn-primary flex items-center gap-2" (click)="showCreate.set(true)"><lucide-icon [img]="PlusIcon" [size]="16" /> Report Incident</button>
@@ -86,10 +87,7 @@ import { ToastService } from '@core/services/toast.service';
 
         <div class="grid grid-cols-2 gap-3">
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-            <select [(ngModel)]="form.site_id" class="input-base w-full" required>
-              <option value="">Select site</option>
-              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-            </select>
+            <g51-searchable-select [(ngModel)]="form.site_id" [options]="siteOptions()" placeholder="Select site" />
             @if (submitted && !form.site_id) { <p class="text-[10px] text-red-500 mt-0.5">Required</p> }
           </div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Date & Time of Occurrence *</label>
@@ -146,6 +144,7 @@ export class IncidentsComponent implements OnInit {
   readonly UploadIcon = Upload; readonly XIcon = X; readonly EyeIcon = Eye; readonly FileTextIcon = FileText;
 
   readonly incidents = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   readonly loading = signal(true); readonly showCreate = signal(false); readonly creating = signal(false);
   search = ''; statusFilter = ''; severityFilter = '';
   submitted = false;
@@ -162,7 +161,7 @@ export class IncidentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadIncidents();
-    this.api.get<any>('/sites').subscribe({ next: res => this.sites.set(res.data?.sites || res.data || []) });
+    this.api.get<any>('/sites').subscribe({ next: (res: any) => { const s = res.data?.sites || res.data || []; this.sites.set(s); this.siteOptions.set(s.map((x: any) => ({ value: x.id, label: x.name, sublabel: x.address || '' }))); } });
     // Auto-detect GPS
     navigator.geolocation?.getCurrentPosition(pos => {
       this.form.latitude = pos.coords.latitude;

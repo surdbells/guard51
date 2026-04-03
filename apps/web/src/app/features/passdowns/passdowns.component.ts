@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, BookOpen, Plus, Send, CheckCircle, Clock } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
@@ -12,7 +13,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-passdowns',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Passdown Logs" subtitle="Shift handover notes and acknowledgements">
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> New Passdown</button>
@@ -59,9 +60,7 @@ import { ToastService } from '@core/services/toast.service';
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Priority</label>
             <select [(ngModel)]="form.priority" class="input-base w-full"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site</label>
-            <select [(ngModel)]="form.site_id" class="input-base w-full"><option value="">All Sites</option>
-              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-            </select></div>
+            <g51-searchable-select [(ngModel)]="form.site_id" [options]="siteOptions()" placeholder="All Sites" [allowEmpty]="true" emptyLabel="All Sites" /></div>
         </div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Content *</label>
           <textarea [(ngModel)]="form.content" rows="4" class="input-base w-full resize-none" placeholder="Handover notes for the incoming shift..."></textarea></div>
@@ -76,9 +75,10 @@ export class PassdownsComponent implements OnInit {
   readonly BookOpenIcon = BookOpen; readonly PlusIcon = Plus; readonly SendIcon = Send;
   readonly activeTab = signal('Pending'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly passdowns = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   form: any = { title: '', priority: 'low', site_id: '', content: '' };
 
-  ngOnInit(): void { this.loadPassdowns(); this.api.get<any>('/sites').subscribe({ next: r => this.sites.set(r.data?.sites || r.data || []) }); }
+  ngOnInit(): void { this.loadPassdowns(); this.api.get<any>('/sites').subscribe({ next: (r: any) => { const s = r.data?.sites || r.data || []; this.sites.set(s); this.siteOptions.set(s.map((x: any) => ({ value: x.id, label: x.name, sublabel: x.address || '' }))); } }); }
   loadPassdowns(): void {
     this.loading.set(true);
     const status = this.activeTab() === 'Pending' ? '?status=pending' : this.activeTab() === 'Acknowledged' ? '?status=acknowledged' : '';

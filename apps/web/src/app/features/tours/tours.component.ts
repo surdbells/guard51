@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, Route, Plus, QrCode, CheckCircle, Clock, MapPin } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
@@ -12,7 +13,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-tours',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Site Tours" subtitle="Checkpoints, sessions, and compliance tracking">
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> Add Checkpoint</button>
@@ -81,9 +82,7 @@ import { ToastService } from '@core/services/toast.service';
       <div class="space-y-3">
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Name *</label><input type="text" [(ngModel)]="form.name" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-          <select [(ngModel)]="form.site_id" class="input-base w-full"><option value="">Select</option>
-            @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.site_id" [options]="siteOptions()" placeholder="Select site" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Type</label>
           <select [(ngModel)]="form.checkpoint_type" class="input-base w-full"><option value="qr">QR Code</option><option value="nfc">NFC Tag</option><option value="virtual">Virtual (GPS)</option></select></div>
       </div>
@@ -97,9 +96,10 @@ export class ToursComponent implements OnInit {
   readonly RouteIcon = Route; readonly PlusIcon = Plus; readonly QrCodeIcon = QrCode; readonly ClockIcon = Clock;
   readonly activeTab = signal('Checkpoints'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly checkpoints = signal<any[]>([]); readonly activeSessions = signal<any[]>([]); readonly history = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   form: any = { name: '', site_id: '', checkpoint_type: 'qr' };
 
-  ngOnInit(): void { this.loadTab(); this.api.get<any>('/sites').subscribe({ next: r => this.sites.set(r.data?.sites || r.data || []) }); }
+  ngOnInit(): void { this.loadTab(); this.api.get<any>('/sites').subscribe({ next: (r: any) => { const s = r.data?.sites || r.data || []; this.sites.set(s); this.siteOptions.set(s.map((x: any) => ({ value: x.id, label: x.name, sublabel: x.address || '' }))); } }); }
   loadTab(): void {
     this.loading.set(true);
     const t = this.activeTab();

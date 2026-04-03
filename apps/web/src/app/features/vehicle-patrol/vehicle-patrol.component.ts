@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, Car, Plus, MapPin, Route, Search, Eye, Play, Square } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
@@ -12,7 +13,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-vehicle-patrol',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Vehicle Patrol" subtitle="Manage patrol routes, vehicles, and hits">
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> New Route</button>
@@ -96,9 +97,7 @@ import { ToastService } from '@core/services/toast.service';
       <div class="space-y-3">
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Route Name *</label><input type="text" [(ngModel)]="form.name" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site</label>
-          <select [(ngModel)]="form.site_id" class="input-base w-full"><option value="">Select site</option>
-            @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.site_id" [options]="siteOptions()" placeholder="Select site" [allowEmpty]="true" emptyLabel="No site" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Distance (km)</label><input type="number" [(ngModel)]="form.distance_km" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Description</label><textarea [(ngModel)]="form.description" rows="2" class="input-base w-full resize-none"></textarea></div>
       </div>
@@ -112,9 +111,10 @@ export class VehiclePatrolComponent implements OnInit {
   readonly CarIcon = Car; readonly PlusIcon = Plus; readonly RouteIcon = Route; readonly EyeIcon = Eye; readonly PlayIcon = Play;
   readonly activeTab = signal('Routes'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly routes = signal<any[]>([]); readonly vehicles = signal<any[]>([]); readonly hits = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   form: any = { name: '', site_id: '', distance_km: 0, description: '' };
 
-  ngOnInit(): void { this.loadTab(); this.api.get<any>('/sites').subscribe({ next: r => this.sites.set(r.data?.sites || r.data || []) }); }
+  ngOnInit(): void { this.loadTab(); this.api.get<any>('/sites').subscribe({ next: (r: any) => { const s = r.data?.sites || r.data || []; this.sites.set(s); this.siteOptions.set(s.map((x: any) => ({ value: x.id, label: x.name, sublabel: x.address || '' }))); } }); }
   loadTab(): void {
     this.loading.set(true);
     const t = this.activeTab();

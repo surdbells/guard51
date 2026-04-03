@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, Users, Plus, Search, LogOut, QrCode, Send, Check, X, Calendar, Mail, Phone, MessageSquare } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
@@ -12,7 +13,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-visitors',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Visitor Management" subtitle="Appointments, access codes, and visitor check-in/out">
       <button class="btn-primary flex items-center gap-2" (click)="showCreate.set(true)"><lucide-icon [img]="PlusIcon" [size]="16" /> Schedule Visit</button>
@@ -152,10 +153,7 @@ import { ToastService } from '@core/services/toast.service';
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Host Phone</label>
             <input type="tel" [(ngModel)]="form.host_phone" class="input-base w-full" /></div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-            <select [(ngModel)]="form.site_id" class="input-base w-full">
-              <option value="">Select site</option>
-              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-            </select></div>
+            <g51-searchable-select [(ngModel)]="form.site_id" [options]="siteOptions()" placeholder="Select site" /></div>
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Date *</label>
@@ -225,6 +223,7 @@ export class VisitorsComponent implements OnInit {
   readonly CalendarIcon = Calendar; readonly MailIcon = Mail; readonly PhoneIcon = Phone; readonly MessageSquareIcon = MessageSquare;
 
   readonly appointments = signal<any[]>([]); readonly visitors = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   readonly loading = signal(true); readonly showCreate = signal(false); readonly showWalkin = signal(false);
   readonly activeTab = signal('Appointments'); readonly verifiedAppointment = signal<any>(null);
   search = ''; statusFilter = ''; verifyCode = '';
@@ -232,7 +231,7 @@ export class VisitorsComponent implements OnInit {
   form: any = { visitor_name: '', visitor_email: '', visitor_phone: '', visitor_company: '', host_name: '', host_email: '', host_phone: '', site_id: '', scheduled_date: new Date().toISOString().slice(0, 10), scheduled_time: '', purpose: 'meeting', notify_email: true, notify_sms: false, notify_whatsapp: false, notes: '' };
   walkinForm: any = { first_name: '', last_name: '', phone: '', company_name: '', purpose: 'meeting', host_name: '', id_number: '' };
 
-  ngOnInit(): void { this.loadTab(); this.api.get<any>('/sites').subscribe({ next: res => this.sites.set(res.data?.sites || res.data || []) }); }
+  ngOnInit(): void { this.loadTab(); this.api.get<any>('/sites').subscribe({ next: (res: any) => { const s = res.data?.sites || res.data || []; this.sites.set(s); this.siteOptions.set(s.map((x: any) => ({ value: x.id, label: x.name, sublabel: x.address || '' }))); } }); }
 
   loadTab(): void {
     this.loading.set(true);
