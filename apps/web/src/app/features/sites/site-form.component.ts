@@ -3,13 +3,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Save, ArrowLeft, Upload, X, MapPin } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'g51-site-form',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PageHeaderComponent],
+  imports: [FormsModule, LucideAngularModule, PageHeaderComponent, SearchableSelectComponent],
   template: `
     <g51-page-header [title]="isEdit() ? 'Edit Site' : 'Add New Site'" subtitle="Post site location and configuration">
       <button class="btn-secondary flex items-center gap-2" (click)="goBack()"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
@@ -20,10 +21,7 @@ import { ToastService } from '@core/services/toast.service';
         <div class="sm:col-span-2"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site Name *</label>
           <input type="text" [(ngModel)]="form.name" class="input-base w-full" required placeholder="e.g. Lekki Phase 1 Headquarters" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Assigned Client</label>
-          <select [(ngModel)]="form.client_id" class="input-base w-full">
-            <option value="">No client assigned</option>
-            @for (c of clients(); track c.id) { <option [value]="c.id">{{ c.company_name || c.name }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.client_id" [options]="clientOptions()" placeholder="Select client" [allowEmpty]="true" emptyLabel="No client assigned" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Timezone</label>
           <select [(ngModel)]="form.timezone" class="input-base w-full">
             <option value="Africa/Lagos">Africa/Lagos (WAT)</option><option value="Africa/Accra">Africa/Accra (GMT)</option>
@@ -35,10 +33,7 @@ import { ToastService } from '@core/services/toast.service';
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">City</label>
           <input type="text" [(ngModel)]="form.city" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">State</label>
-          <select [(ngModel)]="form.state" class="input-base w-full">
-            <option value="">Select State</option>
-            @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.state" [options]="stateOptions" placeholder="Select State" /></div>
       </div>
 
       <h3 class="text-sm font-semibold mb-4 mt-6" [style.color]="'var(--text-primary)'">Geofence Configuration</h3>
@@ -98,9 +93,11 @@ export class SiteFormComponent implements OnInit {
   form: any = { name: '', client_id: '', address: '', city: '', state: '', latitude: '', longitude: '', geofence_radius: 100, timezone: 'Africa/Lagos', contact_name: '', contact_phone: '', contact_email: '', notes: '' };
 
   states = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
+  stateOptions: SelectOption[] = this.states.map(s => ({ value: s, label: s }));
+  clientOptions = signal<SelectOption[]>([]);
 
   ngOnInit(): void {
-    this.api.get<any>('/clients').subscribe({ next: res => this.clients.set(res.data?.clients || res.data || []) });
+    this.api.get<any>('/clients').subscribe({ next: res => { const c = res.data?.clients || res.data || []; this.clients.set(c); this.clientOptions.set(c.map((x: any) => ({ value: x.id, label: x.company_name || x.name, sublabel: x.contact_email || '' }))); } });
     this.siteId = this.route.snapshot.paramMap.get('id');
     if (this.siteId && this.siteId !== 'new') {
       this.isEdit.set(true);

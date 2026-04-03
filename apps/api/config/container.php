@@ -209,6 +209,14 @@ $containerBuilder->addDefinitions([
         $connection = DriverManager::getConnection($settings, $config);
         $em = new EntityManager($connection, $config);
 
+        // Register encryption lifecycle listener for automatic field encryption/decryption
+        $encService = new \Guard51\Service\EncryptionService();
+        $encListener = new \Guard51\EventListener\EncryptionListener($encService);
+        $em->getEventManager()->addEventListener(
+            [\Doctrine\ORM\Events::prePersist, \Doctrine\ORM\Events::preUpdate, \Doctrine\ORM\Events::postLoad],
+            $encListener
+        );
+
         // Filter is registered but NOT enabled by default.
         // TenantMiddleware enables it per-request with the resolved tenant_id.
         // Super admin requests leave it disabled to see all tenants.

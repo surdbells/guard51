@@ -3,13 +3,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Save, ArrowLeft } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'g51-client-form',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, PageHeaderComponent],
+  imports: [FormsModule, LucideAngularModule, PageHeaderComponent, SearchableSelectComponent],
   template: `
     <g51-page-header [title]="isEdit() ? 'Edit Client' : 'Add New Client'" subtitle="Client company details and contract">
       <button class="btn-secondary flex items-center gap-2" (click)="goBack()"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
@@ -20,16 +21,11 @@ import { ToastService } from '@core/services/toast.service';
         <div class="sm:col-span-2"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Company Name *</label>
           <input type="text" [(ngModel)]="form.company_name" class="input-base w-full" required /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Industry / Sector</label>
-          <select [(ngModel)]="form.industry" class="input-base w-full">
-            <option value="">Select</option><option value="banking">Banking & Finance</option><option value="oil_gas">Oil & Gas</option><option value="real_estate">Real Estate</option><option value="retail">Retail</option><option value="manufacturing">Manufacturing</option><option value="telecom">Telecom</option><option value="government">Government</option><option value="education">Education</option><option value="healthcare">Healthcare</option><option value="hospitality">Hospitality</option><option value="other">Other</option>
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.industry" [options]="industryOptions" placeholder="Select industry" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">City</label>
           <input type="text" [(ngModel)]="form.city" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">State</label>
-          <select [(ngModel)]="form.state" class="input-base w-full">
-            <option value="">Select</option>
-            @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.state" [options]="stateOptions" placeholder="Select state" /></div>
       </div>
       <div class="mb-6"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Address</label>
         <textarea [(ngModel)]="form.address" rows="2" class="input-base w-full resize-none"></textarea></div>
@@ -77,6 +73,17 @@ export class ClientFormComponent implements OnInit {
   private clientId: string | null = null;
   form: any = { company_name: '', contact_name: '', contact_phone: '', contact_email: '', city: '', state: '', address: '', industry: '', contract_start: '', contract_end: '', billing_type: '', billing_rate: '', notes: '' };
   states = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
+  stateOptions: SelectOption[] = this.states.map(s => ({ value: s, label: s }));
+  industryOptions: SelectOption[] = [
+    { value: 'banking', label: 'Banking & Finance' }, { value: 'oil_gas', label: 'Oil & Gas' },
+    { value: 'real_estate', label: 'Real Estate' }, { value: 'retail', label: 'Retail' },
+    { value: 'manufacturing', label: 'Manufacturing' }, { value: 'telecom', label: 'Telecom' },
+    { value: 'government', label: 'Government' }, { value: 'education', label: 'Education' },
+    { value: 'healthcare', label: 'Healthcare' }, { value: 'hospitality', label: 'Hospitality' },
+    { value: 'logistics', label: 'Logistics & Transport' }, { value: 'construction', label: 'Construction' },
+    { value: 'technology', label: 'Technology' }, { value: 'agriculture', label: 'Agriculture' },
+    { value: 'other', label: 'Other' },
+  ];
 
   ngOnInit(): void {
     this.clientId = this.route.snapshot.paramMap.get('id');

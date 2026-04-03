@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, Save, ArrowLeft, Upload, X } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'g51-guard-form',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, SearchableSelectComponent],
   template: `
     <g51-page-header [title]="isEdit() ? 'Edit Guard' : 'Add New Guard'" subtitle="Guard personnel details">
       <button class="btn-secondary flex items-center gap-2" (click)="goBack()"><lucide-icon [img]="ArrowLeftIcon" [size]="14" /> Back</button>
@@ -46,10 +47,7 @@ import { ToastService } from '@core/services/toast.service';
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Hire Date *</label>
           <input type="date" [(ngModel)]="form.hire_date" class="input-base w-full" required /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">State of Origin</label>
-          <select [(ngModel)]="form.state" class="input-base w-full">
-            <option value="">Select State</option>
-            @for (s of nigerianStates; track s) { <option [value]="s">{{ s }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.state" [options]="stateOptions" placeholder="Select State" /></div>
       </div>
       <div class="mb-6"><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Residential Address</label>
         <textarea [(ngModel)]="form.address" rows="2" class="input-base w-full resize-none" placeholder="House number, street, area..."></textarea></div>
@@ -84,10 +82,7 @@ import { ToastService } from '@core/services/toast.service';
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Pay Rate (₦)</label>
           <input type="number" [(ngModel)]="form.pay_rate" class="input-base w-full" placeholder="0.00" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Bank Name</label>
-          <select [(ngModel)]="form.bank_name" class="input-base w-full">
-            <option value="">Select Bank</option>
-            @for (b of nigerianBanks; track b) { <option [value]="b">{{ b }}</option> }
-          </select></div>
+          <g51-searchable-select [(ngModel)]="form.bank_name" [options]="bankOptions" placeholder="Select Bank" /></div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Account Number</label>
@@ -146,6 +141,9 @@ export class GuardFormComponent implements OnInit {
     'Union Bank', 'United Bank for Africa', 'Unity Bank', 'VFD Microfinance Bank',
     'Wema Bank', 'Zenith Bank',
   ];
+
+  stateOptions: SelectOption[] = this.nigerianStates.map(s => ({ value: s, label: s }));
+  bankOptions: SelectOption[] = this.nigerianBanks.map(b => ({ value: b, label: b }));
 
   ngOnInit(): void {
     this.guardId = this.route.snapshot.paramMap.get('id');
