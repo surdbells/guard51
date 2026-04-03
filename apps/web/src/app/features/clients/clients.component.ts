@@ -10,6 +10,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/load
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
+import { ConfirmService } from '@core/services/confirm.service';
 
 @Component({
   selector: 'g51-clients',
@@ -87,6 +88,7 @@ import { exportToCsv } from '@core/utils/csv-export';
 })
 export class ClientsComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   readonly BuildingIcon = Building2; readonly PlusIcon = Plus; readonly SearchIcon = Search;
   readonly EyeIcon = Eye; readonly EditIcon = Edit; readonly TrashIcon = Trash2; readonly DownloadIcon = Download;
   readonly clients = signal<any[]>([]); readonly loading = signal(true);
@@ -111,8 +113,9 @@ export class ClientsComponent implements OnInit {
       error: () => this.loading.set(false),
     });
   }
-  confirmDelete(c: any): void {
-    if (confirm(`Delete ${c.company_name || c.name}?`)) {
+  async confirmDelete(c: any): Promise<void> {
+    const ok = await this.confirmSvc.delete(c.company_name || c.name || 'this client');
+    if (ok) {
       this.api.delete(`/clients/${c.id}`).subscribe({ next: () => { this.toast.success('Client deleted'); this.loadClients(); } });
     }
   }

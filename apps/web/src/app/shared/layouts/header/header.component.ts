@@ -1,4 +1,4 @@
-import { Component, inject, signal, input, HostListener } from '@angular/core';
+import { Component, inject, signal, input, HostListener, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -62,10 +62,27 @@ import { BrandingService } from '@core/services/branding.service';
           <lucide-icon [img]="theme.theme() === 'light' ? MoonIcon : SunIcon" [size]="18" />
         </button>
 
-        <!-- Language switcher -->
-        <button (click)="toggleLang()" class="p-2 rounded-lg hover:bg-[var(--surface-hover)] transition-colors" [style.color]="'var(--text-secondary)'" title="Switch language">
-          <lucide-icon [img]="GlobeIcon" [size]="18" />
-        </button>
+        <!-- Language dropdown -->
+        <div class="relative">
+          <button (click)="langMenuOpen = !langMenuOpen" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-[var(--surface-hover)] transition-colors" [style.color]="'var(--text-secondary)'" title="Language">
+            <lucide-icon [img]="GlobeIcon" [size]="16" />
+            <span class="text-xs font-medium hidden sm:inline">{{ currentLangLabel }}</span>
+          </button>
+          @if (langMenuOpen) {
+            <div class="absolute right-0 top-full mt-1 w-44 rounded-xl border py-1 z-50 animate-scale-in"
+              [style.background]="'var(--surface-card)'" [style.borderColor]="'var(--border-default)'" style="box-shadow: var(--shadow-lg)">
+              @for (lang of languages; track lang.code) {
+                <button (click)="switchLang(lang.code)" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-[var(--surface-hover)] transition-colors"
+                  [style.color]="currentLang === lang.code ? 'var(--brand-500)' : 'var(--text-primary)'"
+                  [style.fontWeight]="currentLang === lang.code ? '600' : '400'">
+                  <span class="text-base">{{ lang.flag }}</span>
+                  <span>{{ lang.label }}</span>
+                  @if (currentLang === lang.code) { <span class="ml-auto text-[10px]">✓</span> }
+                </button>
+              }
+            </div>
+          }
+        </div>
 
         <!-- Notifications -->
         <button (click)="navigateTo('/notifications')"
@@ -136,7 +153,7 @@ import { BrandingService } from '@core/services/branding.service';
     }
   `,
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   readonly showUserName = input(true);
 
   readonly auth = inject(AuthStore);
@@ -206,7 +223,15 @@ export class HeaderComponent {
 
   @HostListener('document:click', ['$event'])
   onDocClick(e: Event): void {
-    if (!(e.target as HTMLElement).closest('header .relative')) this.searchOpen.set(false);
+    const el = e.target as HTMLElement;
+    if (!el.closest('header .relative')) {
+      this.searchOpen.set(false);
+      this.langMenuOpen = false;
+    }
+  }
+
+  ngOnInit(): void {
+    this.currentLang = localStorage.getItem('g51_lang') || this.translate.currentLang || 'en';
   }
 
   onSearch(): void {
@@ -227,11 +252,19 @@ export class HeaderComponent {
     this.router.navigateByUrl(route);
   }
 
-  toggleLang(): void {
-    const current = this.translate.currentLang || 'en';
-    const next = current === 'en' ? 'pcm' : 'en';
-    this.translate.use(next);
-    localStorage.setItem('g51_lang', next);
+  langMenuOpen = false;
+  currentLang = 'en';
+  languages = [
+    { code: 'en', label: 'English', flag: '🇬🇧' },
+    { code: 'pcm', label: 'Nigerian Pidgin', flag: '🇳🇬' },
+  ];
+  get currentLangLabel(): string { return this.languages.find(l => l.code === this.currentLang)?.label || 'English'; }
+
+  switchLang(code: string): void {
+    this.currentLang = code;
+    this.translate.use(code);
+    localStorage.setItem('g51_lang', code);
+    this.langMenuOpen = false;
   }
 
   logout(): void {

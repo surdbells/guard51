@@ -10,6 +10,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/load
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
+import { ConfirmService } from '@core/services/confirm.service';
 
 @Component({
   selector: 'g51-sites',
@@ -88,6 +89,7 @@ import { exportToCsv } from '@core/utils/csv-export';
 })
 export class SitesComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   readonly MapPinIcon = MapPin; readonly PlusIcon = Plus; readonly SearchIcon = Search;
   readonly EyeIcon = Eye; readonly EditIcon = Edit; readonly TrashIcon = Trash2;
   readonly DownloadIcon = Download; readonly ShieldIcon = Shield;
@@ -113,8 +115,9 @@ export class SitesComponent implements OnInit {
       error: () => this.loading.set(false),
     });
   }
-  confirmDelete(s: any): void {
-    if (confirm(`Delete site ${s.name}?`)) {
+  async confirmDelete(s: any): Promise<void> {
+    const ok = await this.confirmSvc.delete(s.name || 'this site');
+    if (ok) {
       this.api.delete(`/sites/${s.id}`).subscribe({ next: () => { this.toast.success('Site deleted'); this.loadSites(); } });
     }
   }

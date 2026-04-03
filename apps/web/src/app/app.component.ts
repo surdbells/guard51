@@ -3,14 +3,16 @@ import { RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ThemeService } from './core/services/theme.service';
 import { ToastComponent } from './shared/components/toast/toast.component';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'g51-root',
   standalone: true,
-  imports: [RouterOutlet, ToastComponent],
+  imports: [RouterOutlet, ToastComponent, ConfirmDialogComponent],
   template: `
     <router-outlet />
     <g51-toast />
+    <g51-confirm-dialog />
   `,
 })
 export class AppComponent implements OnInit {

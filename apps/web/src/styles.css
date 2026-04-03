@@ -251,3 +251,70 @@ input.pl-8 { padding-left: 2rem !important; }
 }
 .searchable-select .dropdown-item:hover { background: var(--surface-hover); }
 .searchable-select .dropdown-item.selected { background: var(--brand-50); color: var(--brand-700); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   ═══════════════════════════════════════════════ */
+
+/* Tables → horizontal scroll on mobile */
+.card table { min-width: 600px; }
+.card:has(table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Stats card grid — 2 cols on mobile, 4 on desktop */
+@media (max-width: 640px) {
+  .grid-cols-2.lg\:grid-cols-4,
+  .grid.grid-cols-2.lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+
+  /* Stack header actions */
+  [class*="page-header"] .flex { flex-wrap: wrap; gap: 0.5rem; }
+
+  /* Full-width buttons on mobile */
+  .btn-primary, .btn-secondary { font-size: 0.75rem; padding: 0.5rem 0.75rem; }
+
+  /* Modals full width on mobile */
+  .fixed.inset-0.z-50 .relative.w-full { max-width: 100% !important; margin: 0 0.5rem; }
+
+  /* Reduce card padding on mobile */
+  .card.p-5 { padding: 0.75rem !important; }
+  .card.p-4 { padding: 0.625rem !important; }
+
+  /* Tabs: horizontal scroll */
+  .flex.gap-1.mb-4 { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; flex-wrap: nowrap; }
+  .flex.gap-1.mb-4 > button { white-space: nowrap; flex-shrink: 0; }
+
+  /* Reduce heading sizes */
+  .text-lg { font-size: 1rem !important; }
+  .text-2xl { font-size: 1.25rem !important; }
+
+  /* Grid → single column */
+  .grid.grid-cols-2 { grid-template-columns: 1fr !important; }
+  .grid.grid-cols-3 { grid-template-columns: 1fr !important; }
+  .grid.grid-cols-1.lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+  .grid.grid-cols-1.lg\:grid-cols-2 { grid-template-columns: 1fr !important; }
+}
+
+/* Tablet tweaks */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .grid.grid-cols-2.lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+/* Confirm dialog — centered, max width on mobile */
+@media (max-width: 640px) {
+  .fixed.inset-0.z-\[60\] .max-w-sm { max-width: calc(100vw - 2rem) !important; }
+}
+
+/* Language dropdown — position right-0 works on all sizes */
+/* Header icons spacing on mobile */
+@media (max-width: 640px) {
+  header .gap-1 { gap: 0.125rem; }
+  header .gap-2 { gap: 0.25rem; }
+  header .px-4 { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+/* Modal body scroll on small screens */
+@media (max-height: 700px) {
+  .fixed.inset-0.z-50 .relative { max-height: 90vh; overflow-y: auto; }
+}

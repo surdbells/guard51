@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
+import { ConfirmService } from '@core/services/confirm.service';
 
 @Component({
   selector: 'g51-subscriptions',
@@ -136,6 +137,7 @@ import { ToastService } from '@core/services/toast.service';
 })
 export class SubscriptionsComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   readonly CreditCardIcon = CreditCard; readonly PlusIcon = Plus; readonly EditIcon = Edit; readonly TrashIcon = Trash2;
   readonly activeTab = signal('Plans'); readonly loading = signal(true); readonly showPlanModal = signal(false);
   readonly plans = signal<any[]>([]); readonly subscriptions = signal<any[]>([]);
@@ -160,6 +162,6 @@ export class SubscriptionsComponent implements OnInit {
     const req = this.editingPlan ? this.api.put(url, this.planForm) : this.api.post(url, this.planForm);
     req.subscribe({ next: () => { this.showPlanModal.set(false); this.toast.success(this.editingPlan ? 'Plan updated' : 'Plan created'); this.loadTab(); } });
   }
-  deletePlan(p: any): void { if (confirm(`Delete plan "${p.name}"?`)) this.api.delete(`/admin/plans/${p.id}`).subscribe({ next: () => { this.toast.success('Deleted'); this.loadTab(); } }); }
-  cancelSub(s: any): void { if (confirm('Cancel this subscription?')) this.api.post(`/admin/subscriptions/${s.id}/cancel`, {}).subscribe({ next: () => { this.toast.success('Cancelled'); this.loadTab(); } }); }
+  async deletePlan(p: any): Promise<void> { if (await this.confirmSvc.delete(`Delete plan "${p.name}"?`)) this.api.delete(`/admin/plans/${p.id}`).subscribe({ next: () => { this.toast.success('Deleted'); this.loadTab(); } }); }
+  async cancelSub(s: any): Promise<void> { if (await this.confirmSvc.show({ title: 'Cancel Subscription?', message: 'This will end the subscription immediately.', confirmText: 'Cancel Subscription', variant: 'danger' })) this.api.post(`/admin/subscriptions/${s.id}/cancel`, {}).subscribe({ next: () => { this.toast.success('Cancelled'); this.loadTab(); } }); }
 }

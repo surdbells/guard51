@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
+import { ConfirmService } from '@core/services/confirm.service';
 import { exportToCsv } from '@core/utils/csv-export';
 
 @Component({
@@ -127,7 +128,7 @@ import { exportToCsv } from '@core/utils/csv-export';
   `,
 })
 export class TenantsComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService); private toast = inject(ToastService); private confirmSvc = inject(ConfirmService);
   readonly BuildingIcon = Building2; readonly SearchIcon = Search; readonly EyeIcon = Eye;
   readonly BanIcon = Ban; readonly PlayIcon = Play; readonly DownloadIcon = Download;
   readonly CreditCardIcon = CreditCard;
@@ -174,8 +175,8 @@ export class TenantsComponent implements OnInit {
       error: () => this.toast.error('Failed to update subscription'),
     });
   }
-  suspend(t: any): void { this.api.post(`/admin/tenants/${t.id}/suspend`, {}).subscribe({ next: () => { this.toast.success('Suspended'); this.load(); } }); }
-  activate(t: any): void { this.api.post(`/admin/tenants/${t.id}/activate`, {}).subscribe({ next: () => { this.toast.success('Activated'); this.load(); } }); }
+  async suspend(t: any): Promise<void> { const ok = await this.confirmSvc.suspend(t.company_name || t.name || 'this company'); if (ok) this.api.post(`/admin/tenants/${t.id}/suspend`, {}).subscribe({ next: () => { this.toast.success('Suspended'); this.load(); } }); }
+  async activate(t: any): Promise<void> { const ok = await this.confirmSvc.show({ title: 'Reactivate Company?', message: `Reactivate ${t.company_name || t.name}? They will regain full platform access.`, confirmText: 'Reactivate', variant: 'success' }); if (ok) this.api.post(`/admin/tenants/${t.id}/activate`, {}).subscribe({ next: () => { this.toast.success('Activated'); this.load(); } }); }
   exportAll(): void {
     exportToCsv('tenants', this.tenants(), [
       { key: 'company_name', label: 'Company' }, { key: 'admin_email', label: 'Email' },

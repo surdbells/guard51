@@ -9,6 +9,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/load
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
+import { ConfirmService } from '@core/services/confirm.service';
 
 @Component({
   selector: 'g51-guards',
@@ -72,6 +73,7 @@ import { exportToCsv } from '@core/utils/csv-export';
 export class GuardsComponent implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private confirmSvc = inject(ConfirmService);
   readonly ShieldIcon = Shield; readonly PlusIcon = Plus; readonly SearchIcon = Search;
   readonly TrashIcon = Trash2; readonly UserCheckIcon = UserCheck; readonly UserXIcon = UserX; readonly EyeIcon = Eye;
 
@@ -99,10 +101,10 @@ export class GuardsComponent implements OnInit {
   }
 
   goToPage(p: number): void { this.page.set(p); this.loadGuards(); }
-  suspend(g: any): void { this.api.post(`/guards/${g.id}/suspend`, {}).subscribe({ next: () => { this.toast.success('Guard suspended'); this.loadGuards(); } }); }
-  activate(g: any): void { this.api.post(`/guards/${g.id}/activate`, {}).subscribe({ next: () => { this.toast.success('Guard activated'); this.loadGuards(); } }); }
-  confirmDelete(g: any): void {
-    if (confirm(`Delete guard ${g.first_name} ${g.last_name}? This cannot be undone.`)) {
+  async suspend(g: any): Promise<void> { const ok = await this.confirmSvc.suspend(`${g.first_name} ${g.last_name}`); if (ok) this.api.post(`/guards/${g.id}/suspend`, {}).subscribe({ next: () => { this.toast.success('Guard suspended'); this.loadGuards(); } }); }
+  async activate(g: any): Promise<void> { const ok = await this.confirmSvc.show({ title: 'Activate Guard?', message: `Reactivate ${g.first_name} ${g.last_name}? They will regain access to the system.`, confirmText: 'Activate', variant: 'success' }); if (ok) this.api.post(`/guards/${g.id}/activate`, {}).subscribe({ next: () => { this.toast.success('Guard activated'); this.loadGuards(); } }); }
+  async confirmDelete(g: any): Promise<void> {
+    const ok = await this.confirmSvc.delete(`${g.first_name} ${g.last_name}`); if (ok) {
       this.api.delete(`/guards/${g.id}`).subscribe({ next: () => { this.toast.success('Guard deleted'); this.loadGuards(); } });
     }
   }
