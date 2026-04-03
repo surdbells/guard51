@@ -186,6 +186,69 @@ import { exportToCsv } from '@core/utils/csv-export';
       </g51-modal>
     }
 
+    <!-- EMPLOYEES -->
+    @if (activeTab() === 'Employees' && !tabLoading()) {
+      <div class="flex justify-end mb-3">
+        <button (click)="showEmployeeModal.set(true)" class="btn-primary text-xs flex items-center gap-1"><lucide-icon [img]="PlusIcon" [size]="12" /> Add Employee</button>
+      </div>
+      @if (!employees().length) { <g51-empty-state title="No Employees" message="Add your team members to give them app access." [icon]="UsersIcon" /> }
+      @else {
+        <div class="card overflow-hidden">
+          <table class="w-full text-xs">
+            <thead><tr [style.background]="'var(--surface-muted)'">
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Name</th>
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Email</th>
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Permissions</th>
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Status</th>
+            </tr></thead>
+            <tbody>
+              @for (emp of employees(); track emp.id) {
+                <tr class="border-t" [style.borderColor]="'var(--border-default)'">
+                  <td class="py-2.5 px-4 font-medium" [style.color]="'var(--text-primary)'">{{ emp.first_name }} {{ emp.last_name }}</td>
+                  <td class="py-2.5 px-4" [style.color]="'var(--text-secondary)'">{{ emp.email }}</td>
+                  <td class="py-2.5 px-4">
+                    <div class="flex flex-wrap gap-1">
+                      @if (emp.can_view_reports) { <span class="badge text-[9px] bg-blue-50 text-blue-600">Reports</span> }
+                      @if (emp.can_view_tracking) { <span class="badge text-[9px] bg-emerald-50 text-emerald-600">Tracking</span> }
+                      @if (emp.can_view_invoices) { <span class="badge text-[9px] bg-purple-50 text-purple-600">Invoices</span> }
+                      @if (emp.can_view_incidents) { <span class="badge text-[9px] bg-amber-50 text-amber-600">Incidents</span> }
+                      @if (emp.can_message) { <span class="badge text-[9px] bg-gray-100 text-gray-500">Chat</span> }
+                    </div>
+                  </td>
+                  <td class="py-2.5 px-4"><span class="badge text-[10px]" [ngClass]="emp.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'">{{ emp.is_active ? 'Active' : 'Inactive' }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <g51-modal [open]="showEmployeeModal()" title="Add Team Member" maxWidth="500px" (closed)="showEmployeeModal.set(false)">
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">First Name *</label><input type="text" [(ngModel)]="empForm.first_name" class="input-base w-full" /></div>
+            <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Last Name</label><input type="text" [(ngModel)]="empForm.last_name" class="input-base w-full" /></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Email *</label><input type="email" [(ngModel)]="empForm.email" class="input-base w-full" /></div>
+            <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Phone</label><input type="tel" [(ngModel)]="empForm.phone" class="input-base w-full" /></div>
+          </div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Temporary Password</label><input type="text" [(ngModel)]="empForm.password" class="input-base w-full" placeholder="Leave blank to auto-generate" /></div>
+          <div>
+            <label class="block text-xs font-medium mb-2" [style.color]="'var(--text-secondary)'">App Permissions</label>
+            <div class="grid grid-cols-2 gap-1">
+              <label class="flex items-center gap-1.5 text-xs"><input type="checkbox" [(ngModel)]="empForm.can_view_reports" class="rounded" /> View Reports</label>
+              <label class="flex items-center gap-1.5 text-xs"><input type="checkbox" [(ngModel)]="empForm.can_view_tracking" class="rounded" /> Live Tracking</label>
+              <label class="flex items-center gap-1.5 text-xs"><input type="checkbox" [(ngModel)]="empForm.can_view_invoices" class="rounded" /> View Invoices</label>
+              <label class="flex items-center gap-1.5 text-xs"><input type="checkbox" [(ngModel)]="empForm.can_view_incidents" class="rounded" /> View Incidents</label>
+              <label class="flex items-center gap-1.5 text-xs"><input type="checkbox" [(ngModel)]="empForm.can_message" class="rounded" /> Send Messages</label>
+            </div>
+          </div>
+        </div>
+        <div modal-footer><button (click)="showEmployeeModal.set(false)" class="btn-secondary">Cancel</button>
+          <button (click)="addEmployee()" class="btn-primary">Add Employee</button></div>
+      </g51-modal>
+    }
+
     <!-- ATTENDANCE -->
     @if (activeTab() === 'Attendance' && !tabLoading()) {
       <div class="flex justify-end mb-3">
@@ -217,13 +280,16 @@ export class ClientPortalComponent implements OnInit {
   readonly ReceiptIcon = Receipt; readonly AlertTriangleIcon = AlertTriangle; readonly ClockIcon = Clock;
   readonly CalendarIcon = Calendar; readonly DownloadIcon = Download; readonly PlusIcon = Plus; readonly SendIcon = Send;
 
-  readonly tabs = ['Guard Activity', 'Reports', 'Invoices', 'Incidents', 'Visitors', 'Attendance'];
+  readonly tabs = ['Guard Activity', 'Reports', 'Invoices', 'Incidents', 'Visitors', 'Employees', 'Attendance'];
   readonly activeTab = signal('Guard Activity'); readonly tabLoading = signal(true);
   readonly stats = signal<any>({ active_guards: 0, total_sites: 0, incidents_30d: 0, outstanding_amount: 0 });
   readonly guardActivity = signal<any[]>([]); readonly reports = signal<any[]>([]); readonly invoices = signal<any[]>([]);
   readonly incidents = signal<any[]>([]); readonly visitors = signal<any[]>([]); readonly attendance = signal<any[]>([]);
-  readonly sites = signal<any[]>([]); readonly showVisitorModal = signal(false);
+  readonly employees = signal<any[]>([]);
+  readonly sites = signal<any[]>([]); readonly showVisitorModal = signal(false); readonly showEmployeeModal = signal(false);
   visitorForm: any = { visitor_name: '', visitor_company: '', visitor_phone: '', visitor_email: '', scheduled_date: new Date().toISOString().slice(0, 10), purpose: 'meeting', site_id: '', notify_email: true, notify_sms: false };
+  empForm: any = { first_name: '', last_name: '', email: '', phone: '', password: '', can_view_reports: true, can_view_tracking: true, can_view_invoices: false, can_view_incidents: true, can_message: true };
+  readonly UsersIcon = Users;
   apiUrl = '';
 
   ngOnInit(): void {
@@ -236,15 +302,16 @@ export class ClientPortalComponent implements OnInit {
   loadTab(): void {
     this.tabLoading.set(true);
     const t = this.activeTab();
-    const map: Record<string, string> = { 'Guard Activity': '/client-portal/guard-activity', 'Reports': '/client-portal/reports', 'Invoices': '/client-portal/invoices', 'Incidents': '/client-portal/incidents', 'Visitors': '/visitors/appointments', 'Attendance': '/client-portal/attendance' };
+    const map: Record<string, string> = { 'Guard Activity': '/client-portal/guard-activity', 'Reports': '/client-portal/reports', 'Invoices': '/client-portal/invoices', 'Incidents': '/client-portal/incidents', 'Visitors': '/visitors/appointments', 'Employees': '/client-portal/employees', 'Attendance': '/client-portal/attendance' };
     this.api.get<any>(map[t] || map['Guard Activity']).subscribe({
       next: r => {
-        const d = r.data?.items || r.data?.[t.toLowerCase().replace(/ /g, '_')] || r.data?.appointments || r.data || [];
+        const d = r.data?.items || r.data?.employees || r.data?.[t.toLowerCase().replace(/ /g, '_')] || r.data?.appointments || r.data || [];
         if (t === 'Guard Activity') this.guardActivity.set(d);
         else if (t === 'Reports') this.reports.set(d);
         else if (t === 'Invoices') this.invoices.set(d);
         else if (t === 'Incidents') this.incidents.set(d);
         else if (t === 'Visitors') this.visitors.set(d);
+        else if (t === 'Employees') this.employees.set(d);
         else this.attendance.set(d);
         this.tabLoading.set(false);
       },
@@ -252,6 +319,17 @@ export class ClientPortalComponent implements OnInit {
     });
   }
 
+  addEmployee(): void {
+    if (!this.empForm.email || !this.empForm.first_name) { this.toast.warning('Name and email required'); return; }
+    this.api.post('/client-portal/employees', this.empForm).subscribe({
+      next: () => {
+        this.showEmployeeModal.set(false);
+        this.toast.success('Employee added');
+        this.empForm = { first_name: '', last_name: '', email: '', phone: '', password: '', can_view_reports: true, can_view_tracking: true, can_view_invoices: false, can_view_incidents: true, can_message: true };
+        this.loadTab();
+      },
+    });
+  }
   scheduleVisitor(): void {
     const u = this.auth.user();
     const body = { ...this.visitorForm, host_name: `${u?.first_name || ''} ${u?.last_name || ''}`.trim(), host_email: u?.email || '', host_phone: u?.phone || '' };

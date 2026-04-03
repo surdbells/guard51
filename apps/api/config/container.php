@@ -764,7 +764,7 @@ $containerBuilder->addDefinitions([
         );
     },
 
-    ClientPortalController::class => fn(ContainerInterface $c) => new ClientPortalController($c->get(ClientUserRepository::class), $c->get(ReportService::class), $c->get(InvoiceService::class), $c->get(IncidentService::class)),
+    ClientPortalController::class => fn(ContainerInterface $c) => new ClientPortalController($c->get(ClientUserRepository::class), $c->get(UserRepository::class), $c->get(ReportService::class), $c->get(InvoiceService::class), $c->get(IncidentService::class)),
     ChatController::class => fn(ContainerInterface $c) => new ChatController($c->get(ChatService::class)),
     NotificationController::class => fn(ContainerInterface $c) => new NotificationController($c->get(NotificationService::class)),
 

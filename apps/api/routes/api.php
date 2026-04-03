@@ -573,6 +573,10 @@ return function (App $app): void {
             $cp->get('/incidents', [ClientPortalController::class, 'incidents']);
             $cp->get('/tracking', [ClientPortalController::class, 'tracking']);
             $cp->get('/attendance', [ClientPortalController::class, 'attendance']);
+            // Employee onboarding
+            $cp->get('/employees', [ClientPortalController::class, 'listEmployees']);
+            $cp->post('/employees', [ClientPortalController::class, 'addEmployee']);
+            $cp->delete('/employees/{id}', [ClientPortalController::class, 'removeEmployee']);
         })
             ->add(new RoleMiddleware(UserRole::CLIENT))
             ->add($container->get(TenantMiddleware::class))

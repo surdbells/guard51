@@ -14,6 +14,7 @@ final class ClientPortalController
 {
     public function __construct(
         private readonly ClientUserRepository $clientUserRepo,
+        private readonly \Guard51\Repository\UserRepository $userRepo,
         private readonly ReportService $reportService,
         private readonly InvoiceService $invoiceService,
         private readonly IncidentService $incidentService,
@@ -71,5 +72,94 @@ final class ClientPortalController
         if (!$cu) return JsonResponse::error($response, 'Not found', 404);
         // Returns time clock data for client's sites — in production, filtered by site assignment
         return JsonResponse::success($response, ['records' => [], 'message' => 'Attendance data for client sites']);
+    }
+
+    /** GET /api/v1/client-portal/employees — List client's employees */
+    public function listEmployees(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+        $employees = $this->clientUserRepo->findBy(['clientId' => $cu->getClientId()]);
+        $result = [];
+        foreach ($employees as $emp) {
+            $user = $this->userRepo->find($emp->getUserId());
+            $result[] = array_merge($emp->toArray(), [
+                'first_name' => $user?->getFirstName() ?? '',
+                'last_name' => $user?->getLastName() ?? '',
+                'email' => $user?->getEmail() ?? '',
+                'phone' => $user?->getPhone() ?? '',
+                'is_active' => $user?->getIsActive() ?? false,
+            ]);
+        }
+        return JsonResponse::success($response, ['employees' => $result]);
+    }
+
+    /** POST /api/v1/client-portal/employees — Onboard a new client employee */
+    public function addEmployee(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+
+        $body = (array) $request->getParsedBody();
+        $email = $body['email'] ?? '';
+        $firstName = $body['first_name'] ?? '';
+        $lastName = $body['last_name'] ?? '';
+
+        if (!$email || !$firstName) {
+            return JsonResponse::error($response, 'Email and first name are required.', 422);
+        }
+
+        // Check if user with this email already exists
+        $existing = $this->userRepo->findByEmail($email);
+        if ($existing) {
+            return JsonResponse::error($response, 'A user with this email already exists.', 409);
+        }
+
+        // Create the User account
+        $user = new \Guard51\Entity\User();
+        $user->setTenantId($cu->getTenantId());
+        $user->setFirstName($firstName);
+        $user->setLastName($lastName);
+        $user->setEmail($email);
+        $user->setPhone($body['phone'] ?? null);
+        $user->setRole(\Guard51\Entity\UserRole::CLIENT);
+        $user->setPasswordHash(password_hash($body['password'] ?? bin2hex(random_bytes(6)), PASSWORD_ARGON2ID));
+        $user->setIsActive(true);
+        $this->userRepo->save($user);
+
+        // Create the ClientUser link with permissions
+        $newCu = new \Guard51\Entity\ClientUser();
+        $newCu->setTenantId($cu->getTenantId());
+        $newCu->setClientId($cu->getClientId());
+        $newCu->setUserId($user->getId());
+        $newCu->setCanViewReports((bool) ($body['can_view_reports'] ?? true));
+        $newCu->setCanViewTracking((bool) ($body['can_view_tracking'] ?? true));
+        $newCu->setCanViewInvoices((bool) ($body['can_view_invoices'] ?? false));
+        $newCu->setCanViewIncidents((bool) ($body['can_view_incidents'] ?? true));
+        $newCu->setCanMessage((bool) ($body['can_message'] ?? true));
+        $this->clientUserRepo->save($newCu);
+
+        return JsonResponse::success($response, [
+            'employee' => array_merge($newCu->toArray(), [
+                'first_name' => $firstName, 'last_name' => $lastName, 'email' => $email,
+            ]),
+            'message' => 'Employee onboarded successfully.',
+        ], 201);
+    }
+
+    /** DELETE /api/v1/client-portal/employees/{id} — Remove a client employee */
+    public function removeEmployee(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+
+        $empId = $request->getAttribute('id');
+        $emp = $this->clientUserRepo->find($empId);
+        if (!$emp || $emp->getClientId() !== $cu->getClientId()) {
+            return JsonResponse::error($response, 'Employee not found.', 404);
+        }
+
+        $this->clientUserRepo->remove($emp);
+        return JsonResponse::success($response, ['message' => 'Employee removed.']);
     }
 }
