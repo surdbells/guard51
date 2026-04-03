@@ -1,236 +1,273 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { LucideAngularModule, Users, Plus, Shield, Key, Trash2, Mail, Check, X, UserCheck } from 'lucide-angular';
+import { LucideAngularModule, Users, Plus, Shield, Key, Trash2, Mail, Check, X, UserCheck, Edit, Save } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
+import { ConfirmService } from '@core/services/confirm.service';
 
 @Component({
   selector: 'g51-users',
   standalone: true,
   imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
   template: `
-    <g51-page-header title="Team Management" subtitle="Manage users, roles, and granular module permissions">
+    <g51-page-header title="Team Management" subtitle="Manage users and role-based access control">
       <button class="btn-primary flex items-center gap-2" (click)="showInvite.set(true)"><lucide-icon [img]="PlusIcon" [size]="16" /> Invite User</button>
     </g51-page-header>
 
     <div class="flex gap-1 mb-4">
       @for (tab of ['Active Users', 'Roles & Permissions']; track tab) {
-        <button (click)="activeTab.set(tab)" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+        <button (click)="activeTab.set(tab); loadTab()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
           [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
           [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
       }
     </div>
 
-    @if (loading()) { <g51-loading /> }
-
+    <!-- ACTIVE USERS TAB -->
     @if (activeTab() === 'Active Users') {
-      @if (!users().length) { <g51-empty-state title="No Team Members" message="Invite your first team member." [icon]="UsersIcon" /> }
+      @if (loading()) { <g51-loading /> }
+      @else if (!users().length) { <g51-empty-state title="No Users" message="Invite your first team member." [icon]="UsersIcon" /> }
       @else {
-        <div class="space-y-2">
-          @for (user of users(); track user.id) {
-            <div class="card p-4 card-hover">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white" [style.background]="roleColor(user.role)">{{ user.first_name?.charAt(0) }}{{ user.last_name?.charAt(0) }}</div>
-                  <div>
-                    <p class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ user.first_name }} {{ user.last_name }}</p>
-                    <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ user.email }} · Joined {{ user.created_at }}</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <select [(ngModel)]="user.role" (ngModelChange)="changeRole(user.id, $event)" class="input-base text-xs py-1 px-2">
-                    <option value="company_admin">Admin</option><option value="supervisor">Supervisor</option>
-                    <option value="guard">Guard</option><option value="dispatcher">Dispatcher</option>
-                    <option value="client">Client</option>
-                  </select>
-                  <span class="badge text-[10px]" [ngClass]="user.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'">{{ user.is_active ? 'Active' : 'Inactive' }}</span>
-                  <button (click)="showPermissions(user)" class="btn-secondary text-xs py-1 px-2 flex items-center gap-1" title="Module Permissions">
-                    <lucide-icon [img]="KeyIcon" [size]="12" /> Permissions</button>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      }
-    }
-
-    @if (activeTab() === 'Roles & Permissions') {
-      <div class="card p-6">
-        <h3 class="text-sm font-semibold mb-4" [style.color]="'var(--text-primary)'">Role Definitions & Default Permissions</h3>
-        <p class="text-xs mb-4" [style.color]="'var(--text-tertiary)'">Each role has default access. Use per-user permissions (above) to override.</p>
-        <div class="space-y-3">
-          @for (role of roleDefinitions; track role.value) {
-            <div class="p-4 rounded-lg" [style.background]="'var(--surface-muted)'">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" [style.background]="role.color">{{ role.abbr }}</div>
-                <div>
-                  <p class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ role.label }}</p>
-                  <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ role.description }}</p>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-1 mt-2">
-                @for (perm of role.defaultPermissions; track perm) {
-                  <span class="text-[9px] px-1.5 py-0.5 rounded" [style.background]="'var(--surface-card)'" [style.color]="'var(--text-secondary)'">{{ perm }}</span>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-    }
-
-    <!-- Permissions Modal -->
-    <g51-modal [open]="showPermModal()" [title]="'Module Permissions: ' + (selectedUser()?.first_name || '') + ' ' + (selectedUser()?.last_name || '')" maxWidth="720px" (closed)="showPermModal.set(false)">
-      <div>
-        <p class="text-xs mb-3" [style.color]="'var(--text-secondary)'">Set granular access per module. Check/uncheck permissions as needed.</p>
-        <div class="overflow-x-auto">
+        <div class="card overflow-hidden">
           <table class="w-full text-xs">
-            <thead>
-              <tr [style.borderBottom]="'1px solid var(--border-default)'">
-                <th class="text-left py-2 px-1 font-semibold" [style.color]="'var(--text-primary)'">Module</th>
-                @for (p of permTypes; track p) { <th class="text-center py-2 px-1 font-semibold" [style.color]="'var(--text-primary)'">{{ p }}</th> }
-                <th class="text-center py-2 px-1 font-semibold" [style.color]="'var(--text-primary)'">All</th>
-              </tr>
-            </thead>
+            <thead><tr [style.background]="'var(--surface-muted)'">
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">User</th>
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Role</th>
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Status</th>
+              <th class="text-left py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Last Login</th>
+              <th class="text-center py-2.5 px-4 font-semibold" [style.color]="'var(--text-secondary)'">Actions</th>
+            </tr></thead>
             <tbody>
-              @for (mod of modules(); track mod) {
-                <tr [style.borderBottom]="'1px solid var(--border-default)'">
-                  <td class="py-2 px-1 font-medium capitalize" [style.color]="'var(--text-primary)'">{{ mod.replace('_', ' ') }}</td>
-                  @for (p of permTypes; track p) {
-                    <td class="text-center py-2 px-1">
-                      <input type="checkbox" class="rounded h-3.5 w-3.5"
-                        [checked]="getPermValue(mod, p)"
-                        (change)="togglePerm(mod, p, $event)" />
-                    </td>
-                  }
-                  <td class="text-center py-2 px-1">
-                    <button (click)="grantAll(mod)" class="text-[9px] text-blue-500 hover:underline">Grant All</button>
+              @for (user of users(); track user.id) {
+                <tr class="border-t hover:bg-[var(--surface-hover)]" [style.borderColor]="'var(--border-default)'">
+                  <td class="py-2.5 px-4">
+                    <div class="flex items-center gap-2">
+                      <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" [style.background]="roleColor(user.role)">{{ user.first_name?.charAt(0) }}{{ user.last_name?.charAt(0) }}</div>
+                      <div><p class="font-medium" [style.color]="'var(--text-primary)'">{{ user.first_name }} {{ user.last_name }}</p>
+                        <p class="text-[10px]" [style.color]="'var(--text-tertiary)'">{{ user.email }}</p></div>
+                    </div>
+                  </td>
+                  <td class="py-2.5 px-4">
+                    <select [(ngModel)]="user.role" (ngModelChange)="changeRole(user)" class="input-base text-xs py-1 px-2">
+                      @for (r of roles(); track r.id || r.value) { <option [value]="r.value || r.name">{{ r.label || r.name }}</option> }
+                    </select>
+                  </td>
+                  <td class="py-2.5 px-4">
+                    <span class="badge text-[10px]" [ngClass]="user.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'">{{ user.is_active ? 'Active' : 'Inactive' }}</span>
+                  </td>
+                  <td class="py-2.5 px-4" [style.color]="'var(--text-tertiary)'">{{ user.last_login_at || '—' }}</td>
+                  <td class="py-2.5 px-4 text-center">
+                    <div class="flex justify-center gap-1">
+                      <button (click)="resendInvite(user)" class="p-1 rounded hover:bg-[var(--surface-muted)]" title="Resend invite"><lucide-icon [img]="MailIcon" [size]="14" [style.color]="'var(--text-tertiary)'" /></button>
+                      <button (click)="removeUser(user)" class="p-1 rounded hover:bg-red-50" title="Remove"><lucide-icon [img]="TrashIcon" [size]="14" class="text-red-400" /></button>
+                    </div>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-      </div>
-      <div modal-footer><button (click)="showPermModal.set(false)" class="btn-primary">Done</button></div>
-    </g51-modal>
+      }
+    }
 
-    <!-- Invite Modal -->
-    <g51-modal [open]="showInvite()" title="Invite Team Member" maxWidth="480px" (closed)="showInvite.set(false)">
+    <!-- ROLES & PERMISSIONS TAB -->
+    @if (activeTab() === 'Roles & Permissions') {
+      <div class="flex justify-end mb-3">
+        <button (click)="openRoleCreate()" class="btn-primary text-xs flex items-center gap-1"><lucide-icon [img]="PlusIcon" [size]="12" /> New Custom Role</button>
+      </div>
+
+      <div class="space-y-3">
+        @for (role of roles(); track role.id || role.value) {
+          <div class="card p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold text-white" [style.background]="role.color || '#6B7280'">{{ (role.label || role.name)?.slice(0, 2)?.toUpperCase() }}</div>
+                <div>
+                  <p class="text-sm font-semibold" [style.color]="'var(--text-primary)'">{{ role.label || role.name }}</p>
+                  <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ role.description || (role.is_system ? 'System role' : 'Custom role') }} · {{ role.user_count || 0 }} users</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge text-[10px]" [ngClass]="role.is_system ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'">{{ role.is_system ? 'System' : 'Custom' }}</span>
+                @if (!role.is_system) {
+                  <button (click)="editRole(role)" class="p-1 rounded hover:bg-[var(--surface-muted)]"><lucide-icon [img]="EditIcon" [size]="14" [style.color]="'var(--text-tertiary)'" /></button>
+                  <button (click)="deleteRole(role)" class="p-1 rounded hover:bg-red-50"><lucide-icon [img]="TrashIcon" [size]="14" class="text-red-400" /></button>
+                }
+              </div>
+            </div>
+            <!-- Permission matrix -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
+              @for (mod of allModules; track mod) {
+                <label class="flex items-center gap-1.5 text-[10px] p-1.5 rounded cursor-pointer hover:bg-[var(--surface-muted)]"
+                  [style.color]="(role.permissions || []).includes(mod) ? 'var(--text-primary)' : 'var(--text-tertiary)'"
+                  [style.fontWeight]="(role.permissions || []).includes(mod) ? '600' : '400'">
+                  <input type="checkbox" [checked]="(role.permissions || []).includes(mod)" (change)="toggleRolePerm(role, mod)" [disabled]="role.is_system && role.value === 'company_admin'" class="rounded" style="width:12px;height:12px" />
+                  {{ mod }}
+                </label>
+              }
+            </div>
+            @if (!role.is_system) {
+              <button (click)="saveRolePerms(role)" class="btn-primary text-[10px] py-1 px-3 mt-2 flex items-center gap-1"><lucide-icon [img]="SaveIcon" [size]="10" /> Save</button>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Invite User Modal -->
+    <g51-modal [open]="showInvite()" title="Invite Team Member" maxWidth="450px" (closed)="showInvite.set(false)">
       <div class="space-y-3">
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">First Name</label>
-            <input type="text" [(ngModel)]="inviteForm.first_name" class="input-base w-full" /></div>
-          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Last Name</label>
-            <input type="text" [(ngModel)]="inviteForm.last_name" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">First Name *</label><input type="text" [(ngModel)]="inviteForm.first_name" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Last Name *</label><input type="text" [(ngModel)]="inviteForm.last_name" class="input-base w-full" /></div>
         </div>
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Email *</label>
-          <input type="email" [(ngModel)]="inviteForm.email" class="input-base w-full" required />
-          @if (inviteSubmitted && !inviteForm.email) { <p class="text-[10px] text-red-500 mt-0.5">Email is required</p> }
-        </div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Email *</label><input type="email" [(ngModel)]="inviteForm.email" class="input-base w-full" /></div>
         <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Role *</label>
           <select [(ngModel)]="inviteForm.role" class="input-base w-full">
-            <option value="guard">Guard</option><option value="supervisor">Supervisor</option>
-            <option value="dispatcher">Dispatcher</option><option value="company_admin">Admin</option>
+            @for (r of roles(); track r.id || r.value) { <option [value]="r.value || r.name">{{ r.label || r.name }}</option> }
           </select></div>
-        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Personal Message (optional)</label>
-          <textarea [(ngModel)]="inviteForm.personal_message" rows="2" class="input-base w-full resize-none" placeholder="Welcome message..."></textarea></div>
       </div>
       <div modal-footer><button (click)="showInvite.set(false)" class="btn-secondary">Cancel</button>
-        <button (click)="onInvite()" class="btn-primary flex items-center gap-2"><lucide-icon [img]="MailIcon" [size]="14" /> Send Invite</button></div>
+        <button (click)="invite()" class="btn-primary flex items-center gap-1"><lucide-icon [img]="MailIcon" [size]="12" /> Send Invite</button></div>
+    </g51-modal>
+
+    <!-- Create/Edit Role Modal -->
+    <g51-modal [open]="showRoleModal()" [title]="editingRole() ? 'Edit Role' : 'Create Custom Role'" maxWidth="500px" (closed)="showRoleModal.set(false)">
+      <div class="space-y-3">
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Role Name *</label><input type="text" [(ngModel)]="roleForm.name" class="input-base w-full" placeholder="e.g. Shift Supervisor" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Description</label><input type="text" [(ngModel)]="roleForm.description" class="input-base w-full" placeholder="What this role does" /></div>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Color</label>
+          <div class="flex gap-2">
+            @for (c of roleColors; track c) {
+              <button (click)="roleForm.color = c" class="h-7 w-7 rounded-full border-2 transition-all"
+                [style.background]="c" [style.borderColor]="roleForm.color === c ? c : 'transparent'"
+                [style.transform]="roleForm.color === c ? 'scale(1.2)' : ''"></button>
+            }
+          </div></div>
+        <div>
+          <label class="block text-xs font-medium mb-2" [style.color]="'var(--text-secondary)'">Module Permissions</label>
+          <div class="grid grid-cols-3 gap-1">
+            @for (mod of allModules; track mod) {
+              <label class="flex items-center gap-1.5 text-xs p-1.5 rounded cursor-pointer hover:bg-[var(--surface-muted)]">
+                <input type="checkbox" [checked]="roleForm.permissions.includes(mod)" (change)="toggleFormPerm(mod)" class="rounded" /> {{ mod }}
+              </label>
+            }
+          </div>
+        </div>
+      </div>
+      <div modal-footer><button (click)="showRoleModal.set(false)" class="btn-secondary">Cancel</button>
+        <button (click)="saveRole()" class="btn-primary">{{ editingRole() ? 'Update' : 'Create' }} Role</button></div>
     </g51-modal>
   `,
 })
 export class UsersComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
-  readonly UsersIcon = Users; readonly PlusIcon = Plus; readonly ShieldIcon = Shield;
-  readonly KeyIcon = Key; readonly MailIcon = Mail; readonly CheckIcon = Check;
+  private api = inject(ApiService); private toast = inject(ToastService); private confirmSvc = inject(ConfirmService);
+  readonly UsersIcon = Users; readonly PlusIcon = Plus; readonly ShieldIcon = Shield; readonly KeyIcon = Key;
+  readonly TrashIcon = Trash2; readonly MailIcon = Mail; readonly EditIcon = Edit; readonly SaveIcon = Save;
+  readonly activeTab = signal('Active Users'); readonly loading = signal(true);
+  readonly showInvite = signal(false); readonly showRoleModal = signal(false); readonly editingRole = signal(false);
+  readonly users = signal<any[]>([]); readonly roles = signal<any[]>([]);
+  inviteForm: any = { first_name: '', last_name: '', email: '', role: 'guard' };
+  roleForm: any = { name: '', description: '', color: '#3B82F6', permissions: [] as string[], id: '' };
+  roleColors = ['#3B82F6', '#8B5CF6', '#EC4899', '#10B981', '#F59E0B', '#EF4444', '#6366F1', '#14B8A6'];
+  allModules = ['Dashboard', 'Guards', 'Sites', 'Clients', 'Scheduling', 'Attendance', 'Tracking', 'Incidents', 'Dispatch', 'Invoicing', 'Payroll', 'Reports', 'Visitors', 'Tours', 'Passdowns', 'Chat', 'Parking', 'Vehicle Patrol', 'Analytics', 'Licenses'];
 
-  readonly users = signal<any[]>([]); readonly modules = signal<string[]>([]);
-  readonly loading = signal(true); readonly showInvite = signal(false);
-  readonly showPermModal = signal(false); readonly selectedUser = signal<any>(null);
-  readonly activeTab = signal('Active Users');
-  readonly userPerms = signal<Record<string, any>>({});
-  inviteForm = { email: '', role: 'guard', first_name: '', last_name: '', personal_message: '' };
-  inviteSubmitted = false;
-  permTypes = ['View', 'Create', 'Edit', 'Delete', 'Export', 'Approve'];
+  ngOnInit(): void { this.loadTab(); }
 
-  roleDefinitions = [
-    { value: 'company_admin', label: 'Company Admin', abbr: 'CA', color: '#1B3A5C', description: 'Full access to all company data and settings. Can manage users, billing, and integrations.',
-      defaultPermissions: ['All Modules: Full Access', 'User Management', 'Billing', 'Settings'] },
-    { value: 'supervisor', label: 'Supervisor', abbr: 'SV', color: '#2563EB', description: 'Manages guards at assigned sites. Can approve reports, manage shifts, and view attendance.',
-      defaultPermissions: ['Guards: View/Edit', 'Sites: View', 'Scheduling: Full', 'Reports: View/Approve', 'Attendance: View', 'Tours: View', 'Incidents: Full'] },
-    { value: 'guard', label: 'Guard', abbr: 'GD', color: '#10B981', description: 'Field security personnel. Can clock in/out, submit reports, scan tour checkpoints, and use messenger.',
-      defaultPermissions: ['Clock In/Out', 'Reports: Create', 'Tours: Scan', 'Incidents: Create', 'Messenger', 'Passdowns: View/Create'] },
-    { value: 'dispatcher', label: 'Dispatcher', abbr: 'DS', color: '#F59E0B', description: 'Dispatch console operator. Can manage calls, assign guards, and track responses.',
-      defaultPermissions: ['Dispatch: Full', 'Guards: View', 'Sites: View', 'Tracking: View', 'Panic Alerts: View/Respond'] },
-    { value: 'client', label: 'Client', abbr: 'CL', color: '#8B5CF6', description: 'Security service client. Can view reports, invoices, attendance, and tracking for their sites.',
-      defaultPermissions: ['Client Portal: View Reports', 'Client Portal: View Invoices', 'Client Portal: View Attendance', 'Client Portal: View Tracking'] },
-  ];
-
-  ngOnInit(): void {
-    this.api.get<any>('/users').subscribe({
-      next: res => { this.users.set(res.data?.users || res.data || []); this.loading.set(false); },
-      error: () => this.loading.set(false),
-    });
-    this.api.get<any>('/users/modules').subscribe({ next: res => this.modules.set(res.data?.modules || []) });
-  }
-
-  roleColor(role: string): string {
-    return this.roleDefinitions.find(r => r.value === role)?.color || '#94A3B8';
-  }
-
-  changeRole(userId: string, role: string): void {
-    this.api.put('/users/' + userId + '/role', { role }).subscribe({ next: () => this.toast.success('Role updated') });
-  }
-
-  showPermissions(user: any): void {
-    this.selectedUser.set(user);
-    this.userPerms.set({});
-    this.api.get<any>('/users/' + user.id + '/permissions').subscribe({
-      next: res => {
-        const perms: Record<string, any> = {};
-        (res.data?.permissions || []).forEach((p: any) => { perms[p.module_key] = p; });
-        this.userPerms.set(perms);
-        this.showPermModal.set(true);
+  loadTab(): void {
+    this.loading.set(true);
+    if (this.activeTab() === 'Active Users') {
+      this.api.get<any>('/users').subscribe({
+        next: r => { this.users.set(r.data?.users || r.data || []); this.loading.set(false); },
+        error: () => this.loading.set(false),
+      });
+    }
+    // Always load roles
+    this.api.get<any>('/users/roles').subscribe({
+      next: r => {
+        const custom = r.data?.roles || r.data || [];
+        // Merge system roles with custom
+        const system = [
+          { value: 'company_admin', label: 'Company Admin', description: 'Full access to all modules', color: '#1B3A5C', is_system: true, permissions: [...this.allModules] },
+          { value: 'supervisor', label: 'Supervisor', description: 'Manage guards and schedules', color: '#3B82F6', is_system: true, permissions: ['Dashboard', 'Guards', 'Sites', 'Scheduling', 'Attendance', 'Tracking', 'Incidents', 'Reports', 'Passdowns', 'Tours'] },
+          { value: 'dispatcher', label: 'Dispatcher', description: 'Handle dispatch and incidents', color: '#8B5CF6', is_system: true, permissions: ['Dashboard', 'Dispatch', 'Incidents', 'Tracking', 'Guards', 'Sites', 'Chat'] },
+          { value: 'guard', label: 'Guard', description: 'Field operations only', color: '#10B981', is_system: true, permissions: ['Dashboard', 'Attendance', 'Incidents', 'Passdowns', 'Tours', 'Chat'] },
+          { value: 'client', label: 'Client', description: 'View-only client portal', color: '#F59E0B', is_system: true, permissions: ['Dashboard', 'Reports', 'Invoicing', 'Visitors'] },
+        ];
+        this.roles.set([...system, ...custom.map((r: any) => ({ ...r, is_system: false }))]);
+        this.loading.set(false);
+      },
+      error: () => {
+        // Fallback: just system roles
+        this.roles.set([
+          { value: 'company_admin', label: 'Company Admin', description: 'Full access', color: '#1B3A5C', is_system: true, permissions: [...this.allModules] },
+          { value: 'supervisor', label: 'Supervisor', description: 'Manage guards', color: '#3B82F6', is_system: true, permissions: ['Dashboard', 'Guards', 'Sites', 'Scheduling', 'Attendance', 'Tracking', 'Incidents', 'Reports'] },
+          { value: 'dispatcher', label: 'Dispatcher', description: 'Dispatch operations', color: '#8B5CF6', is_system: true, permissions: ['Dashboard', 'Dispatch', 'Incidents', 'Tracking', 'Guards', 'Sites'] },
+          { value: 'guard', label: 'Guard', description: 'Field operations', color: '#10B981', is_system: true, permissions: ['Dashboard', 'Attendance', 'Incidents', 'Passdowns', 'Tours'] },
+          { value: 'client', label: 'Client', description: 'Client portal', color: '#F59E0B', is_system: true, permissions: ['Dashboard', 'Reports', 'Invoicing', 'Visitors'] },
+        ]);
+        this.loading.set(false);
       },
     });
   }
 
-  getPermValue(mod: string, perm: string): boolean {
-    const p = this.userPerms()[mod];
-    if (!p) return false;
-    return p['can_' + perm.toLowerCase()] || false;
+  roleColor(role: string): string {
+    const r = this.roles().find(r => r.value === role || r.name === role);
+    return r?.color || '#6B7280';
   }
 
-  togglePerm(mod: string, perm: string, event: any): void {
-    const body: any = { module_key: mod, ['can_' + perm.toLowerCase()]: event.target.checked };
-    this.api.post('/users/' + this.selectedUser().id + '/permissions', body).subscribe();
-    // Update local state
-    const perms = { ...this.userPerms() };
-    if (!perms[mod]) perms[mod] = { module_key: mod };
-    perms[mod]['can_' + perm.toLowerCase()] = event.target.checked;
-    this.userPerms.set(perms);
-  }
-
-  grantAll(mod: string): void {
-    const body: any = { module_key: mod, grant_all: true };
-    this.api.post('/users/' + this.selectedUser().id + '/permissions', body).subscribe({ next: () => this.toast.success('All permissions granted for ' + mod) });
-    const perms = { ...this.userPerms() };
-    perms[mod] = { module_key: mod, can_view: true, can_create: true, can_edit: true, can_delete: true, can_export: true, can_approve: true };
-    this.userPerms.set(perms);
-  }
-
-  onInvite(): void {
-    this.inviteSubmitted = true;
-    if (!this.inviteForm.email) { this.toast.warning('Email is required'); return; }
-    this.api.post('/onboarding/invitations', this.inviteForm).subscribe({
-      next: () => { this.showInvite.set(false); this.toast.success('Invitation sent'); this.inviteSubmitted = false; this.ngOnInit(); },
+  changeRole(user: any): void {
+    this.api.put(`/users/${user.id}/role`, { role: user.role }).subscribe({
+      next: () => this.toast.success('Role updated'),
+      error: () => this.toast.error('Failed to update role'),
     });
+  }
+
+  async removeUser(user: any): Promise<void> {
+    const ok = await this.confirmSvc.delete(`${user.first_name} ${user.last_name}`);
+    if (ok) this.api.delete(`/users/${user.id}`).subscribe({ next: () => { this.toast.success('User removed'); this.loadTab(); } });
+  }
+
+  resendInvite(user: any): void { this.api.post(`/users/${user.id}/resend-invite`, {}).subscribe({ next: () => this.toast.success('Invite resent'), error: () => this.toast.error('Failed') }); }
+
+  invite(): void {
+    if (!this.inviteForm.email || !this.inviteForm.first_name) { this.toast.warning('Name and email required'); return; }
+    this.api.post('/invitations', this.inviteForm).subscribe({
+      next: () => { this.showInvite.set(false); this.toast.success('Invitation sent'); this.inviteForm = { first_name: '', last_name: '', email: '', role: 'guard' }; this.loadTab(); },
+    });
+  }
+
+  // Role CRUD
+  openRoleCreate(): void { this.roleForm = { name: '', description: '', color: '#3B82F6', permissions: [], id: '' }; this.editingRole.set(false); this.showRoleModal.set(true); }
+  editRole(role: any): void { this.roleForm = { ...role, permissions: [...(role.permissions || [])] }; this.editingRole.set(true); this.showRoleModal.set(true); }
+  toggleFormPerm(mod: string): void { const i = this.roleForm.permissions.indexOf(mod); i >= 0 ? this.roleForm.permissions.splice(i, 1) : this.roleForm.permissions.push(mod); }
+  toggleRolePerm(role: any, mod: string): void {
+    if (!role.permissions) role.permissions = [];
+    const i = role.permissions.indexOf(mod);
+    i >= 0 ? role.permissions.splice(i, 1) : role.permissions.push(mod);
+  }
+
+  saveRole(): void {
+    if (!this.roleForm.name) { this.toast.warning('Role name required'); return; }
+    const obs = this.editingRole()
+      ? this.api.put(`/users/roles/${this.roleForm.id}`, this.roleForm)
+      : this.api.post('/users/roles', this.roleForm);
+    obs.subscribe({ next: () => { this.showRoleModal.set(false); this.toast.success(this.editingRole() ? 'Role updated' : 'Role created'); this.loadTab(); } });
+  }
+
+  saveRolePerms(role: any): void {
+    this.api.put(`/users/roles/${role.id}/permissions`, { permissions: role.permissions }).subscribe({
+      next: () => this.toast.success('Permissions saved'),
+      error: () => this.toast.error('Failed to save'),
+    });
+  }
+
+  async deleteRole(role: any): Promise<void> {
+    const ok = await this.confirmSvc.delete(role.label || role.name);
+    if (ok) this.api.delete(`/users/roles/${role.id}`).subscribe({ next: () => { this.toast.success('Role deleted'); this.loadTab(); } });
   }
 }
