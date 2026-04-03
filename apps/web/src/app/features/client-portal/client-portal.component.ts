@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass, DecimalPipe } from '@angular/common';
 import { LucideAngularModule, Building2, FileText, Receipt, AlertTriangle, MapPin, Clock, Shield, Users, Calendar, Download, Eye, Send, Plus } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
@@ -15,7 +16,7 @@ import { exportToCsv } from '@core/utils/csv-export';
 @Component({
   selector: 'g51-client-portal',
   standalone: true,
-  imports: [FormsModule, NgClass, DecimalPipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, DecimalPipe, LucideAngularModule, PageHeaderComponent, StatsCardComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Client Portal" [subtitle]="'Welcome, ' + (auth.user()?.first_name || 'Client')" />
 
@@ -173,9 +174,7 @@ import { exportToCsv } from '@core/utils/csv-export';
               <select [(ngModel)]="visitorForm.purpose" class="input-base w-full"><option value="meeting">Meeting</option><option value="delivery">Delivery</option><option value="interview">Interview</option><option value="other">Other</option></select></div>
           </div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-            <select [(ngModel)]="visitorForm.site_id" class="input-base w-full"><option value="">Select site</option>
-              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-            </select></div>
+            <g51-searchable-select [(ngModel)]="visitorForm.site_id" [options]="siteOptions()" placeholder="Select site" /></div>
           <div class="flex gap-3">
             <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="visitorForm.notify_email" /> Email</label>
             <label class="flex items-center gap-1 text-xs"><input type="checkbox" [(ngModel)]="visitorForm.notify_sms" /> SMS</label>
@@ -286,7 +285,7 @@ export class ClientPortalComponent implements OnInit {
   readonly guardActivity = signal<any[]>([]); readonly reports = signal<any[]>([]); readonly invoices = signal<any[]>([]);
   readonly incidents = signal<any[]>([]); readonly visitors = signal<any[]>([]); readonly attendance = signal<any[]>([]);
   readonly employees = signal<any[]>([]);
-  readonly sites = signal<any[]>([]); readonly showVisitorModal = signal(false); readonly showEmployeeModal = signal(false);
+  readonly sites = signal<any[]>([]); readonly siteOptions = signal<any[]>([]); readonly showVisitorModal = signal(false); readonly showEmployeeModal = signal(false);
   visitorForm: any = { visitor_name: '', visitor_company: '', visitor_phone: '', visitor_email: '', scheduled_date: new Date().toISOString().slice(0, 10), purpose: 'meeting', site_id: '', notify_email: true, notify_sms: false };
   empForm: any = { first_name: '', last_name: '', email: '', phone: '', password: '', can_view_reports: true, can_view_tracking: true, can_view_invoices: false, can_view_incidents: true, can_message: true };
   readonly UsersIcon = Users;
@@ -295,7 +294,7 @@ export class ClientPortalComponent implements OnInit {
   ngOnInit(): void {
     this.apiUrl = 'https://api.guard51.com/api/v1';
     this.api.get<any>('/client-portal/stats').subscribe({ next: r => { if (r.data) this.stats.set(r.data); }, error: () => {} });
-    this.api.get<any>('/client-portal/sites').subscribe({ next: r => this.sites.set(r.data?.sites || r.data || []), error: () => {} });
+    this.api.get<any>('/client-portal/sites').subscribe({ next: (r: any) => { const ss = r.data?.sites || r.data || []; this.sites.set(ss); this.siteOptions.set(ss.map((x: any) => ({ value: x.id, label: x.name }))); }, error: () => {} });
     this.loadTab();
   }
 

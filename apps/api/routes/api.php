@@ -195,7 +195,9 @@ return function (App $app): void {
         $group->group('/admin/tenants', function (RouteCollectorProxy $tenants): void {
             $tenants->get('', [TenantController::class, 'index']);
             $tenants->get('/stats', [TenantController::class, 'stats']);
+            $tenants->post('', [TenantController::class, 'createTenant']);
             $tenants->get('/{id}', [TenantController::class, 'show']);
+            $tenants->delete('/{id}', [TenantController::class, 'deleteTenant']);
             $tenants->post('/{id}/suspend', [TenantController::class, 'suspend']);
             $tenants->post('/{id}/reactivate', [TenantController::class, 'reactivate']);
             $tenants->post('/{id}/activate', [TenantController::class, 'reactivate']);

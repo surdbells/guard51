@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideAngularModule, Settings, Building2, Bell, Palette, Globe, Save, Upload } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
@@ -11,7 +12,7 @@ import { BrandingService } from '@core/services/branding.service';
 @Component({
   selector: 'g51-settings',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, LoadingSpinnerComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, LoadingSpinnerComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Settings" subtitle="Company profile, branding, and notification preferences" />
 
@@ -37,9 +38,7 @@ import { BrandingService } from '@core/services/branding.service';
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">State</label>
-              <select [(ngModel)]="company.state" class="input-base w-full">
-                @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
-              </select></div>
+              <g51-searchable-select [(ngModel)]="company.state" [options]="stateOptions" placeholder="Select state" /></div>
             <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">City</label><input type="text" [(ngModel)]="company.city" class="input-base w-full" /></div>
           </div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Address</label><textarea [(ngModel)]="company.address" rows="2" class="input-base w-full resize-none"></textarea></div>
@@ -93,6 +92,7 @@ export class SettingsComponent implements OnInit {
     { key: 'sms_visitors', label: 'Visitor Arrivals (SMS)', description: 'SMS when visitors check in at your sites', enabled: false },
   ];
   states = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
+  stateOptions: any[] = this.states.map(s => ({ value: s, label: s }));
 
   ngOnInit(): void {
     this.api.get<any>('/onboarding/status').subscribe({ next: r => { if (r.data?.tenant) { const t = r.data.tenant; Object.keys(this.company).forEach(k => { if (t[k]) this.company[k] = t[k]; }); if (t.branding) this.branding = { ...this.branding, ...t.branding }; } } });

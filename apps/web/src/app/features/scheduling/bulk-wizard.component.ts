@@ -3,13 +3,14 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, ArrowLeft, Zap, Loader2, Calendar } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { ApiService } from '@core/services/api.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'g51-bulk-wizard',
   standalone: true,
-  imports: [RouterLink, FormsModule, LucideAngularModule, PageHeaderComponent],
+  imports: [RouterLink, FormsModule, LucideAngularModule, PageHeaderComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Bulk Generate Shifts" subtitle="Create multiple shifts from a template across a date range">
       <a routerLink="/scheduling" class="btn-secondary flex items-center gap-1.5"><lucide-icon [img]="ArrowLeftIcon" [size]="16" /> Back</a>
@@ -74,6 +75,7 @@ export class BulkWizardComponent implements OnInit {
   private api = inject(ApiService); private router = inject(Router); private toast = inject(ToastService);
   readonly ArrowLeftIcon = ArrowLeft; readonly ZapIcon = Zap; readonly Loader2Icon = Loader2; readonly CalendarIcon = Calendar;
   readonly templates = signal<any[]>([]); readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   readonly generating = signal(false); readonly result = signal<any>(null);
 
   form = { template_id: '', start_date: '', end_date: '', site_id: '' };

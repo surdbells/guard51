@@ -4,6 +4,7 @@ import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { LucideAngularModule, FileText, Plus, Eye, CheckCircle, Camera } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SearchableSelectComponent, SelectOption } from '@shared/components/searchable-select/searchable-select.component';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
@@ -13,7 +14,7 @@ import { ToastService } from '@core/services/toast.service';
 @Component({
   selector: 'g51-reports',
   standalone: true,
-  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, EmptyStateComponent, ModalComponent],
+  imports: [FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, StatsCardComponent, EmptyStateComponent, ModalComponent, SearchableSelectComponent],
   template: `
     <g51-page-header title="Reports" subtitle="Daily activity reports, custom reports, and watch mode feed">
       <button (click)="showCreateDAR.set(true)" class="btn-primary flex items-center gap-2">
@@ -178,10 +179,7 @@ import { ToastService } from '@core/services/toast.service';
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Report Date *</label>
             <input type="date" [(ngModel)]="darForm.report_date" class="input-base w-full" /></div>
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Site *</label>
-            <select [(ngModel)]="darForm.site_id" class="input-base w-full">
-              <option value="">Select site</option>
-              @for (s of sites(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
-            </select></div>
+            <g51-searchable-select [(ngModel)]="darForm.site_id" [options]="siteOptions()" placeholder="Select site" /></div>
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Shift Start</label>
@@ -266,6 +264,7 @@ export class ReportsComponent implements OnInit {
   };
   darEvidence: File[] = [];
   readonly sites = signal<any[]>([]);
+  readonly siteOptions = signal<SelectOption[]>([]);
   tplForm: { name: string; description: string; fields: { name: string; type: string; required: boolean }[] } = { name: '', description: '', fields: [] };
   readonly watchFeed = signal<any[]>([]);
   ngOnInit(): void {

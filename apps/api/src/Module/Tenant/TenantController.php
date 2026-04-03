@@ -248,4 +248,96 @@ final class TenantController
             'tenant_id' => $tenant->getId(),
         ]);
     }
+
+    /**
+     * POST /api/v1/admin/tenants — Provision a new company (super admin)
+     */
+    public function createTenant(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+
+        // Validate required fields
+        $companyName = $body['company_name'] ?? '';
+        $adminEmail = $body['admin_email'] ?? '';
+        $adminFirstName = $body['admin_first_name'] ?? '';
+        $adminLastName = $body['admin_last_name'] ?? '';
+        $adminPassword = $body['admin_password'] ?? bin2hex(random_bytes(6));
+        $planId = $body['plan_id'] ?? null;
+
+        if (!$companyName || !$adminEmail || !$adminFirstName) {
+            throw ApiException::validation('Company name, admin email, and admin first name are required.');
+        }
+
+        // Check email uniqueness
+        $existing = $this->userRepo->findByEmail($adminEmail);
+        if ($existing) {
+            throw ApiException::validation('A user with this email already exists.');
+        }
+
+        $conn = $this->em->getConnection();
+
+        // Create tenant
+        $tenantId = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        $conn->executeStatement(
+            "INSERT INTO tenants (id, company_name, admin_email, status, tenant_type, created_at) VALUES (?, ?, ?, 'active', 'security_company', NOW())",
+            [$tenantId, $companyName, $adminEmail]
+        );
+
+        // Optional fields
+        if (!empty($body['phone'])) {
+            $conn->executeStatement("UPDATE tenants SET phone = ? WHERE id = ?", [$body['phone'], $tenantId]);
+        }
+        if (!empty($body['state'])) {
+            $conn->executeStatement("UPDATE tenants SET state = ? WHERE id = ?", [$body['state'], $tenantId]);
+        }
+        if (!empty($body['city'])) {
+            $conn->executeStatement("UPDATE tenants SET city = ? WHERE id = ?", [$body['city'], $tenantId]);
+        }
+
+        // Create admin user
+        $userId = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        $passwordHash = password_hash($adminPassword, PASSWORD_ARGON2ID);
+        $conn->executeStatement(
+            "INSERT INTO users (id, tenant_id, email, first_name, last_name, password_hash, role, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, 'company_admin', true, NOW())",
+            [$userId, $tenantId, $adminEmail, $adminFirstName, $adminLastName, $passwordHash]
+        );
+
+        // Create subscription if plan specified
+        if ($planId) {
+            $subId = \Ramsey\Uuid\Uuid::uuid4()->toString();
+            $conn->executeStatement(
+                "INSERT INTO subscriptions (id, tenant_id, plan_id, status, created_at) VALUES (?, ?, ?, 'active', NOW())",
+                [$subId, $tenantId, $planId]
+            );
+        }
+
+        $this->logger->info('Tenant provisioned.', ['tenant_id' => $tenantId, 'company' => $companyName, 'admin' => $adminEmail]);
+
+        return JsonResponse::success($response, [
+            'tenant_id' => $tenantId,
+            'user_id' => $userId,
+            'company_name' => $companyName,
+            'admin_email' => $adminEmail,
+            'admin_password' => $adminPassword,
+            'message' => 'Company provisioned successfully. Admin credentials generated.',
+        ], 201);
+    }
+
+    /**
+     * DELETE /api/v1/admin/tenants/{id} — Delete a tenant (super admin)
+     */
+    public function deleteTenant(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('id');
+        $tenant = $this->tenantRepo->findOrFail($tenantId);
+
+        // Soft delete — set status to 'deleted'
+        $conn = $this->em->getConnection();
+        $conn->executeStatement("UPDATE tenants SET status = 'deleted' WHERE id = ?", [$tenantId]);
+        $conn->executeStatement("UPDATE users SET is_active = false WHERE tenant_id = ?", [$tenantId]);
+
+        $this->logger->warning('Tenant deleted.', ['tenant_id' => $tenantId, 'company' => $tenant->getCompanyName()]);
+
+        return JsonResponse::success($response, ['message' => 'Company deleted. All users deactivated.']);
+    }
 }

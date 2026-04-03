@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass, DecimalPipe } from '@angular/common';
-import { LucideAngularModule, Building2, Search, Eye, Ban, Play, Download, UserPlus, CreditCard, ArrowUpDown } from 'lucide-angular';
+import { LucideAngularModule, Building2, Search, Eye, Ban, Play, Download, UserPlus, CreditCard, ArrowUpDown, Plus } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
@@ -17,7 +17,8 @@ import { exportToCsv } from '@core/utils/csv-export';
   imports: [FormsModule, NgClass, DecimalPipe, LucideAngularModule, PageHeaderComponent, ModalComponent, EmptyStateComponent, LoadingSpinnerComponent],
   template: `
     <g51-page-header title="Company Management" subtitle="All registered security companies">
-      <button (click)="exportAll()" class="btn-secondary text-xs flex items-center gap-1 mr-2"><lucide-icon [img]="DownloadIcon" [size]="14" /> Export</button>
+      <button (click)="openProvision()" class="btn-primary flex items-center gap-2 mr-2"><lucide-icon [img]="PlusIcon" [size]="16" /> Provision Company</button>
+      <button (click)="exportAll()" class="btn-secondary text-xs flex items-center gap-1"><lucide-icon [img]="DownloadIcon" [size]="14" /> Export</button>
     </g51-page-header>
 
     <div class="flex items-center gap-3 mb-4 flex-wrap">
@@ -83,6 +84,42 @@ import { exportToCsv } from '@core/utils/csv-export';
       }
     }
 
+    <!-- Provision Company Modal -->
+    <g51-modal [open]="showProvision()" title="Provision New Company" maxWidth="600px" (closed)="showProvision.set(false)">
+      <div class="space-y-3">
+        <h4 class="text-xs font-semibold uppercase tracking-wide" [style.color]="'var(--text-tertiary)'">Company Details</h4>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Company Name *</label><input type="text" [(ngModel)]="provisionForm.company_name" class="input-base w-full" placeholder="e.g. ShieldForce Security" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Phone</label><input type="tel" [(ngModel)]="provisionForm.phone" class="input-base w-full" placeholder="+234..." /></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">State</label>
+            <select [(ngModel)]="provisionForm.state" class="input-base w-full"><option value="">Select</option>
+              @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
+            </select></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">City</label><input type="text" [(ngModel)]="provisionForm.city" class="input-base w-full" /></div>
+        </div>
+
+        <h4 class="text-xs font-semibold uppercase tracking-wide pt-2" [style.color]="'var(--text-tertiary)'">Admin Account</h4>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">First Name *</label><input type="text" [(ngModel)]="provisionForm.admin_first_name" class="input-base w-full" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Last Name *</label><input type="text" [(ngModel)]="provisionForm.admin_last_name" class="input-base w-full" /></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Admin Email *</label><input type="email" [(ngModel)]="provisionForm.admin_email" class="input-base w-full" placeholder="admin@company.com" /></div>
+          <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Password</label><input type="text" [(ngModel)]="provisionForm.admin_password" class="input-base w-full font-mono" placeholder="Auto-generated if blank" /></div>
+        </div>
+
+        <h4 class="text-xs font-semibold uppercase tracking-wide pt-2" [style.color]="'var(--text-tertiary)'">Subscription</h4>
+        <div><label class="block text-xs font-medium mb-1" [style.color]="'var(--text-secondary)'">Plan</label>
+          <select [(ngModel)]="provisionForm.plan_id" class="input-base w-full"><option value="">No plan (free trial)</option>
+            @for (p of allPlans(); track p.id) { <option [value]="p.id">{{ p.name }} — ₦{{ p.monthly_price }}/mo</option> }
+          </select></div>
+      </div>
+      <div modal-footer><button (click)="showProvision.set(false)" class="btn-secondary">Cancel</button>
+        <button (click)="provisionCompany()" class="btn-primary">Provision Company</button></div>
+    </g51-modal>
+
     <!-- Tenant Detail Modal -->
     <g51-modal [open]="showDetail()" [title]="selectedTenant()?.company_name || 'Company Detail'" maxWidth="600px" (closed)="showDetail.set(false)">
       @if (selectedTenant(); as t) {
@@ -129,15 +166,17 @@ import { exportToCsv } from '@core/utils/csv-export';
 })
 export class TenantsComponent implements OnInit {
   private api = inject(ApiService); private toast = inject(ToastService); private confirmSvc = inject(ConfirmService);
-  readonly BuildingIcon = Building2; readonly SearchIcon = Search; readonly EyeIcon = Eye;
+  readonly BuildingIcon = Building2; readonly SearchIcon = Search; readonly EyeIcon = Eye; readonly PlusIcon = Plus;
   readonly BanIcon = Ban; readonly PlayIcon = Play; readonly DownloadIcon = Download;
   readonly CreditCardIcon = CreditCard;
-  readonly loading = signal(true); readonly showDetail = signal(false); readonly showSub = signal(false);
+  readonly loading = signal(true); readonly showDetail = signal(false); readonly showSub = signal(false); readonly showProvision = signal(false);
   readonly tenants = signal<any[]>([]); readonly allPlans = signal<any[]>([]);
   readonly selectedTenant = signal<any>(null); readonly detailStats = signal<any>({ guards: 0, sites: 0, users: 0, clients: 0 });
   readonly page = signal(1); readonly totalPages = signal(1);
   search = ''; statusFilter = '';
   subForm: any = { plan_id: '', start_date: new Date().toISOString().slice(0, 10), status: 'active' };
+  provisionForm: any = { company_name: '', phone: '', state: '', city: '', admin_first_name: '', admin_last_name: '', admin_email: '', admin_password: '', plan_id: '' };
+  states = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
 
   pages() { return Array.from({ length: Math.min(this.totalPages(), 10) }, (_, i) => i + 1); }
 
@@ -182,5 +221,26 @@ export class TenantsComponent implements OnInit {
       { key: 'company_name', label: 'Company' }, { key: 'admin_email', label: 'Email' },
       { key: 'plan_name', label: 'Plan' }, { key: 'status', label: 'Status' }, { key: 'created_at', label: 'Created' },
     ]);
+  }
+
+  openProvision(): void {
+    this.provisionForm = { company_name: '', phone: '', state: '', city: '', admin_first_name: '', admin_last_name: '', admin_email: '', admin_password: '', plan_id: '' };
+    this.showProvision.set(true);
+  }
+
+  provisionCompany(): void {
+    if (!this.provisionForm.company_name || !this.provisionForm.admin_email || !this.provisionForm.admin_first_name) {
+      this.toast.warning('Company name, admin name, and email are required');
+      return;
+    }
+    this.api.post('/admin/tenants', this.provisionForm).subscribe({
+      next: (r: any) => {
+        this.showProvision.set(false);
+        const pw = r.data?.admin_password || 'Auto-generated';
+        this.toast.success(`Company provisioned! Admin password: ${pw}`);
+        this.load();
+      },
+      error: (e: any) => this.toast.error(e.error?.message || 'Failed to provision'),
+    });
   }
 }
