@@ -415,4 +415,49 @@ final class AuthController
         }
         return $request->getServerParams()['REMOTE_ADDR'] ?? '127.0.0.1';
     }
+
+    /**
+     * PUT /api/v1/auth/profile — Update current user's profile
+     */
+    public function updateProfile(Request $request, Response $response): Response
+    {
+        $userId = $request->getAttribute('user_id');
+        $user = $this->userRepo->findOrFail($userId);
+        $body = (array) $request->getParsedBody();
+
+        if (!empty($body['first_name'])) $user->setFirstName($body['first_name']);
+        if (!empty($body['last_name'])) $user->setLastName($body['last_name']);
+        if (isset($body['phone'])) $user->setPhone($body['phone']);
+
+        $this->userRepo->save($user);
+
+        return JsonResponse::success($response, ['user' => $user->toArray(), 'message' => 'Profile updated.']);
+    }
+
+    /**
+     * POST /api/v1/auth/change-password — Change current user's password
+     */
+    public function changePassword(Request $request, Response $response): Response
+    {
+        $userId = $request->getAttribute('user_id');
+        $user = $this->userRepo->findOrFail($userId);
+        $body = (array) $request->getParsedBody();
+
+        $currentPassword = $body['current_password'] ?? '';
+        $newPassword = $body['new_password'] ?? '';
+
+        if (!password_verify($currentPassword, $user->getPasswordHash())) {
+            throw ApiException::validation('Current password is incorrect.');
+        }
+
+        if (strlen($newPassword) < 10) throw ApiException::validation('Password must be at least 10 characters.');
+        if (!preg_match('/[A-Z]/', $newPassword)) throw ApiException::validation('Password must contain an uppercase letter.');
+        if (!preg_match('/[0-9]/', $newPassword)) throw ApiException::validation('Password must contain a number.');
+        if (!preg_match('/[^A-Za-z0-9]/', $newPassword)) throw ApiException::validation('Password must contain a special character.');
+
+        $user->setPasswordHash(password_hash($newPassword, PASSWORD_ARGON2ID));
+        $this->userRepo->save($user);
+
+        return JsonResponse::success($response, ['message' => 'Password changed successfully.']);
+    }
 }

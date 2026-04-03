@@ -163,6 +163,7 @@ final class FeatureService
         );
 
         $this->loadCache($tenantId);
+        $hasAnyRecords = !empty($this->enabledCache);
 
         $result = [];
         foreach ($allModules as $module) {
@@ -171,7 +172,13 @@ final class FeatureService
             }
 
             $data = $module->toArray();
-            $data['is_enabled'] = $this->enabledCache[$module->getModuleKey()] ?? false;
+            // If tenant has no feature records yet, default ALL modules to enabled
+            // If tenant has records, use the cache (explicitly disabled = false)
+            if (!$hasAnyRecords) {
+                $data['is_enabled'] = true;
+            } else {
+                $data['is_enabled'] = $this->enabledCache[$module->getModuleKey()] ?? $module->getIsCore();
+            }
             $result[] = $data;
         }
 

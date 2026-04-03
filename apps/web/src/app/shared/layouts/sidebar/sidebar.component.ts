@@ -2,7 +2,7 @@ import { Component, inject, input, output, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { LucideAngularModule, LayoutDashboard, Users, Building2, MapPin, Calendar, Clock, Navigation, FileText, AlertTriangle, Radio, Receipt, Wallet, MessageSquare, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, Search, Shield, Boxes, AppWindow, BarChart3, Bell, UserCheck, Route, Car, DoorOpen, KeyRound, Award } from 'lucide-angular';
+import { LucideAngularModule, LayoutDashboard, Users, Building2, MapPin, Calendar, Clock, Navigation, FileText, AlertTriangle, Radio, Receipt, Wallet, MessageSquare, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, Search, Shield, Boxes, AppWindow, BarChart3, Bell, UserCheck, Route, Car, DoorOpen, KeyRound, Award, ClipboardList, BookOpen, Siren, LifeBuoy, TrendingUp, CircleAlert } from 'lucide-angular';
 import { AuthStore } from '@core/services/auth.store';
 import { FeatureService } from '@core/services/feature.service';
 import { BrandingService } from '@core/services/branding.service';
@@ -182,6 +182,9 @@ export class SidebarComponent {
         { label: 'Incidents', translateKey: 'nav.incidents', icon: AlertTriangle, route: '/incidents', moduleKey: 'incident_reporting', roles: ['company_admin', 'supervisor', 'guard'] },
         { label: 'Dispatch', translateKey: 'nav.dispatch', icon: Radio, route: '/dispatch', moduleKey: 'dispatcher_console', roles: ['company_admin', 'dispatcher'] },
         { label: 'Visitors', translateKey: 'nav.visitors', icon: DoorOpen, route: '/visitors', moduleKey: 'visitor_management', roles: ['company_admin', 'supervisor', 'guard'] },
+        { label: 'Passdowns', translateKey: 'nav.passdowns', icon: BookOpen, route: '/passdowns', moduleKey: 'passdown_logs', roles: ['company_admin', 'supervisor', 'guard'] },
+        { label: 'Tasks', translateKey: 'nav.tasks', icon: ClipboardList, route: '/tasks', moduleKey: 'tasks', roles: ['company_admin', 'supervisor', 'guard'] },
+        { label: 'Panic Alerts', translateKey: 'nav.panic', icon: Siren, route: '/panic', moduleKey: 'panic_button', roles: ['company_admin', 'supervisor', 'dispatcher'] },
         { label: 'Vehicle Patrol', translateKey: 'nav.vehicle_patrol', icon: Car, route: '/vehicle-patrol', moduleKey: 'vehicle_patrol', roles: ['company_admin', 'supervisor'] },
         { label: 'Parking', translateKey: 'nav.parking', icon: Car, route: '/parking', moduleKey: 'parking', roles: ['company_admin', 'supervisor', 'guard'] },
       ],
@@ -202,10 +205,14 @@ export class SidebarComponent {
     {
       label: 'Administration', translateKey: 'nav_sections.admin',
       items: [
+        { label: 'Analytics', translateKey: 'nav.analytics', icon: TrendingUp, route: '/analytics', roles: ['company_admin'] },
         { label: 'Team Management', translateKey: 'nav.users', icon: UserCheck, route: '/users', roles: ['company_admin'] },
         { label: 'Licenses', translateKey: 'nav.licenses', icon: Award, route: '/licenses', roles: ['company_admin', 'supervisor'] },
+        { label: 'Notifications', translateKey: 'nav.notifications', icon: Bell, route: '/notifications' },
         { label: 'Security', translateKey: 'nav.security', icon: KeyRound, route: '/security', roles: ['company_admin'] },
         { label: 'Settings', translateKey: 'nav.settings', icon: Settings, route: '/settings', roles: ['company_admin'] },
+        { label: 'Support', translateKey: 'nav.support', icon: LifeBuoy, route: '/support' },
+        { label: 'Help Center', translateKey: 'nav.help', icon: HelpCircle, route: '/help' },
       ],
     },
   ];
@@ -216,8 +223,7 @@ export class SidebarComponent {
       items: [
         { label: 'Platform Dashboard', translateKey: 'nav.dashboard', icon: LayoutDashboard, route: '/admin/dashboard' },
         { label: 'Companies', translateKey: 'nav.companies', icon: Building2, route: '/admin/tenants' },
-        { label: 'Subscriptions', translateKey: 'nav.subscriptions', icon: Receipt, route: '/admin/subscriptions' },
-        { label: 'Plan Management', translateKey: 'nav.plans', icon: Boxes, route: '/admin/plans' },
+        { label: 'Subscriptions & Plans', translateKey: 'nav.subscriptions', icon: Receipt, route: '/admin/subscriptions' },
         { label: 'Feature Flags', translateKey: 'nav.features', icon: AppWindow, route: '/admin/features' },
         { label: 'Support Tickets', translateKey: 'nav.support', icon: Bell, route: '/admin/support' },
         { label: 'App Distribution', translateKey: 'nav.apps', icon: AppWindow, route: '/admin/apps' },
@@ -232,20 +238,26 @@ export class SidebarComponent {
       return this.superAdminSections;
     }
 
+    const role = this.auth.userRole() ?? '';
+
     return this.allSections
       .map(section => ({
         ...section,
         items: section.items.filter(item => {
-          if (item.roles && !item.roles.includes(this.auth.userRole() ?? '')) return false;
-          // Only hide if feature service has loaded AND module is explicitly disabled
-          if (item.moduleKey && this.features.loaded() && !this.features.isEnabled(item.moduleKey)) {
-            // Still show core modules even if not in tenant_feature_modules
+          // Role check
+          if (item.roles && !item.roles.includes(role)) return false;
+          // Module check: only hide if explicitly disabled in tenant_feature_modules
+          // If features haven't loaded yet, or module isn't tracked, SHOW the item
+          if (item.moduleKey && this.features.loaded()) {
             const mod = this.features.modules().find(m => m.module_key === item.moduleKey);
-            if (mod && !mod.is_enabled && !mod.is_core) return false;
+            if (mod && mod.is_enabled === false) return false; // Explicitly disabled
           }
           return true;
         }),
       }))
       .filter(section => section.items.length > 0);
   });
+
+  // Add missing modules: Analytics, Passdowns, Tasks, Notifications, Billing, Support, Help
+  private readonly extraSections: NavSection[] = [];
 }

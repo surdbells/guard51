@@ -4,7 +4,6 @@ export const SUPER_ADMIN_ROUTES: Routes = [
   { path: 'dashboard', loadComponent: () => import('./dashboard/sa-dashboard.component').then(m => m.SaDashboardComponent) },
   { path: 'tenants', loadComponent: () => import('./tenants/tenants.component').then(m => m.TenantsComponent) },
   { path: 'subscriptions', loadComponent: () => import('./subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent) },
-  { path: 'plans', loadComponent: () => import('./plans/plans.component').then(m => m.PlansComponent) },
   { path: 'features', loadComponent: () => import('./features/features.component').then(m => m.FeaturesComponent) },
   { path: 'support', loadComponent: () => import('./support/sa-support.component').then(m => m.SaSupportComponent) },
   { path: 'apps', loadComponent: () => import('./apps/apps.component').then(m => m.AppsComponent) },

@@ -178,6 +178,11 @@ export const routes: Routes = [
         loadChildren: () => import('./features/super-admin/super-admin.routes').then(m => m.SUPER_ADMIN_ROUTES),
       },
 
+      {
+        path: 'profile',
+        loadChildren: () => import('./features/profile/profile.routes').then(m => m.PROFILE_ROUTES),
+      },
+
       // Support & Help
       {
         path: 'support',

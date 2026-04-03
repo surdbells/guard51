@@ -212,4 +212,40 @@ final class TenantController
             'open_tickets' => $openTickets,
         ]);
     }
+
+    /**
+     * POST /api/v1/admin/tenants/{id}/subscription — Update tenant subscription (super admin)
+     */
+    public function updateSubscription(Request $request, Response $response): Response
+    {
+        $tenant = $this->tenantRepo->findOrFail($request->getAttribute('id'));
+        $body = (array) $request->getParsedBody();
+        $planId = $body['plan_id'] ?? null;
+        $status = $body['status'] ?? 'active';
+
+        // Find or create subscription
+        $sub = $this->subscriptionRepo->findActiveByTenant($tenant->getId());
+        if ($sub) {
+            if ($planId) $sub->setPlanId($planId);
+            $sub->setStatus($status);
+            $this->em->persist($sub);
+            $this->em->flush();
+        } else if ($planId) {
+            // Create new subscription via raw SQL for simplicity
+            $conn = $this->em->getConnection();
+            try {
+                $conn->executeStatement(
+                    "INSERT INTO subscriptions (id, tenant_id, plan_id, status, created_at) VALUES (gen_random_uuid()::text, ?, ?, ?, NOW())",
+                    [$tenant->getId(), $planId, $status]
+                );
+            } catch (\Throwable $e) {
+                throw ApiException::internal('Failed to create subscription: ' . $e->getMessage());
+            }
+        }
+
+        return JsonResponse::success($response, [
+            'message' => 'Subscription updated.',
+            'tenant_id' => $tenant->getId(),
+        ]);
+    }
 }

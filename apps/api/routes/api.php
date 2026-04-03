@@ -91,6 +91,8 @@ return function (App $app): void {
         $group->group('/auth', function (RouteCollectorProxy $auth): void {
             $auth->get('/me', [AuthController::class, 'me']);
             $auth->post('/logout', [AuthController::class, 'logout']);
+            $auth->put('/profile', [AuthController::class, 'updateProfile']);
+            $auth->post('/change-password', [AuthController::class, 'changePassword']);
         })
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
@@ -196,6 +198,8 @@ return function (App $app): void {
             $tenants->get('/{id}', [TenantController::class, 'show']);
             $tenants->post('/{id}/suspend', [TenantController::class, 'suspend']);
             $tenants->post('/{id}/reactivate', [TenantController::class, 'reactivate']);
+            $tenants->post('/{id}/activate', [TenantController::class, 'reactivate']);
+            $tenants->post('/{id}/subscription', [TenantController::class, 'updateSubscription']);
             $tenants->post('/{id}/impersonate', [TenantController::class, 'impersonate']);
         })
             ->add(new RoleMiddleware(UserRole::SUPER_ADMIN))

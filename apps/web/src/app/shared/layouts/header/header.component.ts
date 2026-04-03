@@ -120,13 +120,13 @@ import { BrandingService } from '@core/services/branding.service';
               [style.borderColor]="'var(--border-default)'"
               style="box-shadow: var(--shadow-dropdown)"
             >
-              <a class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--surface-hover)] cursor-pointer"
+              <a (click)="navigateTo('/profile'); userMenuOpen = false" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--surface-hover)] cursor-pointer"
                 [style.color]="'var(--text-primary)'"
               >
                 <lucide-icon [img]="UserIcon" [size]="15" />
                 Profile
               </a>
-              <a routerLink="/settings" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--surface-hover)] cursor-pointer"
+              <a (click)="navigateTo('/settings'); userMenuOpen = false" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--surface-hover)] cursor-pointer"
                 [style.color]="'var(--text-primary)'"
               >
                 <lucide-icon [img]="SettingsIcon" [size]="15" />
