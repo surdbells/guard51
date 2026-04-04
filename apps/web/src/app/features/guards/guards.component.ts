@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { LucideAngularModule, Shield, Plus, Search, Trash2, UserCheck, UserX, Eye } from 'lucide-angular';
+import { LucideAngularModule, Shield, Plus, Search, Trash2, UserCheck, UserX, Eye, MoreVertical, Edit } from 'lucide-angular';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
@@ -40,24 +40,49 @@ import { ConfirmService } from '@core/services/confirm.service';
       <div class="space-y-2">
         @for (g of guards(); track g.id) {
           <div class="card p-4 card-hover">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white" [style.background]="'var(--color-brand-500)'">{{ g.first_name?.charAt(0) }}{{ g.last_name?.charAt(0) }}</div>
-                <div>
-                  <a [routerLink]="[g.id]" class="text-sm font-semibold hover:underline" [style.color]="'var(--text-primary)'">{{ g.first_name }} {{ g.last_name }}</a>
-                  <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ g.employee_number }} · {{ g.phone || 'No phone' }}</p>
+            <div class="flex items-start justify-between gap-2">
+              <a [routerLink]="[g.id]" class="flex items-center gap-3 flex-1 min-w-0">
+                <div class="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" [style.background]="'var(--color-brand-500)'">{{ g.first_name?.charAt(0) }}{{ g.last_name?.charAt(0) }}</div>
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold truncate" [style.color]="'var(--text-primary)'">{{ g.first_name }} {{ g.last_name }}</p>
+                  <p class="text-xs truncate" [style.color]="'var(--text-tertiary)'">{{ g.employee_number }} · {{ g.phone || 'No phone' }}</p>
                 </div>
-              </div>
-              <div class="flex items-center gap-2">
+              </a>
+              <div class="flex items-center gap-1.5 shrink-0">
                 <span class="badge text-[10px]" [ngClass]="g.status === 'active' ? 'bg-emerald-50 text-emerald-600' : g.status === 'suspended' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'">{{ g.status }}</span>
-                <a [routerLink]="[g.id]" class="btn-secondary text-xs py-1 px-2"><lucide-icon [img]="EyeIcon" [size]="12" /></a>
-                <a [routerLink]="['edit', g.id]" class="btn-secondary text-xs py-1 px-2">Edit</a>
-                @if (g.status === 'active') {
-                  <button (click)="suspend(g)" class="btn-secondary text-xs py-1 px-2 text-amber-600"><lucide-icon [img]="UserXIcon" [size]="12" /></button>
-                } @else if (g.status === 'suspended' || g.status === 'inactive') {
-                  <button (click)="activate(g)" class="btn-secondary text-xs py-1 px-2 text-emerald-600"><lucide-icon [img]="UserCheckIcon" [size]="12" /></button>
+                <!-- Desktop actions -->
+                @if (auth.isAdmin()) {
+                  <div class="hidden sm:flex items-center gap-1">
+                    <a [routerLink]="[g.id]" class="btn-secondary text-xs py-1 px-2"><lucide-icon [img]="EyeIcon" [size]="12" /></a>
+                    <a [routerLink]="['edit', g.id]" class="btn-secondary text-xs py-1 px-2">Edit</a>
+                    @if (g.status === 'active') {
+                      <button (click)="suspend(g)" class="btn-secondary text-xs py-1 px-2 text-amber-600"><lucide-icon [img]="UserXIcon" [size]="12" /></button>
+                    } @else if (g.status === 'suspended' || g.status === 'inactive') {
+                      <button (click)="activate(g)" class="btn-secondary text-xs py-1 px-2 text-emerald-600"><lucide-icon [img]="UserCheckIcon" [size]="12" /></button>
+                    }
+                    <button (click)="confirmDelete(g)" class="btn-secondary text-xs py-1 px-2 text-red-500"><lucide-icon [img]="TrashIcon" [size]="12" /></button>
+                  </div>
                 }
-                <button (click)="confirmDelete(g)" class="btn-secondary text-xs py-1 px-2 text-red-500"><lucide-icon [img]="TrashIcon" [size]="12" /></button>
+                <!-- Mobile action menu -->
+                @if (auth.isAdmin()) {
+                  <div class="relative sm:hidden">
+                    <button (click)="toggleMenu(g.id)" class="p-1.5 rounded-lg hover:bg-[var(--surface-muted)]"><lucide-icon [img]="MoreIcon" [size]="16" [style.color]="'var(--text-tertiary)'" /></button>
+                    @if (openMenuId() === g.id) {
+                      <div class="absolute right-0 top-full mt-1 w-36 rounded-xl border py-1 z-20 animate-scale-in"
+                        [style.background]="'var(--surface-card)'" [style.borderColor]="'var(--border-default)'" style="box-shadow:var(--shadow-lg)">
+                        <a [routerLink]="[g.id]" class="flex items-center gap-2 px-3 py-2 text-xs hover:bg-[var(--surface-hover)]" [style.color]="'var(--text-primary)'"><lucide-icon [img]="EyeIcon" [size]="13" /> View</a>
+                        <a [routerLink]="['edit', g.id]" class="flex items-center gap-2 px-3 py-2 text-xs hover:bg-[var(--surface-hover)]" [style.color]="'var(--text-primary)'"><lucide-icon [img]="EditIcon" [size]="13" /> Edit</a>
+                        @if (g.status === 'active') {
+                          <button (click)="suspend(g); openMenuId.set(null)" class="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-[var(--surface-hover)] text-amber-600"><lucide-icon [img]="UserXIcon" [size]="13" /> Suspend</button>
+                        } @else {
+                          <button (click)="activate(g); openMenuId.set(null)" class="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-[var(--surface-hover)] text-emerald-600"><lucide-icon [img]="UserCheckIcon" [size]="13" /> Activate</button>
+                        }
+                        <div class="my-1 h-px" [style.background]="'var(--border-default)'"></div>
+                        <button (click)="confirmDelete(g); openMenuId.set(null)" class="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-red-50 text-red-500"><lucide-icon [img]="TrashIcon" [size]="13" /> Delete</button>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </div>
           </div>
@@ -79,6 +104,10 @@ export class GuardsComponent implements OnInit {
   private toast = inject(ToastService);
   private confirmSvc = inject(ConfirmService);
   readonly ShieldIcon = Shield; readonly PlusIcon = Plus; readonly SearchIcon = Search;
+  readonly MoreIcon = MoreVertical; readonly EditIcon = Edit;
+  readonly openMenuId = signal<string | null>(null);
+
+  toggleMenu(id: string): void { this.openMenuId.update(v => v === id ? null : id); }
   readonly TrashIcon = Trash2; readonly UserCheckIcon = UserCheck; readonly UserXIcon = UserX; readonly EyeIcon = Eye;
 
   readonly guards = signal<any[]>([]);

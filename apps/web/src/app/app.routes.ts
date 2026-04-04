@@ -112,6 +112,11 @@ export const routes: Routes = [
         canActivate: [roleGuard], data: { roles: ['client'] },
       },
       {
+        path: 'client-app',
+        loadComponent: () => import('./features/client-mobile/client-mobile.component').then(m => m.ClientMobileComponent),
+        canActivate: [roleGuard], data: { roles: ['client'] },
+      },
+      {
         path: 'chat',
         loadChildren: () => import('./features/chat/chat.routes').then(m => m.CHAT_ROUTES),
       },

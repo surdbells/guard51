@@ -205,4 +205,39 @@ final class ClientPortalController
         $this->clientUserRepo->remove($emp);
         return JsonResponse::success($response, ['message' => 'Employee removed.']);
     }
+
+    /** GET /api/v1/client-portal/deliveries — List scheduled deliveries */
+    public function listDeliveries(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+        $conn = $this->em->getConnection();
+        $deliveries = [];
+        try {
+            $deliveries = $conn->fetchAllAssociative(
+                "SELECT v.id, v.visitor_name as carrier_name, v.visitor_company as description, v.scheduled_date, s.name as site_name, v.status, v.created_at FROM visitors v LEFT JOIN sites s ON v.site_id = s.id WHERE v.purpose = 'delivery' AND v.tenant_id = ? ORDER BY v.scheduled_date DESC LIMIT 50",
+                [$cu->getTenantId()]
+            );
+        } catch (\Throwable) {}
+        return JsonResponse::success($response, ['deliveries' => $deliveries]);
+    }
+
+    /** POST /api/v1/client-portal/deliveries — Schedule a delivery */
+    public function scheduleDelivery(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+        $body = (array) $request->getParsedBody();
+        $conn = $this->em->getConnection();
+        $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        try {
+            $conn->executeStatement(
+                "INSERT INTO visitors (id, tenant_id, visitor_name, visitor_company, purpose, scheduled_date, status, created_at) VALUES (?, ?, ?, ?, 'delivery', ?, 'pending', NOW())",
+                [$id, $cu->getTenantId(), $body['carrier_name'] ?? '', $body['description'] ?? '', $body['scheduled_date'] ?? date('Y-m-d')]
+            );
+        } catch (\Throwable $e) {
+            return JsonResponse::error($response, 'Failed to schedule delivery: ' . $e->getMessage(), 500);
+        }
+        return JsonResponse::success($response, ['id' => $id, 'message' => 'Delivery scheduled.'], 201);
+    }
 }

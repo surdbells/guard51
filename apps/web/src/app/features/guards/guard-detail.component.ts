@@ -25,9 +25,7 @@ import { ToastService } from '@core/services/toast.service';
     <!-- Tabs -->
     <div class="tab-pills">
       @for (tab of tabs; track tab) {
-        <button (click)="activeTab.set(tab)" class="px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px"
-          [style.color]="activeTab() === tab ? 'var(--color-brand-500)' : 'var(--text-tertiary)'"
-          [style.borderColor]="activeTab() === tab ? 'var(--color-brand-500)' : 'transparent'">{{ tab }}</button>
+        <button (click)="activeTab.set(tab)" class="tab-pill" [ngClass]="activeTab() === tab ? 'active' : ''">{{ tab }}</button>
       }
     </div>
 
