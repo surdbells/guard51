@@ -739,7 +739,7 @@ $containerBuilder->addDefinitions([
         );
     },
 
-    InvoiceController::class => fn(ContainerInterface $c) => new InvoiceController($c->get(InvoiceService::class)),
+    InvoiceController::class => fn(ContainerInterface $c) => new InvoiceController($c->get(InvoiceService::class), $c->get(\Guard51\Service\PdfService::class)),
     PayrollController::class => fn(ContainerInterface $c) => new PayrollController($c->get(PayrollService::class)),
 
     // Phase 6: Client Portal, Chat, Notifications
@@ -803,7 +803,7 @@ $containerBuilder->addDefinitions([
     AnalyticsController::class => fn(ContainerInterface $c) => new AnalyticsController($c->get(AnalyticsService::class)),
 
     PermissionRepository::class => fn(ContainerInterface $c) => new PermissionRepository($c->get(EntityManagerInterface::class)),
-    UserManagementService::class => fn(ContainerInterface $c) => new UserManagementService($c->get(UserRepository::class), $c->get(PermissionRepository::class), $c->get(LoggerInterface::class)),
+    UserManagementService::class => fn(ContainerInterface $c) => new UserManagementService($c->get(UserRepository::class), $c->get(PermissionRepository::class), $c->get(EntityManagerInterface::class), $c->get(LoggerInterface::class)),
     UserManagementController::class => fn(ContainerInterface $c) => new UserManagementController($c->get(UserManagementService::class)),
     \Guard51\Module\Upload\FileUploadController::class => fn(ContainerInterface $c) => new \Guard51\Module\Upload\FileUploadController($c->get(FileStorageService::class)),
     \Guard51\Service\VisitorAppointmentService::class => fn(ContainerInterface $c) => new \Guard51\Service\VisitorAppointmentService($c->get(EntityManagerInterface::class), $c->get(\Guard51\Service\ZeptoMailService::class), $c->get(\Guard51\Service\TermiiService::class), $c->get(LoggerInterface::class)),

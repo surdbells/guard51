@@ -180,15 +180,19 @@ final class GuardService
 
     public function addDocument(string $guardId, array $data): GuardDocument
     {
-        if (empty($data['title']) || empty($data['file_url']) || empty($data['document_type'])) {
-            throw ApiException::validation('Document title, file URL, and type are required.');
+        $title = $data['title'] ?? $data['document_type'] ?? '';
+        $fileUrl = $data['file_url'] ?? $data['file_path'] ?? '';
+        $docType = $data['document_type'] ?? 'other';
+
+        if (empty($title) || empty($fileUrl) || empty($docType)) {
+            throw ApiException::validation('Document type and file are required.');
         }
 
         $doc = new GuardDocument();
         $doc->setGuardId($guardId)
-            ->setTitle($data['title'])
-            ->setFileUrl($data['file_url'])
-            ->setDocumentType(DocumentType::from($data['document_type']));
+            ->setTitle($title)
+            ->setFileUrl($fileUrl)
+            ->setDocumentType(DocumentType::from($docType));
 
         if (isset($data['issue_date'])) $doc->setIssueDate(new \DateTimeImmutable($data['issue_date']));
         if (isset($data['expiry_date'])) $doc->setExpiryDate(new \DateTimeImmutable($data['expiry_date']));

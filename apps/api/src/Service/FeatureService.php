@@ -177,7 +177,7 @@ final class FeatureService
             if (!$hasAnyRecords) {
                 $data['is_enabled'] = true;
             } else {
-                $data['is_enabled'] = $this->enabledCache[$module->getModuleKey()] ?? $module->getIsCore();
+                $data['is_enabled'] = $this->enabledCache[$module->getModuleKey()] ?? $module->isCore();
             }
             $result[] = $data;
         }

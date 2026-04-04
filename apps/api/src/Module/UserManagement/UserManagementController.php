@@ -55,4 +55,44 @@ final class UserManagementController
     {
         return JsonResponse::success($response, ['modules' => $this->userMgmt->getAvailableModules()]);
     }
+
+    /** GET /users/roles — List custom roles */
+    public function listRoles(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $roles = $this->userMgmt->listRoles($tenantId);
+        return JsonResponse::success($response, ['roles' => $roles]);
+    }
+
+    /** POST /users/roles — Create custom role */
+    public function createRole(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $body = (array) $request->getParsedBody();
+        $role = $this->userMgmt->createRole($tenantId, $body);
+        return JsonResponse::success($response, $role, 201);
+    }
+
+    /** PUT /users/roles/{id} — Update custom role */
+    public function updateRole(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $role = $this->userMgmt->updateRole($request->getAttribute('id'), $body);
+        return JsonResponse::success($response, $role);
+    }
+
+    /** PUT /users/roles/{id}/permissions — Update role permissions */
+    public function updateRolePermissions(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $role = $this->userMgmt->updateRolePermissions($request->getAttribute('id'), $body['permissions'] ?? []);
+        return JsonResponse::success($response, $role);
+    }
+
+    /** DELETE /users/roles/{id} — Delete custom role */
+    public function deleteRole(Request $request, Response $response): Response
+    {
+        $this->userMgmt->deleteRole($request->getAttribute('id'));
+        return JsonResponse::success($response, ['deleted' => true]);
+    }
 }

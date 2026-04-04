@@ -396,6 +396,7 @@ return function (App $app): void {
 
         // ── Passdown Logs ────────────────────────────
         $group->group('/passdowns', function (RouteCollectorProxy $pd): void {
+            $pd->get('', [PassdownController::class, 'list']);
             $pd->post('', [PassdownController::class, 'create']);
             $pd->get('/site/{siteId}', [PassdownController::class, 'listBySite']);
             $pd->get('/unacknowledged', [PassdownController::class, 'unacknowledged']);
@@ -636,6 +637,12 @@ return function (App $app): void {
         $group->group('/users', function (RouteCollectorProxy $um): void {
 
             $um->get(''  , [UserManagementController::class, 'list']);
+
+            $um->get('/roles', [UserManagementController::class, 'listRoles']);
+            $um->post('/roles', [UserManagementController::class, 'createRole']);
+            $um->put('/roles/{id}', [UserManagementController::class, 'updateRole']);
+            $um->put('/roles/{id}/permissions', [UserManagementController::class, 'updateRolePermissions']);
+            $um->delete('/roles/{id}', [UserManagementController::class, 'deleteRole']);
 
             $um->put('/{id}/role', [UserManagementController::class, 'changeRole']);
 

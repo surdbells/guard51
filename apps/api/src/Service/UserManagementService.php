@@ -14,6 +14,7 @@ final class UserManagementService
     public function __construct(
         private readonly UserRepository $userRepo,
         private readonly PermissionRepository $permRepo,
+        private readonly \Doctrine\ORM\EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -68,5 +69,50 @@ final class UserManagementService
             'invoices', 'payroll', 'chat', 'notifications', 'vehicle_patrol',
             'visitors', 'parking', 'analytics', 'licenses', 'security',
         ];
+    }
+
+    public function listRoles(string $tenantId): array
+    {
+        $conn = $this->em->getConnection();
+        try {
+            $rows = $conn->fetchAllAssociative("SELECT * FROM custom_roles WHERE tenant_id = ? ORDER BY name", [$tenantId]);
+            return array_map(fn($r) => [...$r, 'permissions' => json_decode($r['permissions'] ?? '[]', true)], $rows);
+        } catch (\Throwable) { return []; }
+    }
+
+    public function createRole(string $tenantId, array $data): array
+    {
+        $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
+        $conn = $this->em->getConnection();
+        $perms = json_encode($data['permissions'] ?? []);
+        $conn->executeStatement(
+            "INSERT INTO custom_roles (id, tenant_id, name, description, color, permissions, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())",
+            [$id, $tenantId, $data['name'] ?? '', $data['description'] ?? '', $data['color'] ?? '#3B82F6', $perms]
+        );
+        return ['id' => $id, 'name' => $data['name'] ?? '', 'description' => $data['description'] ?? '', 'color' => $data['color'] ?? '#3B82F6', 'permissions' => $data['permissions'] ?? []];
+    }
+
+    public function updateRole(string $id, array $data): array
+    {
+        $conn = $this->em->getConnection();
+        $sets = []; $params = [];
+        if (isset($data['name'])) { $sets[] = 'name = ?'; $params[] = $data['name']; }
+        if (isset($data['description'])) { $sets[] = 'description = ?'; $params[] = $data['description']; }
+        if (isset($data['color'])) { $sets[] = 'color = ?'; $params[] = $data['color']; }
+        if (isset($data['permissions'])) { $sets[] = 'permissions = ?'; $params[] = json_encode($data['permissions']); }
+        if ($sets) { $params[] = $id; $conn->executeStatement("UPDATE custom_roles SET " . implode(', ', $sets) . " WHERE id = ?", $params); }
+        return $data;
+    }
+
+    public function updateRolePermissions(string $id, array $permissions): array
+    {
+        $conn = $this->em->getConnection();
+        $conn->executeStatement("UPDATE custom_roles SET permissions = ? WHERE id = ?", [json_encode($permissions), $id]);
+        return ['id' => $id, 'permissions' => $permissions];
+    }
+
+    public function deleteRole(string $id): void
+    {
+        $this->em->getConnection()->executeStatement("DELETE FROM custom_roles WHERE id = ?", [$id]);
     }
 }

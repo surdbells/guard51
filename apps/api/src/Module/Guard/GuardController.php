@@ -135,6 +135,24 @@ final class GuardController
     public function addDocument(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
+        $uploadedFiles = $request->getUploadedFiles();
+
+        // Handle file upload if present
+        if (isset($uploadedFiles['file']) && $uploadedFiles['file']->getError() === UPLOAD_ERR_OK) {
+            $file = $uploadedFiles['file'];
+            $ext = pathinfo($file->getClientFilename(), PATHINFO_EXTENSION) ?: 'pdf';
+            $filename = 'doc_' . bin2hex(random_bytes(8)) . '.' . $ext;
+            $uploadDir = dirname(__DIR__, 3) . '/public/uploads/documents';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            $file->moveTo($uploadDir . '/' . $filename);
+            $body['file_url'] = '/uploads/documents/' . $filename;
+        }
+
+        // Allow file_url from body (backward compatibility)
+        if (empty($body['file_url'])) {
+            $body['file_url'] = $body['file_path'] ?? $body['url'] ?? '';
+        }
+
         $doc = $this->guardService->addDocument($request->getAttribute('id'), $body);
         return JsonResponse::success($response, $doc->toArray(), 201);
     }

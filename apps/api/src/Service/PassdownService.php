@@ -54,4 +54,12 @@ final class PassdownService
         $this->passdownRepo->save($log);
         return $log;
     }
+
+    public function listByTenant(string $tenantId, ?string $status = null): array
+    {
+        $criteria = ['tenantId' => $tenantId];
+        if ($status === 'pending') $criteria['isAcknowledged'] = false;
+        elseif ($status === 'acknowledged') $criteria['isAcknowledged'] = true;
+        return $this->passdownRepo->findBy($criteria, ['createdAt' => 'DESC'], 100);
+    }
 }

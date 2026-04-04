@@ -37,4 +37,13 @@ final class PassdownController
         $log = $this->passdownService->acknowledge($request->getAttribute('id'), $request->getAttribute('user_id'));
         return JsonResponse::success($response, $log->toArray());
     }
+
+    /** GET /api/v1/passdowns — List passdowns for tenant */
+    public function list(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $status = $request->getQueryParams()['status'] ?? null;
+        $logs = $this->passdownService->listByTenant($tenantId, $status);
+        return JsonResponse::success($response, ['passdowns' => array_map(fn($l) => $l->toArray(), $logs)]);
+    }
 }
