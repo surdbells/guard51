@@ -23,7 +23,7 @@ import { ToastService } from '@core/services/toast.service';
     </div>
 
     <!-- Tabs -->
-    <div class="flex gap-0 border-b mb-5" [style.borderColor]="'var(--border-default)'">
+    <div class="tab-pills">
       @for (tab of tabs; track tab) {
         <button (click)="activeTab.set(tab)" class="px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px"
           [style.color]="activeTab() === tab ? 'var(--color-brand-500)' : 'var(--text-tertiary)'"

@@ -29,11 +29,9 @@ import { exportToCsv } from '@core/utils/csv-export';
     </div>
 
     <!-- Tabs -->
-    <div class="flex gap-1 mb-4 overflow-x-auto">
+    <div class="tab-pills overflow-x-auto">
       @for (tab of tabs; track tab) {
-        <button (click)="activeTab.set(tab); loadTab()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
-          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
+        <button (click)="activeTab.set(tab); loadTab()" class="tab-pill" [ngClass]="activeTab() === tab ? 'active' : ''">{{ tab }}</button>
       }
     </div>
 

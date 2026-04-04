@@ -26,11 +26,9 @@ import { ToastService } from '@core/services/toast.service';
       <g51-stats-card label="Expired" [value]="stats().expired" [icon]="AlertTriangleIcon" />
     </div>
 
-    <div class="flex gap-1 mb-4">
+    <div class="tab-pills">
       @for (tab of ['All', 'Expiring Soon', 'Expired']; track tab) {
-        <button (click)="activeTab.set(tab); loadLicenses()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
-          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
+        <button (click)="activeTab.set(tab); loadLicenses()" class="tab-pill" [ngClass]="activeTab() === tab ? 'active' : ''">{{ tab }}</button>
       }
     </div>
     @if (loading()) { <g51-loading /> }

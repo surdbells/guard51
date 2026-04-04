@@ -26,7 +26,7 @@ import { ConfirmService } from '@core/services/confirm.service';
       <div class="card p-4 text-center"><p class="text-2xl font-bold" [style.color]="'var(--text-primary)'">{{ stats().total_downloads }}</p><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Total Downloads</p></div>
     </div>
 
-    <div class="flex gap-1 mb-4">
+    <div class="tab-pills">
       @for (tab of ['All', 'Android', 'iOS']; track tab) {
         <button (click)="platformFilter.set(tab === 'All' ? '' : tab.toLowerCase()); load()"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"

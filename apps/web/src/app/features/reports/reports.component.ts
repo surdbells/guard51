@@ -29,11 +29,10 @@ import { ToastService } from '@core/services/toast.service';
       <g51-stats-card label="Watch Photos" [value]="stats().watchPhotos" [icon]="CameraIcon" />
     </div>
 
-    <div class="flex gap-1 mb-6">
+    <div class="tab-pills">
       @for (tab of ['Activity Reports', 'Custom Reports', 'Watch Feed']; track tab) {
         <button (click)="activeTab.set(tab)" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
-          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
+          [ngClass]="activeTab() === tab ? 'active' : ''">{{ tab }}</button>
       }
     </div>
 

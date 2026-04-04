@@ -18,11 +18,9 @@ import { ToastService } from '@core/services/toast.service';
       }
     </g51-page-header>
 
-    <div class="flex gap-1 mb-4">
+    <div class="tab-pills">
       @for (tab of ['All', 'Unread']; track tab) {
-        <button (click)="activeTab.set(tab); loadNotifications()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
-          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }} {{ tab === 'Unread' && unreadCount() > 0 ? '(' + unreadCount() + ')' : '' }}</button>
+        <button (click)="activeTab.set(tab); loadNotifications()" class="tab-pill" [ngClass]="activeTab() === tab ? 'active' : ''">{{ tab }} {{ tab === 'Unread' && unreadCount() > 0 ? '(' + unreadCount() + ')' : '' }}</button>
       }
     </div>
 

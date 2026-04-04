@@ -18,7 +18,7 @@ import { ToastService } from '@core/services/toast.service';
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> New Ticket</button>
     </g51-page-header>
 
-    <div class="flex gap-1 mb-4">
+    <div class="tab-pills">
       @for (tab of ['All', 'Open', 'In Progress', 'Resolved']; track tab) {
         <button (click)="statusFilter.set(tab === 'All' ? '' : tab === 'In Progress' ? 'in_progress' : tab.toLowerCase()); load()"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"

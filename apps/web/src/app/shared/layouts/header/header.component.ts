@@ -1,4 +1,4 @@
-import { Component, inject, signal, input, HostListener, OnInit } from '@angular/core';
+import { Component, inject, signal, input, output, HostListener, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ import { BrandingService } from '@core/services/branding.service';
     >
       <!-- Left: Mobile menu + Search -->
       <div class="flex items-center gap-3">
-        <button class="lg:hidden p-2 rounded-lg hover:bg-[var(--surface-hover)] transition-colors" [style.color]="'var(--text-secondary)'" (click)="mobileMenuOpen = !mobileMenuOpen">
+        <button class="lg:hidden p-2 rounded-lg hover:bg-[var(--surface-hover)] transition-colors" [style.color]="'var(--text-secondary)'" (click)="toggleMobileMenu.emit()">
           <lucide-icon [img]="MenuIcon" [size]="20" />
         </button>
 
@@ -164,7 +164,7 @@ export class HeaderComponent implements OnInit {
   private translate = inject(TranslateService);
 
   userMenuOpen = false;
-  mobileMenuOpen = false;
+  readonly toggleMobileMenu = output<void>();
   searchQuery = '';
   readonly searchOpen = signal(false);
   readonly searchResults = signal<{ type: string; label: string; route: string }[]>([]);

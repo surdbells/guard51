@@ -30,7 +30,7 @@ import { AuthStore } from '@core/services/auth.store';
         : 'lg:ml-[var(--spacing-sidebar)]'"
     >
       <!-- Header -->
-      <g51-header />
+      <g51-header (toggleMobileMenu)="mobileSidebarOpen.set(!mobileSidebarOpen())" />
 
       <!-- Page content -->
       <main class="p-4 md:p-6 pb-24 lg:pb-6" [style.background]="'var(--surface-bg)'">

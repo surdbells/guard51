@@ -20,7 +20,7 @@ import { ToastService } from '@core/services/toast.service';
       <div class="card p-3 text-center"><p class="text-xl font-bold" [style.color]="'var(--text-primary)'">{{ resolvedCount() }}</p><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Resolved</p></div>
       <div class="card p-3 text-center"><p class="text-xl font-bold" [style.color]="'var(--text-primary)'">{{ tickets().length }}</p><p class="text-[10px]" [style.color]="'var(--text-tertiary)'">Total</p></div>
     </div>
-    <div class="flex gap-1 mb-4">
+    <div class="tab-pills">
       @for (tab of ['All', 'Open', 'In Progress', 'Resolved', 'Closed']; track tab) {
         <button (click)="filter.set(tab === 'All' ? '' : tab === 'In Progress' ? 'in_progress' : tab.toLowerCase()); load()"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"

@@ -19,11 +19,9 @@ import { ToastService } from '@core/services/toast.service';
       <button (click)="showCreate.set(true)" class="btn-primary flex items-center gap-2"><lucide-icon [img]="PlusIcon" [size]="16" /> Add Checkpoint</button>
     </g51-page-header>
 
-    <div class="flex gap-1 mb-4">
+    <div class="tab-pills">
       @for (tab of ['Checkpoints', 'Active Sessions', 'History']; track tab) {
-        <button (click)="activeTab.set(tab); loadTab()" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          [ngClass]="activeTab() === tab ? 'bg-[var(--color-brand-500)] text-white' : 'bg-[var(--surface-muted)]'"
-          [style.color]="activeTab() !== tab ? 'var(--text-secondary)' : ''">{{ tab }}</button>
+        <button (click)="activeTab.set(tab); loadTab()" class="tab-pill" [ngClass]="activeTab() === tab ? 'active' : ''">{{ tab }}</button>
       }
     </div>
     @if (loading()) { <g51-loading /> }

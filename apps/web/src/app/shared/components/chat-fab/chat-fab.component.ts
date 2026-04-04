@@ -11,7 +11,7 @@ import { AuthStore } from '@core/services/auth.store';
   imports: [NgClass, LucideAngularModule],
   template: `
     @if (auth.isAuthenticated() && !auth.isSuperAdmin()) {
-      <div class="fixed bottom-6 right-6 z-50">
+      <div class="fixed bottom-6 right-6 z-40 lg:bottom-6 max-lg:bottom-20">
         <button (click)="openChat()" class="relative h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
           [style.background]="'var(--color-brand-500)'" [style.color]="'white'">
           <lucide-icon [img]="MessageIcon" [size]="24" />
