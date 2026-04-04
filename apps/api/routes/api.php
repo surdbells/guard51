@@ -97,6 +97,14 @@ return function (App $app): void {
             ->add($container->get(TenantMiddleware::class))
             ->add($container->get(AuthMiddleware::class));
 
+        // ── GDPR / Account ──────────────────────────
+        $group->get('/account/export', [\Guard51\Module\Auth\GdprController::class, 'exportData'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+        $group->post('/account/delete', [\Guard51\Module\Auth\GdprController::class, 'deleteAccount'])
+            ->add($container->get(TenantMiddleware::class))
+            ->add($container->get(AuthMiddleware::class));
+
         // ── Subscription Plans: Public ───────────────
         $group->get('/subscriptions/plans', [PlanController::class, 'publicPlans']);
 
@@ -569,6 +577,9 @@ return function (App $app): void {
 
         // ── Client Portal ────────────────────────────
         $group->group('/client-portal', function (RouteCollectorProxy $cp): void {
+            $cp->get('/stats', [ClientPortalController::class, 'stats']);
+            $cp->get('/guard-activity', [ClientPortalController::class, 'guardActivity']);
+            $cp->get('/sites', [ClientPortalController::class, 'clientSites']);
             $cp->get('/profile', [ClientPortalController::class, 'profile']);
             $cp->get('/reports', [ClientPortalController::class, 'reports']);
             $cp->get('/invoices', [ClientPortalController::class, 'invoices']);

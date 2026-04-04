@@ -18,6 +18,9 @@ return function (App $app): void {
         logErrorDetails: true,
     );
 
+    // Security headers (HSTS, X-Frame-Options, CSP, etc.)
+    $app->add(\Guard51\Middleware\SecurityHeadersMiddleware::class);
+
     // CSRF protection (validates Origin/Referer on POST/PUT/DELETE)
     $app->add(CsrfMiddleware::class);
 

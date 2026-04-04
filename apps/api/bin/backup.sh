@@ -1,36 +1,31 @@
 #!/bin/bash
-# Guard51 PostgreSQL Daily Backup Script
-# Usage: ./backup.sh
-# Recommended crontab: 0 3 * * * /www/wwwroot/guard51/apps/api/bin/backup.sh
+# Guard51 Database Backup Script
+# Run via cron: 0 2 * * * /www/wwwroot/guard51/apps/api/bin/backup.sh
+set -e
 
 BACKUP_DIR="/var/backups/guard51"
-DB_NAME="guard51"
-DB_USER="guard51"
-DB_PORT="5433"
 RETENTION_DAYS=30
+DB_NAME="${DB_NAME:-guard51wpetd7900}"
+DB_USER="${DB_USER:-guard51wpetd7900}"
+DB_HOST="${DB_HOST:-127.0.0.1}"
+DB_PORT="${DB_PORT:-5432}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="${BACKUP_DIR}/guard51_${TIMESTAMP}.sql.gz"
 
-# Create backup directory
 mkdir -p "$BACKUP_DIR"
 
-# Dump and compress
-echo "[$(date)] Starting backup..."
-pg_dump -U "$DB_USER" -p "$DB_PORT" "$DB_NAME" | gzip > "$BACKUP_FILE"
+echo "[Backup] Starting at $(date)"
 
-if [ $? -eq 0 ]; then
-  SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
-  echo "[$(date)] Backup completed: $BACKUP_FILE ($SIZE)"
-else
-  echo "[$(date)] ERROR: Backup failed!"
-  exit 1
-fi
+# Full database dump
+PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+  --format=custom --compress=9 \
+  -f "$BACKUP_DIR/guard51_${TIMESTAMP}.dump"
 
-# Remove old backups
-echo "[$(date)] Cleaning backups older than ${RETENTION_DAYS} days..."
-find "$BACKUP_DIR" -name "guard51_*.sql.gz" -mtime +$RETENTION_DAYS -delete
+echo "[Backup] Created: guard51_${TIMESTAMP}.dump ($(du -h "$BACKUP_DIR/guard51_${TIMESTAMP}.dump" | cut -f1))"
 
-# List remaining backups
-echo "[$(date)] Current backups:"
-ls -lh "$BACKUP_DIR"/guard51_*.sql.gz 2>/dev/null | tail -5
-echo "[$(date)] Done."
+# Clean old backups
+find "$BACKUP_DIR" -name "guard51_*.dump" -mtime +$RETENTION_DAYS -delete
+echo "[Backup] Cleaned backups older than $RETENTION_DAYS days"
+
+# Count remaining
+REMAINING=$(ls "$BACKUP_DIR"/guard51_*.dump 2>/dev/null | wc -l)
+echo "[Backup] Done. $REMAINING backup(s) retained."

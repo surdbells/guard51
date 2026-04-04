@@ -15,12 +15,55 @@ final class ClientPortalController
     public function __construct(
         private readonly ClientUserRepository $clientUserRepo,
         private readonly \Guard51\Repository\UserRepository $userRepo,
+        private readonly \Doctrine\ORM\EntityManagerInterface $em,
         private readonly ReportService $reportService,
         private readonly InvoiceService $invoiceService,
         private readonly IncidentService $incidentService,
     ) {}
 
     /** GET /api/v1/client-portal/profile — Client user profile + permissions */
+    /** GET /api/v1/client-portal/stats — Client dashboard KPIs */
+    public function stats(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+        $clientId = $cu->getClientId();
+        $conn = $this->em->getConnection();
+        $guards = 0; $sites = 0; $incidents = 0; $outstanding = 0;
+        try { $guards = (int) $conn->fetchOne("SELECT COUNT(*) FROM guards g JOIN sites s ON g.site_id = s.id WHERE s.client_id = ?", [$clientId]); } catch (\Throwable) {}
+        try { $sites = (int) $conn->fetchOne("SELECT COUNT(*) FROM sites WHERE client_id = ?", [$clientId]); } catch (\Throwable) {}
+        try { $incidents = (int) $conn->fetchOne("SELECT COUNT(*) FROM incident_reports ir JOIN sites s ON ir.site_id = s.id WHERE s.client_id = ? AND ir.created_at >= NOW() - INTERVAL '30 days'", [$clientId]); } catch (\Throwable) {}
+        try { $outstanding = (float) $conn->fetchOne("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE client_id = ? AND status != 'paid'", [$clientId]); } catch (\Throwable) {}
+        return JsonResponse::success($response, ['active_guards' => $guards, 'total_sites' => $sites, 'incidents_30d' => $incidents, 'outstanding_amount' => $outstanding]);
+    }
+
+    /** GET /api/v1/client-portal/guard-activity — Recent guard activity for client's sites */
+    public function guardActivity(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+        $conn = $this->em->getConnection();
+        $activity = [];
+        try {
+            $activity = $conn->fetchAllAssociative(
+                "SELECT tc.id, u.first_name || ' ' || u.last_name as guard_name, s.name as site_name, tc.clock_in_time, tc.clock_out_time, CASE WHEN tc.clock_out_time IS NULL THEN 'clocked_in' ELSE 'completed' END as status, tc.clock_in_time as timestamp FROM time_clocks tc JOIN users u ON tc.user_id = u.id JOIN sites s ON tc.site_id = s.id WHERE s.client_id = ? ORDER BY tc.clock_in_time DESC LIMIT 50",
+                [$cu->getClientId()]
+            );
+        } catch (\Throwable) {}
+        return JsonResponse::success($response, ['items' => $activity]);
+    }
+
+    /** GET /api/v1/client-portal/sites — List sites assigned to this client */
+    public function clientSites(Request $request, Response $response): Response
+    {
+        $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));
+        if (!$cu) return JsonResponse::error($response, 'Not found', 404);
+        $conn = $this->em->getConnection();
+        $sites = [];
+        try { $sites = $conn->fetchAllAssociative("SELECT id, name, address, city, state FROM sites WHERE client_id = ?", [$cu->getClientId()]); } catch (\Throwable) {}
+        return JsonResponse::success($response, ['sites' => $sites]);
+    }
+
     public function profile(Request $request, Response $response): Response
     {
         $cu = $this->clientUserRepo->findByUserId($request->getAttribute('user_id'));

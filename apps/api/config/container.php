@@ -764,7 +764,7 @@ $containerBuilder->addDefinitions([
         );
     },
 
-    ClientPortalController::class => fn(ContainerInterface $c) => new ClientPortalController($c->get(ClientUserRepository::class), $c->get(UserRepository::class), $c->get(ReportService::class), $c->get(InvoiceService::class), $c->get(IncidentService::class)),
+    ClientPortalController::class => fn(ContainerInterface $c) => new ClientPortalController($c->get(ClientUserRepository::class), $c->get(UserRepository::class), $c->get(EntityManagerInterface::class), $c->get(ReportService::class), $c->get(InvoiceService::class), $c->get(IncidentService::class)),
     ChatController::class => fn(ContainerInterface $c) => new ChatController($c->get(ChatService::class)),
     NotificationController::class => fn(ContainerInterface $c) => new NotificationController($c->get(NotificationService::class)),
 
@@ -818,6 +818,7 @@ $containerBuilder->addDefinitions([
     \Guard51\Repository\HelpArticleRepository::class => fn(ContainerInterface $c) => new \Guard51\Repository\HelpArticleRepository($c->get(EntityManagerInterface::class)),
     \Guard51\Service\SupportTicketService::class => fn(ContainerInterface $c) => new \Guard51\Service\SupportTicketService($c->get(\Guard51\Repository\SupportTicketRepository::class)),
     \Guard51\Module\Support\SupportController::class => fn(ContainerInterface $c) => new \Guard51\Module\Support\SupportController($c->get(\Guard51\Service\SupportTicketService::class), $c->get(\Guard51\Repository\HelpArticleRepository::class)),
+    \Guard51\Module\Auth\GdprController::class => fn(ContainerInterface $c) => new \Guard51\Module\Auth\GdprController($c->get(UserRepository::class), $c->get(EntityManagerInterface::class)),
 ]);
 
 return $containerBuilder->build();
