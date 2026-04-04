@@ -10,7 +10,7 @@ class InvoiceRepository extends BaseRepository
 
     public function findByTenant(string $tenantId, ?string $status = null, ?string $clientId = null): array
     {
-        $qb = $this->createQueryBuilder('i')->where('i.tenantId = :tid')->setParameter('tid', $tenantId)
+        return $this->createQueryBuilder('i')->where('i.tenantId = :tid')->setParameter('tid', $tenantId)
             ->orderBy('i.dueDate', 'ASC')->getQuery()->getResult();
     }
 
