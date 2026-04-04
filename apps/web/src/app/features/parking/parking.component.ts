@@ -7,6 +7,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
 
@@ -120,7 +121,8 @@ import { exportToCsv } from '@core/utils/csv-export';
   `,
 })
 export class ParkingComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly CarIcon = Car; readonly PlusIcon = Plus; readonly SearchIcon = Search; readonly LogOutIcon = LogOut;
   readonly ParkingIcon = ParkingCircle; readonly AlertTriangleIcon = AlertTriangle;
   readonly activeTab = signal('Parked Vehicles'); readonly loading = signal(true);

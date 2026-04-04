@@ -7,6 +7,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 import { ConfirmService } from '@core/services/confirm.service';
 
@@ -163,7 +164,8 @@ import { ConfirmService } from '@core/services/confirm.service';
   `,
 })
 export class UsersComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService); private confirmSvc = inject(ConfirmService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService); private confirmSvc = inject(ConfirmService);
   readonly UsersIcon = Users; readonly PlusIcon = Plus; readonly ShieldIcon = Shield; readonly KeyIcon = Key;
   readonly TrashIcon = Trash2; readonly MailIcon = Mail; readonly EditIcon = Edit; readonly SaveIcon = Save;
   readonly activeTab = signal('Active Users'); readonly loading = signal(true);

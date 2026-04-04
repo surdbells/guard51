@@ -9,6 +9,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -70,7 +71,8 @@ import { ToastService } from '@core/services/toast.service';
   `,
 })
 export class LicensesComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly FileCheckIcon = FileCheck; readonly AlertTriangleIcon = AlertTriangle; readonly ClockIcon = Clock; readonly PlusIcon = Plus;
   readonly activeTab = signal('All'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly licenses = signal<any[]>([]); readonly guards = signal<any[]>([]);

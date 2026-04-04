@@ -8,6 +8,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -90,7 +91,8 @@ import { ToastService } from '@core/services/toast.service';
   `,
 })
 export class ToursComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly RouteIcon = Route; readonly PlusIcon = Plus; readonly QrCodeIcon = QrCode; readonly ClockIcon = Clock;
   readonly activeTab = signal('Checkpoints'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly checkpoints = signal<any[]>([]); readonly activeSessions = signal<any[]>([]); readonly history = signal<any[]>([]); readonly sites = signal<any[]>([]);

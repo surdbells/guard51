@@ -12,6 +12,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/load
 import { PieChartComponent, PieChartData } from '@shared/components/charts/pie-chart.component';
 import { LineChartComponent, LineChartSeries } from '@shared/components/charts/line-chart.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -139,7 +140,8 @@ import { ToastService } from '@core/services/toast.service';
   `,
 })
 export class IncidentsComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly AlertTriangleIcon = AlertTriangle; readonly PlusIcon = Plus; readonly SearchIcon = Search;
   readonly UploadIcon = Upload; readonly XIcon = X; readonly EyeIcon = Eye; readonly FileTextIcon = FileText;
 

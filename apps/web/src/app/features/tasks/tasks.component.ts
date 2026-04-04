@@ -7,6 +7,7 @@ import { StatsCardComponent } from '@shared/components/stats-card/stats-card.com
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -99,7 +100,8 @@ import { ToastService } from '@core/services/toast.service';
   `,
 })
 export class TasksComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly ListTodoIcon = ListTodo; readonly PlusIcon = Plus; readonly AlertTriangleIcon = AlertTriangle;
   readonly CheckCircleIcon = CheckCircle; readonly ClockIcon = Clock; readonly UserIcon = User;
   readonly showCreate = signal(false);

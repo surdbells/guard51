@@ -1,0 +1,20 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo" class="page" backgroundSpanUnderStatusBar="true">
+  <ActionBar title="Emergency" class="action-bar" flat="true" />
+  <GridLayout rows="auto,*,auto" class="p-4">
+    <StackLayout row="0" class="text-center p-4">
+      <Label text="PANIC BUTTON" class="text-lg font-bold text-red-600" />
+      <Label text="Press and hold the button below to send an emergency alert" class="text-xs text-gray-500 mt-1" />
+    </StackLayout>
+
+    <StackLayout row="1" verticalAlignment="center" horizontalAlignment="center">
+      <Button text="🚨 SEND PANIC ALERT" tap="onPanicTap" longPress="onPanicLongPress"
+        class="bg-red-600 text-white text-xl font-bold p-8 rounded-full w-64 h-64" />
+      <Label text="{{ statusMessage }}" class="text-sm text-center mt-4" />
+    </StackLayout>
+
+    <StackLayout row="2" class="p-4">
+      <Label text="Your GPS location will be sent to dispatch immediately." class="text-xs text-gray-400 text-center" />
+      <Label text="Guard: {{ guardName }} | {{ currentTime }}" class="text-xs text-gray-400 text-center mt-1" />
+    </StackLayout>
+  </GridLayout>
+</Page>

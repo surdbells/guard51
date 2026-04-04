@@ -10,6 +10,7 @@ import { LineChartComponent, LineChartSeries } from '@shared/components/charts/l
 import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
 
@@ -158,7 +159,8 @@ import { exportToCsv } from '@core/utils/csv-export';
   `,
 })
 export class InvoicesComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService); private router = inject(Router);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService); private router = inject(Router);
   readonly ReceiptIcon = Receipt; readonly PlusIcon = Plus; readonly DollarSignIcon = DollarSign;
   readonly AlertTriangleIcon = AlertTriangle; readonly CheckCircleIcon = CheckCircle;
   readonly SendIcon = Send; readonly CreditCardIcon = CreditCard;

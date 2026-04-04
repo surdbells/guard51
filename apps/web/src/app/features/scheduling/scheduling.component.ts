@@ -7,6 +7,7 @@ import { PageHeaderComponent } from '@shared/components/page-header/page-header.
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
 import { StackedBarChartComponent, StackedBarSeries } from '@shared/components/charts/stacked-bar-chart.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 
 @Component({
   selector: 'g51-scheduling',
@@ -104,6 +105,7 @@ import { ApiService } from '@core/services/api.service';
 })
 export class SchedulingComponent implements OnInit {
   private api = inject(ApiService);
+  readonly auth = inject(AuthStore);
   readonly PlusIcon = Plus; readonly CalendarIcon = Calendar; readonly ClockIcon = Clock;
   readonly ChevronLeftIcon = ChevronLeft; readonly ChevronRightIcon = ChevronRight;
   readonly UsersIcon = Users; readonly AlertTriangleIcon = AlertTriangle;

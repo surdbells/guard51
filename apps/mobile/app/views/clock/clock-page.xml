@@ -1,0 +1,27 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo" class="page">
+  <ActionBar title="Clock In/Out" class="action-bar">
+    <NavigationButton text="Back" android.systemIcon="ic_menu_back" tap="goBack" />
+  </ActionBar>
+  <GridLayout rows="auto,*,auto" class="p-4">
+    <!-- Status card -->
+    <StackLayout row="0" class="card m-2 p-6 text-center">
+      <Label text="{{ currentStatus }}" class="text-2xl font-bold" />
+      <Label text="{{ statusTime }}" class="text-sm text-gray-500 mt-1" />
+      <Label text="{{ siteName }}" class="text-xs text-gray-400 mt-2" />
+    </StackLayout>
+
+    <!-- GPS indicator -->
+    <StackLayout row="1" class="m-4 text-center" verticalAlignment="center">
+      <Label text="{{ gpsStatus }}" class="text-sm" />
+      <Label text="Lat: {{ latitude }} | Lng: {{ longitude }}" class="text-xs text-gray-400 mt-1" />
+      <Label text="{{ gpsAccuracy }}m accuracy" class="text-xs text-gray-400" />
+    </StackLayout>
+
+    <!-- Clock button -->
+    <StackLayout row="2" class="m-4">
+      <Button text="{{ isClockedIn ? 'CLOCK OUT' : 'CLOCK IN' }}" tap="onClockTap"
+        class="{{ isClockedIn ? 'btn-danger' : 'btn-primary' }} text-xl p-6 rounded-2xl" />
+      <Label text="Your location will be recorded" class="text-xs text-gray-400 text-center mt-2" />
+    </StackLayout>
+  </GridLayout>
+</Page>

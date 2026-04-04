@@ -8,6 +8,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -105,7 +106,8 @@ import { ToastService } from '@core/services/toast.service';
   `,
 })
 export class VehiclePatrolComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly CarIcon = Car; readonly PlusIcon = Plus; readonly RouteIcon = Route; readonly EyeIcon = Eye; readonly PlayIcon = Play;
   readonly activeTab = signal('Routes'); readonly loading = signal(true); readonly showCreate = signal(false);
   readonly routes = signal<any[]>([]); readonly vehicles = signal<any[]>([]); readonly hits = signal<any[]>([]); readonly sites = signal<any[]>([]);

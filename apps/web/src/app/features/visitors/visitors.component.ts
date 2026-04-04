@@ -8,6 +8,7 @@ import { ModalComponent } from '@shared/components/modal/modal.component';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -215,7 +216,8 @@ import { ToastService } from '@core/services/toast.service';
   `,
 })
 export class VisitorsComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   readonly UsersIcon = Users; readonly PlusIcon = Plus; readonly SearchIcon = Search;
   readonly LogOutIcon = LogOut; readonly QrCodeIcon = QrCode; readonly SendIcon = Send;
   readonly CalendarIcon = Calendar; readonly MailIcon = Mail; readonly PhoneIcon = Phone; readonly MessageSquareIcon = MessageSquare;
