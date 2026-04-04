@@ -1,0 +1,15 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo" actionBarHidden="true">
+  <GridLayout rows="*,auto">
+    <!-- Content frame -->
+    <Frame row="0" id="contentFrame" defaultPage="app/views/dashboard/dashboard-page" />
+
+    <!-- Bottom tab bar -->
+    <GridLayout row="1" columns="*,*,*,*,*" rows="auto" class="bottom-nav p-1 border-t" backgroundColor="#FFFFFF" borderColor="#E5E7EB">
+      <StackLayout col="0" tap="navDashboard" class="p-2 text-center"><Label text="🏠" class="text-lg" /><Label text="Home" class="text-xs" /></StackLayout>
+      <StackLayout col="1" tap="navClock" class="p-2 text-center"><Label text="⏰" class="text-lg" /><Label text="Clock" class="text-xs" /></StackLayout>
+      <StackLayout col="2" tap="navPanic" class="p-2 text-center"><Label text="🚨" class="text-lg" /><Label text="Panic" class="text-xs" /></StackLayout>
+      <StackLayout col="3" tap="navTours" class="p-2 text-center"><Label text="📍" class="text-lg" /><Label text="Tours" class="text-xs" /></StackLayout>
+      <StackLayout col="4" tap="navChat" class="p-2 text-center"><Label text="💬" class="text-lg" /><Label text="Chat" class="text-xs" /></StackLayout>
+    </GridLayout>
+  </GridLayout>
+</Page>

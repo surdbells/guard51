@@ -1,9 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass, DatePipe, DecimalPipe } from '@angular/common';
-import { LucideAngularModule, Home, CalendarDays, Truck, Shield, FileText, Bell, User, MessageSquare, Clock, MapPin, Plus, X, Check, Send } from 'lucide-angular';
+import { LucideAngularModule, Home, CalendarDays, Truck, Shield, FileText, Bell, User, MessageSquare, Clock, MapPin, Plus, X, Check, Send, LogOut } from 'lucide-angular';
 import { ApiService } from '@core/services/api.service';
 import { AuthStore } from '@core/services/auth.store';
+import { AuthService } from '@core/services/auth.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -196,6 +197,82 @@ import { ToastService } from '@core/services/toast.service';
           }
           @if (!reports().length) { <div class="card p-6 text-center"><p class="text-xs" [style.color]="'var(--text-tertiary)'">No reports yet</p></div> }
         }
+
+        <!-- INVOICES VIEW -->
+        @if (activeView() === 'invoices') {
+          <h2 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Invoices</h2>
+          @for (inv of invoices(); track inv.id) {
+            <div class="card p-3 mb-2">
+              <div class="flex items-center justify-between">
+                <div><p class="text-sm font-medium" [style.color]="'var(--text-primary)'">{{ inv.invoice_number || inv.id?.slice(0,8) }}</p>
+                  <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ inv.due_date || inv.created_at?.slice(0,10) }}</p></div>
+                <div class="text-right">
+                  <p class="text-sm font-bold" [style.color]="'var(--text-primary)'">₦{{ inv.total_amount || 0 | number:'1.0-0' }}</p>
+                  <span class="badge text-[9px]" [ngClass]="inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : inv.status === 'overdue' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'">{{ inv.status }}</span>
+                </div>
+              </div>
+            </div>
+          }
+          @if (!invoices().length) { <div class="card p-6 text-center"><p class="text-xs" [style.color]="'var(--text-tertiary)'">No invoices</p></div> }
+        }
+
+        <!-- NOTIFICATIONS VIEW -->
+        @if (activeView() === 'notifications') {
+          <h2 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Notifications</h2>
+          @for (n of notifications(); track n.id) {
+            <div class="card p-3 mb-2" [ngClass]="n.is_read ? '' : 'border-l-2 border-l-[var(--color-brand-500)]'">
+              <p class="text-sm font-medium" [style.color]="'var(--text-primary)'">{{ n.title }}</p>
+              <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ n.message }}</p>
+              <p class="text-[10px] mt-1" [style.color]="'var(--text-tertiary)'">{{ n.created_at?.slice(0,16)?.replace('T', ' ') }}</p>
+            </div>
+          }
+          @if (!notifications().length) { <div class="card p-6 text-center"><p class="text-xs" [style.color]="'var(--text-tertiary)'">No notifications</p></div> }
+        }
+
+        <!-- CHAT VIEW -->
+        @if (activeView() === 'chat') {
+          <h2 class="text-sm font-semibold mb-3" [style.color]="'var(--text-primary)'">Messages</h2>
+          @for (c of conversations(); track c.id) {
+            <div class="card p-3 mb-2 cursor-pointer" (click)="openChat(c)">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold text-white" [style.background]="'var(--color-brand-500)'">{{ c.name?.charAt(0) || '?' }}</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium truncate" [style.color]="'var(--text-primary)'">{{ c.name || 'Chat' }}</p>
+                  <p class="text-xs truncate" [style.color]="'var(--text-tertiary)'">{{ c.last_message || '' }}</p>
+                </div>
+                @if (c.unread_count) { <span class="h-5 w-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">{{ c.unread_count }}</span> }
+              </div>
+            </div>
+          }
+          @if (!conversations().length) { <div class="card p-6 text-center"><p class="text-xs" [style.color]="'var(--text-tertiary)'">No conversations</p></div> }
+        }
+
+        <!-- PROFILE VIEW -->
+        @if (activeView() === 'profile') {
+          <div class="card p-5 mb-4 text-center">
+            <div class="h-16 w-16 rounded-full mx-auto mb-3 flex items-center justify-center text-xl font-bold text-white" [style.background]="'var(--color-brand-500)'">{{ auth.user()?.first_name?.charAt(0) }}{{ auth.user()?.last_name?.charAt(0) }}</div>
+            <p class="text-base font-bold" [style.color]="'var(--text-primary)'">{{ auth.user()?.first_name }} {{ auth.user()?.last_name }}</p>
+            <p class="text-xs" [style.color]="'var(--text-tertiary)'">{{ auth.user()?.email }}</p>
+          </div>
+          <div class="space-y-2">
+            <button (click)="activeView.set('notifications')" class="card p-3 w-full flex items-center gap-3 text-left">
+              <lucide-icon [img]="BellIcon" [size]="18" [style.color]="'var(--text-tertiary)'" />
+              <span class="text-sm" [style.color]="'var(--text-primary)'">Notifications</span>
+            </button>
+            <button (click)="activeView.set('chat')" class="card p-3 w-full flex items-center gap-3 text-left">
+              <lucide-icon [img]="MsgIcon" [size]="18" [style.color]="'var(--text-tertiary)'" />
+              <span class="text-sm" [style.color]="'var(--text-primary)'">Messages</span>
+            </button>
+            <button (click)="activeView.set('invoices')" class="card p-3 w-full flex items-center gap-3 text-left">
+              <lucide-icon [img]="FileTextIcon" [size]="18" [style.color]="'var(--text-tertiary)'" />
+              <span class="text-sm" [style.color]="'var(--text-primary)'">Invoices</span>
+            </button>
+            <button (click)="logout()" class="card p-3 w-full flex items-center gap-3 text-left text-red-500">
+              <lucide-icon [img]="LogOutIcon" [size]="18" />
+              <span class="text-sm font-medium">Sign Out</span>
+            </button>
+          </div>
+        }
       </main>
 
       <!-- Bottom Nav -->
@@ -226,18 +303,22 @@ export class ClientMobileComponent implements OnInit {
   readonly stats = signal<any>({ active_guards: 0, total_sites: 0, incidents_30d: 0, outstanding_amount: 0 });
   readonly activity = signal<any[]>([]); readonly appointments = signal<any[]>([]);
   readonly deliveries = signal<any[]>([]); readonly reports = signal<any[]>([]);
+  readonly invoices = signal<any[]>([]); readonly notifications = signal<any[]>([]);
+  readonly conversations = signal<any[]>([]);
   readonly unreadCount = signal(0);
   readonly showSchedule = signal(false); readonly showDelivery = signal(false);
+  readonly LogOutIcon = LogOut;
+  private authService = inject(AuthService);
 
   aptForm: any = { purpose: 'meeting', visitor_name: '', scheduled_date: new Date().toISOString().slice(0, 10), scheduled_time: '09:00', notes: '' };
   delForm: any = { carrier_name: '', description: '', scheduled_date: new Date().toISOString().slice(0, 10), scheduled_time: '' };
 
   navItems = [
     { label: 'Home', icon: Home, view: 'home' },
-    { label: 'Appointments', icon: CalendarDays, view: 'appointments' },
+    { label: 'Schedule', icon: CalendarDays, view: 'appointments' },
     { label: 'Deliveries', icon: Truck, view: 'deliveries' },
     { label: 'Tracking', icon: Shield, view: 'tracking' },
-    { label: 'Reports', icon: FileText, view: 'reports' },
+    { label: 'Profile', icon: User, view: 'profile' },
   ];
 
   quickActions = [
@@ -268,8 +349,18 @@ export class ClientMobileComponent implements OnInit {
       this.api.get<any>('/client-portal/guard-activity').subscribe({ next: r => this.activity.set(r.data?.items || []) });
     } else if (v === 'reports') {
       this.api.get<any>('/client-portal/reports').subscribe({ next: r => this.reports.set(r.data?.reports || r.data || []) });
+    } else if (v === 'invoices') {
+      this.api.get<any>('/client-portal/invoices').subscribe({ next: r => this.invoices.set(r.data?.invoices || r.data || []) });
+    } else if (v === 'notifications') {
+      this.api.get<any>('/notifications').subscribe({ next: r => this.notifications.set(r.data?.notifications || r.data || []), error: () => {} });
+    } else if (v === 'chat') {
+      this.api.get<any>('/chat/conversations').subscribe({ next: r => this.conversations.set(r.data?.conversations || r.data || []), error: () => {} });
     }
   }
+
+  openChat(c: any): void { this.toast.info('Chat', c.name || 'Opening conversation...'); }
+
+  logout(): void { this.authService.logout(); }
 
   scheduleAppointment(): void {
     if (!this.aptForm.visitor_name) { this.toast.warning('Visitor name required'); return; }
