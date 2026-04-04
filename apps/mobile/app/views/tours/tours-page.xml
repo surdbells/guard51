@@ -1,0 +1,25 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo" class="page">
+  <ActionBar title="Tour Checkpoints" class="action-bar">
+    <NavigationButton text="Back" android.systemIcon="ic_menu_back" tap="goBack" />
+  </ActionBar>
+  <GridLayout rows="auto,*,auto">
+    <StackLayout row="0" class="card m-3 p-4">
+      <Label text="{{ tourName }}" class="text-lg font-bold" />
+      <Label text="{{ scannedCount }}/{{ totalCheckpoints }} checkpoints scanned" class="text-sm text-gray-500" />
+      <Progress value="{{ progress }}" maxValue="100" class="mt-2" />
+    </StackLayout>
+    <ListView row="1" items="{{ checkpoints }}" class="m-3">
+      <ListView.itemTemplate>
+        <GridLayout columns="auto,*,auto" class="p-3 border-b">
+          <Label col="0" text="{{ scanned ? '✅' : '⬜' }}" class="text-xl mr-3" />
+          <StackLayout col="1">
+            <Label text="{{ name }}" class="text-sm font-semibold" />
+            <Label text="{{ location }}" class="text-xs text-gray-400" />
+          </StackLayout>
+          <Label col="2" text="{{ scannedAt || '' }}" class="text-xs text-gray-400" />
+        </GridLayout>
+      </ListView.itemTemplate>
+    </ListView>
+    <Button row="2" text="📷 SCAN CHECKPOINT" tap="onScan" class="btn-primary m-4 p-4 text-lg" />
+  </GridLayout>
+</Page>

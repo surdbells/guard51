@@ -1,0 +1,20 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo" class="page">
+  <ActionBar title="Chat" class="action-bar">
+    <NavigationButton text="Back" android.systemIcon="ic_menu_back" tap="goBack" />
+  </ActionBar>
+  <GridLayout rows="*,auto">
+    <ListView row="0" items="{{ messages }}" class="p-2">
+      <ListView.itemTemplate>
+        <StackLayout class="{{ isMine ? 'ml-12 bg-blue-50' : 'mr-12 bg-gray-50' }} rounded-xl p-3 mb-2">
+          <Label text="{{ senderName }}" class="text-xs font-bold text-gray-500" />
+          <Label text="{{ content }}" class="text-sm mt-1" textWrap="true" />
+          <Label text="{{ sentAt }}" class="text-xs text-gray-400 mt-1" />
+        </StackLayout>
+      </ListView.itemTemplate>
+    </ListView>
+    <GridLayout row="1" columns="*,auto" class="p-3 border-t">
+      <TextField col="0" hint="Type a message..." text="{{ messageText }}" class="input-base p-2" returnKeyType="send" returnPress="{{ onSend }}" />
+      <Button col="1" text="Send" tap="{{ onSend }}" class="btn-primary ml-2 px-4" />
+    </GridLayout>
+  </GridLayout>
+</Page>

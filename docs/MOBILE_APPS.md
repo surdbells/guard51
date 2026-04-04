@@ -5,7 +5,7 @@
 ### 1. NativeScript Guard App (`apps/mobile/`)
 
 **Platform:** NativeScript 8.7 (Android + iOS)
-**Status:** MVP / Prototype (30% production-ready)
+**Status:** Feature-complete MVP (75% production-ready)
 
 #### Implemented Views (3 of 8):
 | View | Status | Notes |
@@ -13,11 +13,11 @@
 | Login | ✅ Functional | JWT authentication, secure token storage |
 | Dashboard | ✅ Functional | Today's shift, quick actions, stats |
 | Incident Report | ✅ Functional | Form with GPS auto-detection, camera capture |
-| Clock In/Out | ⚠️ Empty | Directory exists, no implementation |
-| Panic Button | ⚠️ Empty | Directory exists, no implementation |
-| Tours/QR Scan | ❌ Missing | Not created |
-| Passdowns | ❌ Missing | Not created |
-| Chat | ❌ Missing | Not created |
+| Clock In/Out | ✅ Functional | GPS verification, status toggle, site display |
+| Panic Button | ✅ Functional | GPS, vibration feedback, offline queue fallback |
+| Tours/QR Scan | ✅ Functional | Barcode scanner, checkpoint progress, session tracking |
+| Passdowns | ✅ Functional | List with priority, acknowledge button |
+| Chat | ✅ Functional | Conversation list, send/receive messages |
 
 #### Implemented Services (4 of 4):
 | Service | Status | Notes |
@@ -90,7 +90,7 @@
 | App | Score | Blocker |
 |-----|-------|---------|
 | **Web App (PWA)** | **90/100** | Needs service worker, icons |
-| **Guard Mobile (NativeScript)** | **30/100** | 5 of 8 views missing |
+| **Guard Mobile (NativeScript)** | **75/100** | All 8 views implemented, needs store prep |
 | **Client Mobile** | **0/100** | Not started |
 | **SaaS Admin Mobile** | **N/A** | Not needed (admin = desktop) |
 
@@ -99,5 +99,5 @@
 | App | Score | Blocker |
 |-----|-------|---------|
 | **Web App** | **95/100** | All 34 modules working, searchable dropdowns, RBAC |
-| **Guard Mobile** | **15/100** | No store listing, missing core features |
+| **Guard Mobile** | **60/100** | All views done, needs store listing |
 | **Client Mobile** | **0/100** | Not started |

@@ -1,0 +1,21 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo" class="page">
+  <ActionBar title="Passdowns" class="action-bar">
+    <NavigationButton text="Back" android.systemIcon="ic_menu_back" tap="goBack" />
+  </ActionBar>
+  <GridLayout rows="*,auto">
+    <ListView row="0" items="{{ passdowns }}" class="m-3">
+      <ListView.itemTemplate>
+        <StackLayout class="card p-3 mb-2">
+          <GridLayout columns="*,auto">
+            <Label col="0" text="{{ title }}" class="text-sm font-bold" />
+            <Label col="1" text="{{ priority }}" class="{{ priority === 'high' ? 'text-red-500' : priority === 'medium' ? 'text-amber-500' : 'text-green-500' }} text-xs font-bold" />
+          </GridLayout>
+          <Label text="{{ message }}" class="text-xs text-gray-600 mt-1" textWrap="true" />
+          <Label text="{{ siteName }} · {{ createdAt }}" class="text-xs text-gray-400 mt-1" />
+          <Button text="{{ isAcknowledged ? '✅ Acknowledged' : 'Acknowledge' }}" tap="{{ onAcknowledge }}"
+            class="{{ isAcknowledged ? 'btn-disabled' : 'btn-primary' }} mt-2 p-2 text-xs" isEnabled="{{ !isAcknowledged }}" />
+        </StackLayout>
+      </ListView.itemTemplate>
+    </ListView>
+  </GridLayout>
+</Page>
