@@ -121,6 +121,18 @@ final class UserManagementService
         return ['id' => $id, 'permissions' => $permissions];
     }
 
+    public function saveRolePermissions(string $tenantId, string $roleId, array $permissions): void
+    {
+        $rps = new \Guard51\Service\RolePermissionService($this->em);
+        $rps->savePermissions($tenantId, $roleId, $permissions);
+    }
+
+    public function getAllRoleOverrides(string $tenantId): array
+    {
+        $rps = new \Guard51\Service\RolePermissionService($this->em);
+        return $rps->getAllOverrides($tenantId);
+    }
+
     public function deleteRole(string $id): void
     {
         $this->em->getConnection()->executeStatement("DELETE FROM custom_roles WHERE id = ?", [$id]);

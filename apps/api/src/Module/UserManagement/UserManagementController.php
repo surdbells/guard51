@@ -81,12 +81,25 @@ final class UserManagementController
         return JsonResponse::success($response, $role);
     }
 
-    /** PUT /users/roles/{id}/permissions — Update role permissions */
+    /** PUT /users/roles/{id}/permissions — Save role permissions */
     public function updateRolePermissions(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $role = $this->userMgmt->updateRolePermissions($request->getAttribute('id'), $body['permissions'] ?? []);
-        return JsonResponse::success($response, $role);
+        $roleId = $request->getAttribute('id');
+        $tenantId = $request->getAttribute('tenant_id');
+        $permissions = $body['permissions'] ?? [];
+
+        $this->userMgmt->saveRolePermissions($tenantId, $roleId, $permissions);
+
+        return JsonResponse::success($response, ['role_id' => $roleId, 'permissions' => $permissions, 'message' => 'Permissions saved.']);
+    }
+
+    /** GET /users/roles/overrides — Get all permission overrides for tenant */
+    public function getRoleOverrides(Request $request, Response $response): Response
+    {
+        $tenantId = $request->getAttribute('tenant_id');
+        $overrides = $this->userMgmt->getAllRoleOverrides($tenantId);
+        return JsonResponse::success($response, ['overrides' => $overrides]);
     }
 
     /** DELETE /users/roles/{id} — Delete custom role */

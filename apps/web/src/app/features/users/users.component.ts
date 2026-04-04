@@ -351,12 +351,30 @@ export class UsersComponent implements OnInit {
     if (this.activeTab() === 'Active Users') {
       this.api.get<any>('/users').subscribe({ next: r => { this.users.set(r.data?.users || r.data || []); this.loading.set(false); }, error: () => this.loading.set(false) });
     } else { this.loading.set(false); }
-    // Load roles
+
+    // Load custom roles
     this.api.get<any>('/users/roles').subscribe({
       next: r => {
         const custom = (r.data?.roles || []).map((cr: any) => ({ ...cr, value: cr.id || cr.name, label: cr.name, icon: '🔧', is_system: false, permissions: cr.permissions || [] }));
-        this.allRoles.set([...this.systemRoles, ...custom]);
-        if (!this.selectedRole() && this.allRoles().length) this.selectRole(this.allRoles()[0]);
+        const roles = [...this.systemRoles.map(sr => ({ ...sr, permissions: [...sr.permissions] })), ...custom];
+
+        // Load saved permission overrides and merge with defaults
+        this.api.get<any>('/users/roles/overrides').subscribe({
+          next: or => {
+            const overrides: Record<string, string[]> = or.data?.overrides || {};
+            for (const role of roles) {
+              if (overrides[role.value]) {
+                role.permissions = overrides[role.value];
+              }
+            }
+            this.allRoles.set(roles);
+            if (!this.selectedRole() && roles.length) this.selectRole(roles[0]);
+          },
+          error: () => {
+            this.allRoles.set(roles);
+            if (!this.selectedRole() && roles.length) this.selectRole(roles[0]);
+          },
+        });
       },
       error: () => this.allRoles.set([...this.systemRoles]),
     });
@@ -385,19 +403,19 @@ export class UsersComponent implements OnInit {
   savePermissions(): void {
     const role = this.selectedRole();
     if (!role) return;
-    const perms = this.rolePermissions();
-    if (role.is_system) {
-      // Save system role overrides per tenant
-      this.api.put(`/users/roles/${role.value}/permissions`, { permissions: perms }).subscribe({
-        next: () => { this.toast.success('Permissions saved'); role.permissions = [...perms]; },
-        error: () => this.toast.error('Failed to save'),
-      });
-    } else {
-      this.api.put(`/users/roles/${role.value}/permissions`, { permissions: perms }).subscribe({
-        next: () => { this.toast.success('Permissions saved'); role.permissions = [...perms]; },
-        error: () => this.toast.error('Failed to save'),
-      });
-    }
+    const perms = [...this.rolePermissions()];
+    this.api.put(`/users/roles/${role.value}/permissions`, { permissions: perms }).subscribe({
+      next: () => {
+        this.toast.success('Permissions saved');
+        // Update the role in allRoles so sidebar count refreshes
+        this.allRoles.update(roles => roles.map(r =>
+          r.value === role.value ? { ...r, permissions: perms } : r
+        ));
+        // Update selected role
+        this.selectedRole.update(r => r ? { ...r, permissions: perms } : r);
+      },
+      error: () => this.toast.error('Failed to save permissions'),
+    });
   }
 
   changeRole(user: any): void { this.api.put(`/users/${user.id}/role`, { role: user.role }).subscribe({ next: () => this.toast.success('Role updated') }); }

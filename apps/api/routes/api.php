@@ -643,6 +643,7 @@ return function (App $app): void {
             $um->get(''  , [UserManagementController::class, 'list']);
 
             $um->get('/roles', [UserManagementController::class, 'listRoles']);
+            $um->get('/roles/overrides', [UserManagementController::class, 'getRoleOverrides']);
             $um->post('/roles', [UserManagementController::class, 'createRole']);
             $um->put('/roles/{id}', [UserManagementController::class, 'updateRole']);
             $um->put('/roles/{id}/permissions', [UserManagementController::class, 'updateRolePermissions']);
