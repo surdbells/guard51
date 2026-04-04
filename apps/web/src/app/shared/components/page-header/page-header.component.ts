@@ -13,7 +13,7 @@ import { Component, input } from '@angular/core';
           <p class="text-sm mt-1" [style.color]="'var(--text-secondary)'">{{ subtitle() }}</p>
         }
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center gap-2 flex-wrap">
         <ng-content />
       </div>
     </div>

@@ -7,6 +7,7 @@ import { PageHeaderComponent } from '@shared/components/page-header/page-header.
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
 import { ConfirmService } from '@core/services/confirm.service';
@@ -17,8 +18,10 @@ import { ConfirmService } from '@core/services/confirm.service';
   imports: [RouterLink, FormsModule, NgClass, LucideAngularModule, PageHeaderComponent, EmptyStateComponent, LoadingSpinnerComponent],
   template: `
     <g51-page-header title="Guards" subtitle="Manage your security personnel">
-      <button class="btn-secondary flex items-center gap-2" (click)="exportGuards()">Export CSV</button>
-      <button class="btn-primary flex items-center gap-2" routerLink="new"><lucide-icon [img]="PlusIcon" [size]="16" /> Add Guard</button>
+      @if (auth.isAdmin()) {
+        <button class="btn-secondary flex items-center gap-2 text-xs" (click)="exportGuards()">Export CSV</button>
+        <button class="btn-primary flex items-center gap-2 text-xs" routerLink="new"><lucide-icon [img]="PlusIcon" [size]="14" /> Add Guard</button>
+      }
     </g51-page-header>
 
     <div class="flex items-center gap-3 mb-4">
@@ -72,6 +75,7 @@ import { ConfirmService } from '@core/services/confirm.service';
 })
 export class GuardsComponent implements OnInit {
   private api = inject(ApiService);
+  readonly auth = inject(AuthStore);
   private toast = inject(ToastService);
   private confirmSvc = inject(ConfirmService);
   readonly ShieldIcon = Shield; readonly PlusIcon = Plus; readonly SearchIcon = Search;

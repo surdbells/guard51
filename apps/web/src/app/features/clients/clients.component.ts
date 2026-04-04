@@ -8,6 +8,7 @@ import { StatsCardComponent } from '@shared/components/stats-card/stats-card.com
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '@core/services/api.service';
+import { AuthStore } from '@core/services/auth.store';
 import { ToastService } from '@core/services/toast.service';
 import { exportToCsv } from '@core/utils/csv-export';
 import { ConfirmService } from '@core/services/confirm.service';
@@ -87,7 +88,8 @@ import { ConfirmService } from '@core/services/confirm.service';
   `,
 })
 export class ClientsComponent implements OnInit {
-  private api = inject(ApiService); private toast = inject(ToastService);
+  private api = inject(ApiService);
+  readonly auth = inject(AuthStore); private toast = inject(ToastService);
   private confirmSvc = inject(ConfirmService);
   readonly BuildingIcon = Building2; readonly PlusIcon = Plus; readonly SearchIcon = Search;
   readonly EyeIcon = Eye; readonly EditIcon = Edit; readonly TrashIcon = Trash2; readonly DownloadIcon = Download;

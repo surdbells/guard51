@@ -46,6 +46,9 @@ export class AuthStore {
   readonly userRole = computed(() => this.user()?.role ?? null);
   readonly isSuperAdmin = computed(() => this.userRole() === 'super_admin');
   readonly isCompanyAdmin = computed(() => this.userRole() === 'company_admin');
+  readonly isAdmin = computed(() => this.userRole() === 'company_admin' || this.userRole() === 'super_admin');
+  readonly isSupervisor = computed(() => this.userRole() === 'supervisor');
+  readonly canManage = computed(() => ['company_admin', 'super_admin', 'supervisor'].includes(this.userRole() || ''));
   readonly tenantType = computed(() => this.tenant()?.tenant_type ?? 'private_security');
   readonly userInitials = computed(() => {
     const u = this.user();
