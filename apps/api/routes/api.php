@@ -649,6 +649,9 @@ return function (App $app): void {
 
             $um->put('/{id}/role', [UserManagementController::class, 'changeRole']);
 
+            $um->post('/{id}/resend-invite', [UserManagementController::class, 'resendInvite']);
+            $um->delete('/{id}', [UserManagementController::class, 'removeUser']);
+
             $um->get('/{id}/permissions', [UserManagementController::class, 'permissions']);
 
             $um->post('/{id}/permissions', [UserManagementController::class, 'setPermission']);

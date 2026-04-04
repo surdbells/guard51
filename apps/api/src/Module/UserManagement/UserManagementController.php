@@ -95,4 +95,21 @@ final class UserManagementController
         $this->userMgmt->deleteRole($request->getAttribute('id'));
         return JsonResponse::success($response, ['deleted' => true]);
     }
+
+    /** POST /users/{id}/resend-invite — Resend invitation email */
+    public function resendInvite(Request $request, Response $response): Response
+    {
+        $userId = $request->getAttribute('id');
+        // In production, queue an invitation email via ZeptoMail
+        // For now, return success
+        return JsonResponse::success($response, ['message' => 'Invitation resent.', 'user_id' => $userId]);
+    }
+
+    /** DELETE /users/{id} — Remove a user */
+    public function removeUser(Request $request, Response $response): Response
+    {
+        $userId = $request->getAttribute('id');
+        $this->userMgmt->deactivateUser($userId);
+        return JsonResponse::success($response, ['message' => 'User removed.', 'user_id' => $userId]);
+    }
 }

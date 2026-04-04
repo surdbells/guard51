@@ -42,7 +42,11 @@ import { ConfirmService } from '@core/services/confirm.service';
           <div class="card p-4 card-hover">
             <div class="flex items-start justify-between gap-2">
               <a [routerLink]="[g.id]" class="flex items-center gap-3 flex-1 min-w-0">
-                <div class="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" [style.background]="'var(--color-brand-500)'">{{ g.first_name?.charAt(0) }}{{ g.last_name?.charAt(0) }}</div>
+                @if (g.photo_url) {
+                  <img [src]="g.photo_url" class="h-10 w-10 rounded-full object-cover shrink-0" />
+                } @else {
+                  <div class="h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" [style.background]="'var(--color-brand-500)'">{{ g.first_name?.charAt(0) }}{{ g.last_name?.charAt(0) }}</div>
+                }
                 <div class="min-w-0">
                   <p class="text-sm font-semibold truncate" [style.color]="'var(--text-primary)'">{{ g.first_name }} {{ g.last_name }}</p>
                   <p class="text-xs truncate" [style.color]="'var(--text-tertiary)'">{{ g.employee_number }} · {{ g.phone || 'No phone' }}</p>

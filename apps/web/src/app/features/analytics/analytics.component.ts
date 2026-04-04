@@ -22,10 +22,18 @@ import { exportToCsv } from '@core/utils/csv-export';
     @if (loading()) { <g51-loading /> } @else {
       <!-- KPI Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
-        <g51-stats-card label="Total Guards" [value]="kpis().total_guards" [icon]="ShieldIcon" />
-        <g51-stats-card label="Active Sites" [value]="kpis().total_sites" [icon]="MapPinIcon" />
-        <g51-stats-card label="Attendance Rate" [value]="kpis().attendance_rate + '%'" [icon]="ClockIcon" [trend]="kpis().attendance_trend" />
-        <g51-stats-card label="Incidents This Month" [value]="kpis().incidents_this_month" [icon]="AlertTriangleIcon" />
+        <g51-stats-card label="Active Guards" [value]="kpis().active_guards" [icon]="ShieldIcon" />
+        <g51-stats-card label="Active Sites" [value]="kpis().active_sites" [icon]="MapPinIcon" />
+        <g51-stats-card label="Punctuality Rate" [value]="kpis().guard_punctuality_rate + '%'" [icon]="ClockIcon" />
+        <g51-stats-card label="Open Incidents" [value]="kpis().open_incidents" [icon]="AlertTriangleIcon" />
+      </div>
+
+      <!-- Secondary KPIs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <g51-stats-card label="Avg Response Time" [value]="kpis().avg_response_time_min + ' min'" [icon]="ClockIcon" />
+        <g51-stats-card label="Tour Compliance" [value]="kpis().tour_compliance_rate + '%'" [icon]="MapPinIcon" />
+        <g51-stats-card label="Incident Resolution" [value]="kpis().incident_resolution_hours + ' hrs'" [icon]="AlertTriangleIcon" />
+        <g51-stats-card label="Overdue Tasks" [value]="kpis().overdue_tasks" [icon]="TrendingUpIcon" />
       </div>
 
       <!-- Charts Row 1 -->
@@ -93,7 +101,7 @@ export class AnalyticsComponent implements OnInit {
   readonly String = String;
 
   readonly loading = signal(true);
-  readonly kpis = signal<any>({ total_guards: 0, total_sites: 0, attendance_rate: 0, attendance_trend: 0, incidents_this_month: 0 });
+  readonly kpis = signal<any>({ active_guards: 0, active_sites: 0, open_incidents: 0, overdue_tasks: 0, avg_response_time_min: 0, tour_compliance_rate: 0, incident_resolution_hours: 0, guard_punctuality_rate: 0 });
   readonly attendanceSeries = signal<LineChartSeries[]>([]);
   readonly attendanceLabels = signal<string[]>([]);
   readonly incidentDonut = signal<DonutChartData[]>([]);

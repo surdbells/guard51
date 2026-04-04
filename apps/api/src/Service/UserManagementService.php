@@ -77,7 +77,17 @@ final class UserManagementService
         try {
             $rows = $conn->fetchAllAssociative("SELECT * FROM custom_roles WHERE tenant_id = ? ORDER BY name", [$tenantId]);
             return array_map(fn($r) => [...$r, 'permissions' => json_decode($r['permissions'] ?? '[]', true)], $rows);
-        } catch (\Throwable) { return []; }
+        } catch (\Throwable $e) {
+            // Auto-create table if it doesn't exist
+            if (str_contains($e->getMessage(), 'custom_roles') || str_contains($e->getMessage(), 'relation') || str_contains($e->getMessage(), 'exist')) {
+                try {
+                    $conn->executeStatement("CREATE TABLE IF NOT EXISTS custom_roles (id VARCHAR(36) NOT NULL, tenant_id VARCHAR(36) NOT NULL, name VARCHAR(100) NOT NULL, description VARCHAR(255) DEFAULT NULL, color VARCHAR(10) DEFAULT '#3B82F6', permissions TEXT DEFAULT '[]', created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL DEFAULT NOW(), PRIMARY KEY (id))");
+                    $conn->executeStatement("CREATE INDEX IF NOT EXISTS idx_cr_tenant ON custom_roles (tenant_id)");
+                    return [];
+                } catch (\Throwable) { return []; }
+            }
+            return [];
+        }
     }
 
     public function createRole(string $tenantId, array $data): array
@@ -114,5 +124,15 @@ final class UserManagementService
     public function deleteRole(string $id): void
     {
         $this->em->getConnection()->executeStatement("DELETE FROM custom_roles WHERE id = ?", [$id]);
+    }
+
+    public function deactivateUser(string $userId): void
+    {
+        $user = $this->userRepo->find($userId);
+        if ($user) {
+            $user->setIsActive(false);
+            $this->userRepo->save($user);
+            $this->logger->info('User deactivated.', ['user_id' => $userId]);
+        }
     }
 }

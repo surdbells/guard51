@@ -53,17 +53,22 @@ import { ToastService } from '@core/services/toast.service';
         <textarea [(ngModel)]="form.address" rows="2" class="input-base w-full resize-none" placeholder="House number, street, area..."></textarea></div>
 
       <h3 class="text-sm font-semibold mb-4 mt-6" [style.color]="'var(--text-primary)'">Photo</h3>
-      <div class="mb-6">
+      <div class="mb-6 flex items-center gap-4">
         @if (photoPreview()) {
-          <div class="relative inline-block mb-2">
-            <img [src]="photoPreview()" class="h-24 w-24 rounded-lg object-cover border" [style.borderColor]="'var(--border-default)'" />
-            <button (click)="removePhoto()" class="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center"><lucide-icon [img]="XIcon" [size]="10" /></button>
+          <div class="relative inline-block">
+            <img [src]="photoPreview()" class="h-20 w-20 rounded-full object-cover border-2" [style.borderColor]="'var(--border-default)'" />
+            <button (click)="removePhoto()" class="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center"><lucide-icon [img]="XIcon" [size]="10" /></button>
           </div>
+        } @else {
+          <div class="h-20 w-20 rounded-full flex items-center justify-center text-xl font-bold text-white" [style.background]="'var(--color-brand-500)'">{{ form.first_name?.charAt(0) || '?' }}{{ form.last_name?.charAt(0) || '' }}</div>
         }
-        <label class="btn-secondary inline-flex items-center gap-2 cursor-pointer text-xs">
-          <lucide-icon [img]="UploadIcon" [size]="14" /> {{ photoPreview() ? 'Change Photo' : 'Upload Photo' }}
-          <input type="file" accept="image/*" (change)="onPhotoSelect($event)" class="hidden" />
-        </label>
+        <div>
+          <label class="btn-secondary inline-flex items-center gap-2 cursor-pointer text-xs">
+            <lucide-icon [img]="UploadIcon" [size]="14" /> {{ photoPreview() ? 'Change Photo' : 'Upload Photo' }}
+            <input type="file" accept="image/*" (change)="onPhotoSelect($event)" class="hidden" />
+          </label>
+          <p class="text-[10px] mt-1" [style.color]="'var(--text-tertiary)'">JPG, PNG up to 5MB</p>
+        </div>
       </div>
 
       <h3 class="text-sm font-semibold mb-4 mt-6" [style.color]="'var(--text-primary)'">Emergency Contact</h3>
