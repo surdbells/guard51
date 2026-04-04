@@ -8,13 +8,20 @@
     "tns-android": { "version": "8.7.0" },
     "tns-ios": { "version": "8.7.0" }
   },
+  "scripts": {
+    "build:android": "ns build android --release --key-store-path ./keystore/guard51.jks --key-store-password Guard51@2026 --key-store-alias guard51 --key-store-alias-password Guard51@2026",
+    "build:android:debug": "ns build android",
+    "build:ios": "ns build ios --release --for-device",
+    "run:android": "ns run android",
+    "run:ios": "ns run ios",
+    "clean": "ns clean",
+    "tsc": "tsc --noEmit"
+  },
   "dependencies": {
     "@nativescript/core": "~8.7.0",
     "@nativescript/geolocation": "~8.0.0",
     "@nativescript/camera": "~5.0.0",
-    "@nativescript/barcodescanner": "~4.0.0",
-    "@nativescript/local-notifications": "~6.0.0",
-    "nativescript-sqlite": "~2.0.0"
+    "@nativescript/local-notifications": "~6.0.0"
   },
   "devDependencies": {
     "@nativescript/android": "~8.7.0",

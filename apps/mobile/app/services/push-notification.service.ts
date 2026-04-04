@@ -1,11 +1,9 @@
 import { Application, Device } from '@nativescript/core';
 import { ApiService } from './api.service';
-import { SecureStorageService } from './secure-storage.service';
+import { SecureStorage } from './secure-storage.service';
 
 export class PushNotificationService {
-  private api = new ApiService();
-  private storage = new SecureStorageService();
-
+    
   async register(): Promise<void> {
     if (Device.os === 'Android') {
       await this.registerAndroid();
@@ -21,7 +19,7 @@ export class PushNotificationService {
       const token = await firebase.messaging().getToken();
       if (token) {
         await this.sendTokenToServer(token, 'android');
-        this.storage.set('fcm_token', token);
+        SecureStorage.set('fcm_token', token);
       }
 
       // Handle incoming messages
@@ -42,7 +40,7 @@ export class PushNotificationService {
       const token = await firebase.messaging().getToken();
       if (token) {
         await this.sendTokenToServer(token, 'ios');
-        this.storage.set('apns_token', token);
+        SecureStorage.set('apns_token', token);
       }
     } catch (e) {
       console.error('APNS registration failed:', e);
@@ -51,7 +49,7 @@ export class PushNotificationService {
 
   private async sendTokenToServer(token: string, platform: string): Promise<void> {
     try {
-      await this.api.post('/devices/register', {
+      await ApiService.post('/devices/register', {
         token, platform, device_id: Device.uuid,
         app_version: '1.0.0', os_version: Device.osVersion,
       });

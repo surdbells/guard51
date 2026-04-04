@@ -1,4 +1,4 @@
-import { Observable, Frame } from '@nativescript/core';
+import { Observable, Frame, NavigationEntry } from '@nativescript/core';
 import { ApiService } from '../../services/api.service';
 import { SecureStorage } from '../../services/secure-storage.service';
 

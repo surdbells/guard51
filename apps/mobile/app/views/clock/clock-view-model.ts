@@ -3,8 +3,7 @@ import { getCurrentLocation, enableLocationRequest } from '@nativescript/geoloca
 import { ApiService } from '../../services/api.service';
 
 export class ClockViewModel extends Observable {
-  private api = new ApiService();
-
+  
   currentStatus = 'Not Clocked In';
   statusTime = '';
   siteName = 'Loading...';
@@ -28,7 +27,7 @@ export class ClockViewModel extends Observable {
 
     // Check current clock status
     try {
-      const res = await this.api.get('/time-clock/status');
+      const res = await ApiService.get('/time-clock/status');
       if (res.data?.is_clocked_in) {
         this.set('isClockedIn', true);
         this.set('currentStatus', 'Clocked In');
@@ -43,7 +42,7 @@ export class ClockViewModel extends Observable {
       const loc = await getCurrentLocation({ desiredAccuracy: 3, timeout: 10000 });
       const endpoint = this.isClockedIn ? '/time-clock/clock-out' : '/time-clock/clock-in';
       const body = { latitude: loc.latitude, longitude: loc.longitude };
-      const res = await this.api.post(endpoint, body);
+      const res = await ApiService.post(endpoint, body);
 
       if (this.isClockedIn) {
         this.set('isClockedIn', false);

@@ -1,21 +1,21 @@
-import { Observable, Vibrate } from '@nativescript/core';
+import { Observable, Utils, Device } from '@nativescript/core';
 import { getCurrentLocation, enableLocationRequest } from '@nativescript/geolocation';
 import { ApiService } from '../../services/api.service';
-import { SecureStorageService } from '../../services/secure-storage.service';
+import { SecureStorage } from '../../services/secure-storage.service';
+import { OfflineQueue } from '../../services/offline-queue.service';
 
 export class PanicViewModel extends Observable {
-  private api = new ApiService();
-  private storage = new SecureStorageService();
-
   statusMessage = '';
   guardName = '';
   currentTime = new Date().toLocaleTimeString();
 
   async init(): Promise<void> {
-    const user = this.storage.get('user');
+    const user = SecureStorage.get('user');
     if (user) {
-      const u = JSON.parse(user);
-      this.set('guardName', `${u.first_name || ''} ${u.last_name || ''}`);
+      try {
+        const u = JSON.parse(user);
+        this.set('guardName', `${u.first_name || ''} ${u.last_name || ''}`);
+      } catch (e) { /* ignore parse errors */ }
     }
   }
 
@@ -31,14 +31,18 @@ export class PanicViewModel extends Observable {
     this.set('statusMessage', 'Sending alert...');
 
     try {
-      // Vibrate to confirm
-      const vibrator = new Vibrate();
-      vibrator.vibrate([500, 200, 500]);
+      // Vibrate for feedback (Android only)
+      if (Device.os === 'Android') {
+        try {
+          const vibrator = Utils.android.getApplicationContext().getSystemService('vibrator');
+          if (vibrator) vibrator.vibrate(500);
+        } catch (e) { /* vibration not available */ }
+      }
 
       await enableLocationRequest();
       const loc = await getCurrentLocation({ desiredAccuracy: 3, timeout: 10000 });
 
-      await this.api.post('/panic', {
+      await ApiService.post('/panic', {
         latitude: loc.latitude,
         longitude: loc.longitude,
         accuracy: loc.horizontalAccuracy,
@@ -48,16 +52,15 @@ export class PanicViewModel extends Observable {
       this.set('statusMessage', '✅ ALERT SENT — Dispatch has been notified. Help is on the way.');
     } catch (e: any) {
       this.set('statusMessage', '⚠️ Failed to send. Check your connection and try again.');
-
       // Queue for offline sync
-      const { OfflineQueueService } = require('../../services/offline-queue.service');
-      const queue = new OfflineQueueService();
-      queue.enqueue('POST', '/panic', {
-        latitude: 0, longitude: 0,
-        timestamp: new Date().toISOString(),
-        offline: true,
-      });
-      this.set('statusMessage', '📱 Alert queued — will send when connection restores.');
+      try {
+        OfflineQueue.enqueue('POST', '/panic', {
+          latitude: 0, longitude: 0,
+          timestamp: new Date().toISOString(),
+          offline: true,
+        });
+        this.set('statusMessage', '📱 Alert queued — will send when connection restores.');
+      } catch (qe) { /* queue failed too */ }
     }
   }
 }
