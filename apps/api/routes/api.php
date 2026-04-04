@@ -415,6 +415,7 @@ return function (App $app): void {
             $tr->post('/location', [TrackingController::class, 'recordLocation']);
             $tr->post('/batch', [TrackingController::class, 'recordBatch']);
             $tr->get('/live', [TrackingController::class, 'liveLocations']);
+            $tr->get('/positions', [TrackingController::class, 'liveLocations']);
             $tr->get('/guard/{guardId}/latest', [TrackingController::class, 'latestLocation']);
             $tr->get('/guard/{guardId}/path', [TrackingController::class, 'guardPath']);
             // Geofence alerts
